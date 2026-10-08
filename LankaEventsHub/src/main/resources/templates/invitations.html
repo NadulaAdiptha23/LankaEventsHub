@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Invitation Requests')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('myevents')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">Invitation requests</h1>
+        <p class="page-header__sub" th:text="${event.name}">Event</p>
+      </div>
+      <div class="page-header__actions">
+        <a th:href="@{/events/{id}(id=${eventId})}" class="btn btn-light-custom">
+          <i class="fa-solid fa-eye" aria-hidden="true"></i> View event
+        </a>
+        <a th:href="@{/my-events}" class="btn btn-light-custom">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> My events
+        </a>
+      </div>
+    </div>
+
+    <div th:replace="~{fragments/alerts :: flash}"></div>
+
+    <div class="alert-custom alert-info">
+      <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+      <span>
+        A decision is final: someone you reject cannot submit a second request.
+        If you change your mind, approve their existing request instead.
+      </span>
+    </div>
+
+    <div class="row g-4 mb-5">
+      <div class="col-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-icon"><i class="fa-solid fa-envelope" aria-hidden="true"></i></span>
+          <div class="stat-value" th:text="${#lists.size(invitations)}">0</div>
+          <div class="stat-label">Total requests</div>
+        </div>
+      </div>
+      <div class="col-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-icon is-warning"><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i></span>
+          <div class="stat-value"
+               th:text="${#lists.size(invitations.?[status.name() == 'PENDING'])}">0</div>
+          <div class="stat-label">Awaiting your decision</div>
+        </div>
+      </div>
+      <div class="col-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-icon is-success"><i class="fa-solid fa-circle-check" aria-hidden="true"></i></span>
+          <div class="stat-value"
+               th:text="${#lists.size(invitations.?[status.name() == 'APPROVED'])}">0</div>
+          <div class="stat-label">Approved</div>
+        </div>
+      </div>
+      <div class="col-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-icon is-danger"><i class="fa-solid fa-circle-xmark" aria-hidden="true"></i></span>
+          <div class="stat-value"
+               th:text="${#lists.size(invitations.?[status.name() == 'REJECTED'])}">0</div>
+          <div class="stat-label">Rejected</div>
+        </div>
+      </div>
+    </div>
+
+    <section class="card-custom">
+      <div class="card-head" th:unless="${#lists.isEmpty(invitations)}">
+        <h2>Requests</h2>
+        <span class="text-micro" style="color:var(--muted);"
+              th:text="${#lists.size(invitations)} + ' requests'">0 requests</span>
+      </div>
+
+      <div th:if="${#lists.isEmpty(invitations)}">
+          <div
+               th:replace="~{fragments/components :: emptyState(
+                  'fa-envelope-open',
+                  'No invitation requests yet',
+                  'When attendees ask for access to this event, their requests appear here.',
+                  null, null)}"></div>
+      </div>
+
+      <!--
+        Bulk approve/reject. The previous version had "Select All / Approve
+        Selected / Reject Selected" as dead placeholder links that did
+        nothing at all; these are now a real form posting the ticked ids to
+        /events/{id}/invitations/bulk, which re-checks ownership, that each
+        invitation belongs to this event, and that it is still pending.
+      -->
+      <form method="post" th:action="@{/events/{id}/invitations/bulk(id=${eventId})}"
+            th:unless="${#lists.isEmpty(invitations)}" id="bulk-form">
+        <div class="table-responsive">
+          <table class="table-modern">
+            <caption class="visually-hidden-focusable">Invitation requests for this event</caption>
+            <thead>
+              <tr>
+                <th scope="col" style="width:44px;">
+                  <input type="checkbox" id="select-all" aria-label="Select all pending requests">
+                </th>
+                <th scope="col">Applicant</th>
+                <th scope="col">Requested</th>
+                <th scope="col">Status</th>
+                <th scope="col" class="col-actions">Decision</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="inv : ${invitations}">
+                <td>
+                  <input type="checkbox" name="invitationIds" th:value="${inv.id}"
+                         class="bulk-check" th:disabled="${inv.status.name() != 'PENDING'}"
+                         th:aria-label="'Select request from ' + ${inv.userName}">
+                </td>
+                <td>
+                  <div class="d-flex align-items-center gap-3">
+                    <span class="avatar avatar-sm"
+                          th:text="${#strings.toUpperCase(#strings.substring(inv.userName,0,1))}">N</span>
+                    <span class="cell-title" th:text="${inv.userName}">Name</span>
+                  </div>
+                </td>
+                <td th:text="${inv.requestedAt != null
+                              ? #temporals.format(inv.requestedAt, 'd MMM yyyy, HH:mm') : ''}">Date</td>
+                <td>
+                  <th:block th:replace="~{fragments/components :: invitationStatus(${inv.status})}"></th:block>
+                </td>
+                <td class="col-actions">
+                  <span th:if="${inv.status.name() != 'PENDING'}" class="text-micro"
+                        style="color:var(--muted);"
+                        th:text="${inv.decidedAt != null
+                                  ? #temporals.format(inv.decidedAt, 'd MMM yyyy') : 'Decided'}">Decided</span>
+                  <span th:if="${inv.status.name() == 'PENDING'}" class="d-inline-flex gap-2">
+                    <button type="submit" class="btn btn-success btn-sm"
+                            th:formaction="@{/events/{eid}/invitations/{iid}/approve(eid=${eventId},iid=${inv.id})}">
+                      Approve
+                    </button>
+                    <button type="submit" class="btn btn-outline-danger btn-sm"
+                            th:formaction="@{/events/{eid}/invitations/{iid}/reject(eid=${eventId},iid=${inv.id})}">
+                      Reject
+                    </button>
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card-pad d-flex flex-wrap gap-3 align-items-center justify-content-between"
+             style="border-top:1px solid var(--border);">
+          <div class="d-flex gap-2 flex-wrap">
+            <button type="submit" name="decision" value="approve" class="btn btn-success btn-sm">
+              <i class="fa-solid fa-check" aria-hidden="true"></i> Approve selected
+            </button>
+            <button type="submit" name="decision" value="reject" class="btn btn-outline-danger btn-sm">
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i> Reject selected
+            </button>
+          </div>
+          <span class="text-micro" style="color:var(--muted);">
+            Only pending requests can be selected.
+          </span>
+        </div>
+      </form>
+    </section>
+  </main>
+</div>
+
+<script>
+// "Select all" only ticks the rows that can actually be decided.
+document.getElementById('select-all')?.addEventListener('change', function () {
+  document.querySelectorAll('.bulk-check:not([disabled])')
+      .forEach(cb => { cb.checked = this.checked; });
+});
+</script>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

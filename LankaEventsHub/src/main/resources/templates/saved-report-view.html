@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Report')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('savedreports')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title" th:text="${result.title}">Report</h1>
+        <p class="page-header__sub">
+          <span th:text="${result.typeLabel}">Measures</span> ·
+          <span th:text="${result.scope}">Scope</span> ·
+          <span th:text="${result.window}">Window</span>
+        </p>
+      </div>
+      <div class="page-header__actions">
+        <a th:href="@{/reports}" class="btn btn-light-custom">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> My reports
+        </a>
+      </div>
+    </div>
+
+    <div th:replace="~{fragments/alerts :: flash}"></div>
+
+    <!-- The timestamp is on the page for a reason: a figure with no "as
+         of" invites somebody to screenshot it and quote it a month later
+         as though it were still true. -->
+    <div class="alert-custom alert-info">
+      <i class="fa-solid fa-clock" aria-hidden="true"></i>
+      <span>
+        Calculated
+        <span th:text="${#temporals.format(result.generatedAt, 'd MMM yyyy, HH:mm')}">now</span>
+        from live data. Nothing on this page is stored - open it again tomorrow and the
+        figures will be tomorrow's.
+      </span>
+    </div>
+
+    <div class="row g-4 mb-4">
+      <div class="col-6 col-xl-3" th:each="f : ${result.figures}">
+        <div class="stat-card">
+          <div class="stat-value" th:text="${f.value()}">0</div>
+          <div class="stat-label" th:text="${f.label()}">Label</div>
+          <div class="text-micro" style="color:var(--muted);" th:text="${f.hint()}">hint</div>
+        </div>
+      </div>
+    </div>
+
+    <section class="card-custom" th:if="${result.hasRows}">
+      <div class="card-head">
+        <h2 th:text="${result.rowsHeading}">Breakdown</h2>
+      </div>
+      <div class="table-responsive">
+        <table class="table-modern">
+          <caption class="visually-hidden" th:text="${result.rowsHeading}">Breakdown</caption>
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Count</th>
+              <th scope="col">Unit</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="row : ${result.rows}">
+              <td class="cell-title" th:text="${row.label()}">Label</td>
+              <td th:text="${row.value()}">0</td>
+              <td class="text-micro" th:text="${row.secondary()}">unit</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div th:replace="~{fragments/footer :: foot}"></div>
+</body>
+</html>

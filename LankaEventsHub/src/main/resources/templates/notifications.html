@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Notifications')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('notifications')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">Notifications</h1>
+        <p class="page-header__sub">
+          In-app updates about your registrations, payments and invitations.
+        </p>
+      </div>
+      <div class="page-header__actions">
+        <form method="post" data-busy th:action="@{/notifications/read-all}"
+              th:if="${unreadNotifications > 0}">
+          <button type="submit" class="btn btn-light-custom">
+            <i class="fa-solid fa-check-double" aria-hidden="true"></i> Mark all read
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div th:replace="~{fragments/alerts :: flash}"></div>
+
+    <div class="row">
+      <div class="col-xl-9">
+        <section class="card-custom">
+          <div class="card-head" th:if="${!#lists.isEmpty(notifications)}">
+            <h2>Recent activity</h2>
+            <span class="badge-custom badge-primary-soft" th:if="${unreadNotifications > 0}"
+                  th:text="${unreadNotifications} + ' unread'">0 unread</span>
+          </div>
+
+          <div th:if="${#lists.isEmpty(notifications)}">
+              <div
+                   th:replace="~{fragments/components :: emptyState(
+                      'fa-bell',
+                      'You are all caught up',
+                      'Register for an event and updates about it will show up here.',
+                      @{/events}, 'Browse events')}"></div>
+          </div>
+
+          <!-- Unread rows are tinted and carry a dot, so the difference is
+               visible at a glance rather than only in a badge at the end
+               of the row. -->
+          <div th:each="n : ${notifications}" class="notification-row"
+               th:classappend="${n.read} ? '' : 'is-unread'">
+            <span class="notification-row__icon">
+              <i class="fa-solid fa-bell" aria-hidden="true"></i>
+            </span>
+            <div class="flex-grow-1" style="min-width:0;">
+              <div class="text-micro fw-bold text-heading"
+                   th:text="${#strings.capitalizeWords(#strings.replace(#strings.toLowerCase(n.type.name()),'_',' '))}">Type</div>
+              <p class="notification-row__text" th:text="${n.message}">Message</p>
+              <p class="notification-row__time"
+                 th:text="${n.sentAt != null ? #temporals.format(n.sentAt,'d MMM yyyy, HH:mm') : ''}">When</p>
+            </div>
+            <span class="notification-row__dot" th:unless="${n.read}" aria-label="Unread"></span>
+          </div>
+
+          <div class="card-pad text-micro" style="color:var(--muted);border-top:1px solid var(--border);"
+               th:unless="${#lists.isEmpty(notifications)}">
+            These are in-app notifications only. This system does not send email or SMS.
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

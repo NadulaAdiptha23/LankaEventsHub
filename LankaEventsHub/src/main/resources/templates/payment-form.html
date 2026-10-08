@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Complete Payment')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('registrations')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">Complete your registration</h1>
+        <p class="page-header__sub" th:text="${registration.eventName}">Event</p>
+      </div>
+      <div class="page-header__actions">
+        <a th:href="@{/my-registrations}" class="btn btn-light-custom">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back
+        </a>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         Where the attendee is in the flow. Four steps, three behind
+         them: they have already chosen the event and registered, and
+         the ticket is issued the moment this payment succeeds.
+         ============================================================ -->
+    <nav class="stepper" aria-label="Checkout progress">
+      <div class="stepper__step is-done">
+        <span class="stepper__dot"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
+        <span class="stepper__label">Event</span>
+      </div>
+      <span class="stepper__line"></span>
+      <div class="stepper__step is-done">
+        <span class="stepper__dot"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
+        <span class="stepper__label">Registration</span>
+      </div>
+      <span class="stepper__line"></span>
+      <div class="stepper__step is-current" aria-current="step">
+        <span class="stepper__dot">3</span>
+        <span class="stepper__label">Payment</span>
+      </div>
+      <span class="stepper__line"></span>
+      <div class="stepper__step">
+        <span class="stepper__dot">4</span>
+        <span class="stepper__label">Ticket</span>
+      </div>
+    </nav>
+
+    <div th:replace="~{fragments/alerts :: flash}"></div>
+
+    <div class="row g-4">
+
+      <!-- ==========================================================
+           LEFT: what is being bought, and the discount choice
+           ========================================================== -->
+      <div class="col-lg-7">
+
+        <!-- Event summary -->
+        <section class="card-custom mb-4">
+          <div class="card-head"><h2>Event summary</h2></div>
+          <div class="card-pad">
+            <div class="d-flex gap-4 flex-wrap">
+              <div class="flex-grow-1" style="min-width:200px;">
+                <div class="fw-bold text-heading mb-2" th:text="${registration.eventName}">Event</div>
+                <p class="event-card__meta mb-1">
+                  <i class="fa-solid fa-calendar-day" aria-hidden="true"></i>
+                  <span th:text="${registration.eventStartDatetime != null
+                                  ? #temporals.format(registration.eventStartDatetime, 'EEE d MMM yyyy · HH:mm')
+                                  : 'Date to be confirmed'}">Date</span>
+                </p>
+                <p class="event-card__meta mb-1" th:if="${registration.eventVenue}">
+                  <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                  <span th:text="${registration.eventVenue}">Venue</span>
+                </p>
+                <p class="event-card__meta mb-0">
+                  <i class="fa-solid fa-user" aria-hidden="true"></i>
+                  <span th:text="${registration.userName}">Attendee</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Payment -->
+        <section class="card-custom">
+          <div class="card-head"><h2>Payment</h2></div>
+          <div class="card-pad">
+            <div class="alert-custom alert-info">
+              <i class="fa-solid fa-flask" aria-hidden="true"></i>
+              <span>
+                This is a mock gateway standing in until a real payment provider is
+                integrated. No money moves and nothing leaves this machine — but the
+                card decides the outcome, so a declined card really is declined, and
+                nothing about the card is stored.
+              </span>
+            </div>
+
+            <form method="post" id="pay-form" data-busy
+                  th:action="@{/registrations/{id}/pay(id=${registration.id})}">
+
+              <!-- ====================================================
+                   How to pay. Two methods, and the choice changes what
+                   happens rather than only what the page looks like:
+                   a card settles now, on arrival holds the seat until
+                   the event and leaves the money owed at the door.
+                   ==================================================== -->
+              <fieldset class="mb-4">
+                <legend class="form-label">How would you like to pay?</legend>
+                <div class="method-grid">
+                  <label class="method-tile" for="method-card">
+                    <input type="radio" id="method-card" name="method" value="CARD"
+                           th:checked="${selectedMethod == null or selectedMethod == 'CARD'}"
+                           onchange="chooseMethod()">
+                    <span class="method-tile__body">
+                      <span class="method-tile__icon">
+                        <i class="fa-regular fa-credit-card" aria-hidden="true"></i>
+                      </span>
+                      <span class="method-tile__title">Card</span>
+                      <span class="method-tile__sub">Visa, Mastercard, Amex — settled now</span>
+                    </span>
+                  </label>
+                  <label class="method-tile" for="method-arrival">
+                    <input type="radio" id="method-arrival" name="method" value="ON_ARRIVAL"
+                           th:checked="${selectedMethod == 'ON_ARRIVAL'}"
+                           onchange="chooseMethod()">
+                    <span class="method-tile__body">
+                      <span class="method-tile__icon">
+                        <i class="fa-solid fa-qrcode" aria-hidden="true"></i>
+                      </span>
+                      <span class="method-tile__title">Pay on arrival</span>
+                      <span class="method-tile__sub">Show your code and settle at the door</span>
+                    </span>
+                  </label>
+                </div>
+              </fieldset>
+
+              <!-- ====================================================
+                   The card. A preview above the fields, because a card
+                   number typed into a bare text box is the easiest
+                   thing in the world to mistype, and seeing it laid
+                   out the way it is on the card catches that.
+                   ==================================================== -->
+              <div id="card-panel">
+                <div class="card-preview" aria-hidden="true">
+                  <div class="card-preview__brand" id="cp-brand">CARD</div>
+                  <div class="card-preview__chip"></div>
+                  <div class="card-preview__number tnum" id="cp-number">•••• •••• •••• ••••</div>
+                  <div class="card-preview__foot">
+                    <div>
+                      <div class="card-preview__label">Card holder</div>
+                      <div class="card-preview__value" id="cp-holder">YOUR NAME</div>
+                    </div>
+                    <div>
+                      <div class="card-preview__label">Expires</div>
+                      <div class="card-preview__value tnum" id="cp-expiry">MM/YY</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-4">
+                  <label class="form-label" for="cardNumber">Card number</label>
+                  <input type="text" id="cardNumber" name="cardNumber" class="form-control tnum"
+                         inputmode="numeric" autocomplete="off" maxlength="23"
+                         placeholder="0000 0000 0000 0000" oninput="paintCard()">
+                </div>
+
+                <div class="mb-4">
+                  <label class="form-label" for="cardHolder">Name on the card</label>
+                  <input type="text" id="cardHolder" name="cardHolder" class="form-control"
+                         autocomplete="off" maxlength="100" th:value="${cardHolder}"
+                         placeholder="As printed on the card" oninput="paintCard()">
+                </div>
+
+                <div class="row g-3 mb-4">
+                  <div class="col-4">
+                    <label class="form-label" for="expiryMonth">Month</label>
+                    <input type="number" id="expiryMonth" name="expiryMonth" class="form-control tnum"
+                           min="1" max="12" placeholder="MM" oninput="paintCard()">
+                  </div>
+                  <div class="col-4">
+                    <label class="form-label" for="expiryYear">Year</label>
+                    <input type="number" id="expiryYear" name="expiryYear" class="form-control tnum"
+                           min="2024" max="2099" placeholder="YYYY" oninput="paintCard()">
+                  </div>
+                  <div class="col-4">
+                    <label class="form-label" for="securityCode">CVV</label>
+                    <input type="text" id="securityCode" name="securityCode" class="form-control tnum"
+                           inputmode="numeric" autocomplete="off" maxlength="4" placeholder="123">
+                  </div>
+                </div>
+
+                <!-- The test cards, read from the gateway class itself
+                     rather than retyped here. A number that approves in
+                     this panel and declines in the code would be worse
+                     than no panel at all. -->
+                <details class="mb-4 test-cards">
+                  <summary>Test card numbers</summary>
+                  <div class="test-cards__body">
+                    <p class="mb-2">
+                      <button type="button" class="btn btn-light-custom btn-sm"
+                              th:attr="data-card=${approvingCard}" onclick="useCard(this)">Use</button>
+                      <code class="tnum" th:text="${approvingCard}">4111 1111 1111 1111</code>
+                      — approves
+                    </p>
+                    <p class="mb-2" th:each="c : ${decliningCards}">
+                      <button type="button" class="btn btn-light-custom btn-sm"
+                              th:attr="data-card=${c.key}" onclick="useCard(this)">Use</button>
+                      <code class="tnum" th:text="${c.key}">4000000000000002</code>
+                      — declined: <span th:text="${c.value}">reason</span>
+                    </p>
+                    <p class="text-micro mb-0" style="color:var(--muted);">
+                      Any other number that passes the checksum is approved. A number
+                      that fails it is rejected before the gateway is called at all —
+                      that is a typo, not a decline.
+                    </p>
+                  </div>
+                </details>
+              </div>
+
+              <!-- ====================================================
+                   Paying at the door. No fields, because there is
+                   nothing to collect: the code below is issued on
+                   confirming and is what the organizer looks up.
+                   ==================================================== -->
+              <div id="arrival-panel" style="display:none;">
+                <div class="qr-placeholder" aria-hidden="true">
+                  <i class="fa-solid fa-qrcode"></i>
+                  <span>Your code appears here once you confirm</span>
+                </div>
+                <div class="alert-custom alert-warning">
+                  <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                  <span>
+                    Your seat is held until the event starts, and your booking is
+                    confirmed when the organizer takes the money at the door. Until
+                    then it is a reservation, not a ticket.
+                  </span>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label" for="discountId">Discount</label>
+                <select id="discountId" name="discountId" class="form-select" onchange="refreshQuote()">
+                  <option value="">No discount</option>
+                  <!-- DiscountOptionResponse, not the Discount entity: the label
+                       and the "which extra field does this need" decision are
+                       made once, in the service, instead of being re-derived by
+                       a chain of conditionals in the view. -->
+                  <option th:each="d : ${discounts}" th:value="${d.id}"
+                          th:selected="${selectedDiscountId != null and selectedDiscountId == d.id}"
+                          th:text="${d.label}"
+                          th:attr="data-type=${d.type},data-requires-code=${d.requiresCode},data-requires-group-size=${d.requiresGroupSize}">Discount</option>
+                </select>
+                <p class="form-text" th:if="${#lists.isEmpty(discounts)}">
+                  There are no discounts available for this event right now.
+                </p>
+              </div>
+
+              <div id="promo-field" class="mb-4" style="display:none;">
+                <label class="form-label" for="enteredCode">Promo code</label>
+                <input type="text" id="enteredCode" name="enteredCode" class="form-control"
+                       placeholder="Enter your promo code" th:value="${enteredCode}"
+                       oninput="refreshQuote()" autocomplete="off">
+              </div>
+
+              <div id="group-field" class="mb-4" style="display:none;">
+                <label class="form-label" for="groupSizeDisplay">Group size</label>
+                <!-- Read-only: eligibility is judged on the seats THIS
+                     registration actually holds (registration.seats), not
+                     on a number typed here - see PaymentServiceImpl.pay().
+                     A free-text field the server does not act on is worse
+                     than no field at all, because it implies typing a
+                     bigger number gets a bigger group's discount. Nothing
+                     here is submitted - there is no name attribute and the
+                     quote request below no longer sends a groupSize key at
+                     all, so there is nothing left for a client to supply. -->
+                <input type="text" id="groupSizeDisplay" class="form-control" disabled
+                       th:value="|${registration.seats} seat${registration.seats == 1 ? '' : 's'} booked|">
+                <p class="form-text">Group discounts apply from 3 attendees upwards, based on the seats in this booking.</p>
+              </div>
+
+              <!-- Any problem with the chosen discount is reported here as
+                   soon as the preview refreshes, instead of being discovered
+                   only after the form is submitted. -->
+              <div id="quote-error" class="alert-custom alert-warning" style="display:none;" role="alert">
+                <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+                <span id="quote-error-text"></span>
+              </div>
+
+              <button type="submit" id="pay-button" class="btn btn-primary btn-lg btn-block">
+                <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                <span id="pay-verb">Pay</span>
+                LKR <span id="payTotal"
+                          th:text="${#numbers.formatDecimal(registration.totalFee, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+              </button>
+              <p class="text-micro text-center mt-3 mb-0" style="color:var(--muted);">
+                <i class="fa-solid fa-shield-halved me-1" aria-hidden="true"></i>
+                The amount charged is always recalculated on the server.
+              </p>
+            </form>
+          </div>
+        </section>
+      </div>
+
+      <!-- ==========================================================
+           RIGHT: the money
+           ========================================================== -->
+      <div class="col-lg-5">
+        <section class="card-custom sticky-panel">
+          <div class="card-head"><h2>Order summary</h2></div>
+          <div class="card-pad">
+
+            <div class="d-flex justify-content-between align-items-center mb-3"
+                 th:if="${registration.party}">
+              <span class="text-meta">Seats</span>
+              <span class="text-meta tnum text-heading fw-semibold"
+                    th:text="|${registration.seats} × LKR ${#numbers.formatDecimal(registration.eventFee, 1, 'COMMA', 2, 'POINT')}|">
+                4 × LKR 0.00</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="text-meta">Original price</span>
+              <span class="text-meta tnum text-heading fw-semibold" id="q-original"
+                    th:text="'LKR ' + ${#numbers.formatDecimal(registration.totalFee, 1, 'COMMA', 2, 'POINT')}">LKR 0.00</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-3"
+                 style="color:var(--success-ink);">
+              <span class="text-meta">Discount</span>
+              <span class="text-meta tnum fw-semibold" id="q-discount">− LKR 0.00</span>
+            </div>
+
+            <hr class="divider" style="margin:var(--s-4) 0;">
+
+            <!-- The total is the one number that matters here, so it is the
+                 one thing on this panel set at display size. -->
+            <div class="d-flex justify-content-between align-items-end">
+              <span class="fw-bold text-heading">Total</span>
+              <span class="booking-price tnum" id="q-final"
+                    th:text="'LKR ' + ${#numbers.formatDecimal(registration.totalFee, 1, 'COMMA', 2, 'POINT')}">LKR 0.00</span>
+            </div>
+
+            <div class="alert-custom alert-info mt-4 mb-0">
+              <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+              <span>If the organizer cancels this event, a full refund is created automatically.</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script th:inline="javascript">
+/*
+ * Live price preview.
+ *
+ * Three things worth noting:
+ *  - it posts to /registrations/{id}/quote, a session-authenticated page
+ *    endpoint, and sends the CSRF token like every other state-changing
+ *    request on this site;
+ *  - every failure path is handled: a non-OK response shows the server's
+ *    own message, a network or JSON failure falls back to the undiscounted
+ *    price rather than leaving a stale number on screen;
+ *  - none of it is authoritative. The server recalculates the amount when
+ *    the form is submitted.
+ */
+// The PARTY total, not the per-seat fee - this is the number the
+// preview starts from and the number the server will charge.
+const baseFee = /*[[${registration.totalFee}]]*/ 0;
+const registrationId = /*[[${registration.id}]]*/ 0;
+const csrfToken = document.querySelector('meta[name="_csrf"]')?.content || '';
+const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content || 'X-CSRF-TOKEN';
+
+const ds = document.getElementById('discountId');
+const promoField = document.getElementById('promo-field');
+const groupField = document.getElementById('group-field');
+const errorBox = document.getElementById('quote-error');
+const errorText = document.getElementById('quote-error-text');
+const payButton = document.getElementById('pay-button');
+
+function money(n) {
+  return 'LKR ' + Number(n).toLocaleString('en-LK', {
+    minimumFractionDigits: 2, maximumFractionDigits: 2
+  });
+}
+
+function showTotals(original, discount, final) {
+  document.getElementById('q-original').textContent = money(original);
+  document.getElementById('q-discount').textContent = '− ' + money(discount);
+  document.getElementById('q-final').textContent = money(final);
+  document.getElementById('payTotal').textContent = Number(final).toLocaleString('en-LK', {
+    minimumFractionDigits: 2, maximumFractionDigits: 2
+  });
+}
+
+function showError(message) {
+  if (message) {
+    errorText.textContent = message;
+    errorBox.style.display = 'flex';
+  } else {
+    errorBox.style.display = 'none';
+  }
+}
+
+async function refreshQuote() {
+  // Which extra field to reveal is decided by the server (the flags on the
+  // option), not by the page re-deciding what each discount type means.
+  const selected = ds.options[ds.selectedIndex];
+  const needsCode = selected ? selected.getAttribute('data-requires-code') === 'true' : false;
+  const needsGroupSize = selected ? selected.getAttribute('data-requires-group-size') === 'true' : false;
+  promoField.style.display = needsCode ? 'block' : 'none';
+  groupField.style.display = needsGroupSize ? 'block' : 'none';
+
+  const discountId = ds.value || null;
+  if (!discountId) {
+    showError(null);
+    showTotals(baseFee, 0, baseFee);
+    return;
+  }
+
+  const codeEl = document.getElementById('enteredCode');
+
+  // The button is disabled and marked busy while a price is in flight, so
+  // nobody can submit against a total that is still being calculated.
+  payButton.disabled = true;
+  payButton.classList.add('is-busy');
+  try {
+    const response = await fetch(`/registrations/${registrationId}/quote`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        [csrfHeader]: csrfToken
+      },
+      body: JSON.stringify({
+        discountId: Number(discountId),
+        enteredCode: codeEl && codeEl.value ? codeEl.value : null
+      })
+    });
+
+    let payload = null;
+    try { payload = await response.json(); } catch (e) { payload = null; }
+
+    if (!response.ok) {
+      showError((payload && payload.message)
+          ? payload.message
+          : 'That discount could not be applied right now.');
+      showTotals(baseFee, 0, baseFee);
+      return;
+    }
+    if (!payload || payload.finalAmount === undefined) {
+      showError('The price preview is unavailable. You can still confirm payment at the full price.');
+      showTotals(baseFee, 0, baseFee);
+      return;
+    }
+    showError(null);
+    showTotals(payload.originalAmount, payload.discountAmount, payload.finalAmount);
+  } catch (e) {
+    showError('Could not reach the server for a price preview. The amount will be confirmed when you submit.');
+    showTotals(baseFee, 0, baseFee);
+  } finally {
+    payButton.disabled = false;
+    payButton.classList.remove('is-busy');
+  }
+}
+
+/*
+ * The method switch.
+ *
+ * It only shows and hides: what each method actually DOES is decided on
+ * the server, which re-reads the radio value and branches on it. Hiding
+ * the card fields is a convenience, never the control - a card posted
+ * alongside ON_ARRIVAL is ignored there, and an ON_ARRIVAL with no card
+ * is not a validation failure.
+ */
+function chooseMethod() {
+  const onArrival = document.getElementById('method-arrival').checked;
+  document.getElementById('card-panel').style.display = onArrival ? 'none' : 'block';
+  document.getElementById('arrival-panel').style.display = onArrival ? 'block' : 'none';
+  // The button has to say what pressing it does. "Pay" on a booking that
+  // will be settled at a door is a small lie that produces a support
+  // ticket.
+  document.getElementById('pay-verb').textContent = onArrival ? 'Reserve — owe' : 'Pay';
+  document.querySelectorAll('.method-tile').forEach(function (tile) {
+    tile.classList.toggle('is-selected', tile.querySelector('input').checked);
+  });
+}
+
+/* The card preview. Presentation only - nothing here validates anything. */
+function paintCard() {
+  const raw = (document.getElementById('cardNumber').value || '').replace(/[^0-9]/g, '');
+  const grouped = raw.replace(/(.{4})/g, '$1 ').trim();
+  document.getElementById('cardNumber').value = grouped;
+  document.getElementById('cp-number').textContent =
+      grouped.padEnd(19, '•').slice(0, 23) || '•••• •••• •••• ••••';
+
+  const holder = (document.getElementById('cardHolder').value || '').trim();
+  document.getElementById('cp-holder').textContent = holder ? holder.toUpperCase() : 'YOUR NAME';
+
+  const month = document.getElementById('expiryMonth').value;
+  const year = document.getElementById('expiryYear').value;
+  document.getElementById('cp-expiry').textContent =
+      (month ? String(month).padStart(2, '0') : 'MM') + '/' + (year ? String(year).slice(-2) : 'YY');
+
+  // The brand is read from the first digits, the way every checkout does
+  // it. Cosmetic: the gateway does not care and neither does the server.
+  let brand = 'CARD';
+  if (/^4/.test(raw)) { brand = 'VISA'; }
+  else if (/^5[1-5]/.test(raw) || /^2[2-7]/.test(raw)) { brand = 'MASTERCARD'; }
+  else if (/^3[47]/.test(raw)) { brand = 'AMEX'; }
+  document.getElementById('cp-brand').textContent = brand;
+}
+
+/* Fills in one of the test numbers, so a demo is not a typing exercise. */
+function useCard(button) {
+  document.getElementById('cardNumber').value = button.getAttribute('data-card');
+  const holder = document.getElementById('cardHolder');
+  if (!holder.value) { holder.value = 'Test Cardholder'; }
+  const month = document.getElementById('expiryMonth');
+  const year = document.getElementById('expiryYear');
+  if (!month.value) { month.value = 12; }
+  if (!year.value) { year.value = new Date().getFullYear() + 2; }
+  const cvv = document.getElementById('securityCode');
+  if (!cvv.value) { cvv.value = '123'; }
+  paintCard();
+}
+
+// Restore the field visibility when the page comes back after an error.
+document.addEventListener('DOMContentLoaded', function () {
+  chooseMethod();
+  paintCard();
+  if (ds.value) { refreshQuote(); }
+});
+</script>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

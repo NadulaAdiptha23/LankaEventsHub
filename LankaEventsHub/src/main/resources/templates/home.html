@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Event Management & Discovery')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/navbar :: nav('home', false)}"></div>
+
+<main id="main">
+
+<!-- ==================================================================
+     01 — CINEMATIC HERO
+
+     Full-bleed image, controlled wash, the headline set large over the
+     dark side of the frame. The navbar sits ON this section (it is
+     transparent until the page scrolls), which is why the hero pulls
+     itself up underneath the bar and then pads its content back down.
+
+     The figures along the foot are COUNTED, not written: see
+     PublicStatsService. If this platform has run four events it says
+     four.
+     ================================================================== -->
+<section class="hero">
+    <div class="hero__media">
+        <img th:src="@{/img/hero.svg}"
+             alt="A speaker on a lit stage in front of a full auditorium">
+    </div>
+    <div class="hero__scrim" aria-hidden="true"></div>
+
+    <div class="hero__inner">
+        <div class="container-editorial">
+            <div class="hero__content">
+                <p class="hero__eyebrow">Event Management &amp; Discovery</p>
+
+                <h1 class="hero__title">
+                    Create moments<br>
+                    worth <span class="accent">remembering.</span>
+                </h1>
+
+                <p class="hero__subtitle">
+                    We plan, manage and deliver exceptional events designed around
+                    people, experiences and moments.
+                </p>
+
+                <div class="hero__actions">
+                    <a class="btn btn-primary btn-lg" th:href="@{/events}">Explore Events</a>
+                    <a class="btn btn-outline-light btn-lg" th:href="@{/contact}">Plan Your Event</a>
+                </div>
+
+                <div class="hero__foot" th:if="${stats != null and stats.meaningful}">
+                    <div>
+                        <div class="hero__stat-value" th:text="${stats.eventsLive}">0</div>
+                        <div class="hero__stat-label">Events open now</div>
+                    </div>
+                    <div>
+                        <div class="hero__stat-value" th:text="${stats.attendees}">0</div>
+                        <div class="hero__stat-label">Confirmed bookings</div>
+                    </div>
+                    <div>
+                        <div class="hero__stat-value" th:text="${stats.organizers}">0</div>
+                        <div class="hero__stat-label">Event organizers</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <span class="hero__cue" aria-hidden="true"></span>
+</section>
+
+
+<!-- ==================================================================
+     02 — BRAND STATEMENT
+
+     No card, no border, no background. A statement set in the middle of
+     a great deal of ivory, which is the whole point of it.
+     ================================================================== -->
+<section class="section section--ivory" data-reveal>
+    <div class="container-editorial">
+        <div class="row justify-content-between align-items-start g-5">
+            <div class="col-lg-7">
+                <p class="eyebrow">Who we are</p>
+                <h2 class="display-2x mb-0">
+                    More than an event.<br>
+                    It&rsquo;s an <span class="serif-italic">experience.</span>
+                </h2>
+            </div>
+            <div class="col-lg-4">
+                <p class="lede mb-4">
+                    Verdant Events is where events are planned and where they are found.
+                    Organizers run the whole lifecycle here &mdash; approvals, capacity,
+                    ticketing, payments, the door. Guests discover what is happening and
+                    book a seat in a few seconds.
+                </p>
+                <p class="text-meta text-muted-custom mb-4">
+                    One platform, two sides of the same evening. The people organizing and
+                    the people attending are working from the same source of truth, which
+                    is why nothing on the night comes as a surprise.
+                </p>
+                <a class="link-editorial" th:href="@{/about}">
+                    Our story <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ==================================================================
+     03 — STATISTICS
+
+     Rendered only when there is something true to report. An empty
+     platform shows nothing here rather than a row of confident zeroes,
+     and the attendance rate is omitted entirely until somebody has
+     actually been checked in at a door.
+     ================================================================== -->
+<section class="section section--tight section--ivory" th:if="${stats != null and stats.meaningful}" data-reveal>
+    <div class="container-editorial">
+        <div class="stat-row">
+            <div class="stat-row__item">
+                <div class="stat-row__value" th:text="${stats.eventsDelivered}">0</div>
+                <div class="stat-row__label">Events delivered</div>
+            </div>
+            <div class="stat-row__item">
+                <div class="stat-row__value" th:text="${stats.eventsLive}">0</div>
+                <div class="stat-row__label">Open for booking</div>
+            </div>
+            <div class="stat-row__item">
+                <div class="stat-row__value" th:text="${stats.attendees}">0</div>
+                <div class="stat-row__label">Confirmed bookings</div>
+            </div>
+            <div class="stat-row__item" th:if="${stats.hasAttendanceRate}">
+                <div class="stat-row__value" th:text="${stats.attendanceRate} + '%'">0%</div>
+                <div class="stat-row__label">Turned up on the day</div>
+            </div>
+            <div class="stat-row__item" th:unless="${stats.hasAttendanceRate}">
+                <div class="stat-row__value" th:text="${stats.organizers}">0</div>
+                <div class="stat-row__label">Professional organizers</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ==================================================================
+     04 — WHAT WE DO
+
+     A numbered editorial list rather than six identical icon cards.
+     The number does the work an icon would have done, and it carries
+     information an icon does not: the order.
+     ================================================================== -->
+<section class="section section--white" id="services" data-reveal>
+    <div class="container-editorial">
+        <div class="section-bar">
+            <div>
+                <p class="eyebrow">What we do</p>
+                <h2 class="section-head__title display-2x mb-0">Four disciplines,<br>one evening.</h2>
+            </div>
+            <a class="link-editorial" th:href="@{/services}">
+                All services <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            </a>
+        </div>
+
+        <div class="numbered">
+            <div class="numbered__row">
+                <div class="numbered__num">01</div>
+                <h3 class="numbered__title">Event Management</h3>
+                <p class="numbered__text">
+                    Planning, coordination and execution from concept to completion.
+                    Draft, approval, publication and the full booking lifecycle, with
+                    every change recorded.
+                </p>
+            </div>
+            <div class="numbered__row">
+                <div class="numbered__num">02</div>
+                <h3 class="numbered__title">Event Discovery</h3>
+                <p class="numbered__text">
+                    Helping people find meaningful events. Search by keyword, category,
+                    venue, date and price &mdash; and see what is genuinely still
+                    available before booking.
+                </p>
+            </div>
+            <div class="numbered__row">
+                <div class="numbered__num">03</div>
+                <h3 class="numbered__title">Venue &amp; Logistics</h3>
+                <p class="numbered__text">
+                    Coordination of locations, schedules and capacity. Venue conflicts are
+                    refused before they happen, and a room is never double-booked by two
+                    people working at once.
+                </p>
+            </div>
+            <div class="numbered__row">
+                <div class="numbered__num">04</div>
+                <h3 class="numbered__title">Experience Design</h3>
+                <p class="numbered__text">
+                    Sessions, invitations, announcements and the door itself &mdash; the
+                    details that decide whether an evening is remembered.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ==================================================================
+     05 — FEATURED EXPERIENCES
+
+     An asymmetric grid on a 12-column field. Every tile is a REAL
+     category, taken from the published events in the database and
+     ordered by how many each one holds - so no tile can send a visitor
+     to an empty listing. Category is free text an organizer types, not
+     a fixed enum, which is exactly why this cannot be hard-coded: one
+     organizer's vocabulary is not the platform's.
+
+     The span pattern is chosen by how many categories there actually
+     are, so the last row is always full rather than leaving one tile
+     stranded beside a gap. Square corners, different sizes, no card.
+     ================================================================== -->
+<th:block th:if="${featured != null and not #lists.isEmpty(featured)}">
+<section class="section section--ivory" data-reveal>
+    <div class="container-editorial">
+        <div class="section-bar">
+            <div>
+                <p class="eyebrow">Browse by category</p>
+                <h2 class="section-head__title display-2x mb-0">Featured experiences</h2>
+            </div>
+            <a class="link-editorial" th:href="@{/events}">
+                Browse all events <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            </a>
+        </div>
+
+        <!--
+          Artwork is assigned by POSITION, not by category name, and the
+          two lists are parallel so the alt text always describes the
+          picture that is actually drawn.
+
+          Matching art to the category name was the first attempt and it
+          was worse: category is free text, most real ones ("Business",
+          "Networking", "Tech") map to the same corporate scene, and
+          three identical tiles in a five-tile grid reads as a broken
+          page. Six images, at most five tiles, indexed straight - so
+          every tile is guaranteed a different one.
+        -->
+        <div class="experience-grid"
+             th:with="n=${#lists.size(featured)},
+                      spans=${ {{12},{5,7},{4,4,4},{5,7,6,6},{5,7,4,4,4}} },
+                      art=${ {'exp-corporate','exp-wedding','exp-exhibition','exp-music','exp-workshop','exp-private'} },
+                      alts=${ {'Delegates seated before a lit stage at a conference',
+                               'A marquee lit by strings of warm lights at a reception',
+                               'Lit display panels in an exhibition hall',
+                               'Stage lighting over a crowd at a live music event',
+                               'A presentation screen in front of a seated workshop audience',
+                               'Candles along a long table with guests seated in silhouette'} }">
+
+            <a class="experience" th:each="f,i : ${featured}"
+               th:href="@{/events(category=${f.name})}"
+               th:with="span=${spans[n - 1][i.index]},
+                        slot=${i.index % 6},
+                        rowStart=${i.index == 0 or (n >= 4 and i.index == 2)},
+                        ratio=${span >= 12 ? '21/9' : (span >= 6 ? '3/2' : (span == 5 ? '4/5' : '1/1'))},
+                        tileStyle=${'grid-column: span ' + span + '; '
+                                    + (rowStart ? 'aspect-ratio: ' + ratio : 'height: 100%') + ';'}"
+               th:style="${tileStyle}">
+                <img th:src="@{'/img/' + ${art[slot]} + '.svg'}"
+                     th:alt="${alts[slot]}" loading="lazy">
+                <span class="experience__body">
+                    <!-- The count is the honest kicker: it is the number of
+                         published events behind the link, so a visitor knows
+                         what they are clicking into before they click it. -->
+                    <span class="experience__cat"
+                          th:text="${f.count} + (${f.count} == 1 ? ' event' : ' events')">3 events</span>
+                    <span class="experience__title" th:text="${f.name}">Category</span>
+                    <span class="experience__more">View events</span>
+                </span>
+            </a>
+        </div>
+    </div>
+</section>
+</th:block>
+
+
+<!-- ==================================================================
+     06 — DISCOVER EVENTS
+
+     Real events from the database, and the same search the listing page
+     uses. Nothing here is hard-coded: an empty platform gets the empty
+     state, not eight invented records.
+     ================================================================== -->
+<section class="section section--white" id="events" data-reveal>
+    <div class="container-editorial">
+        <div class="section-bar">
+            <div>
+                <p class="eyebrow">What&rsquo;s on</p>
+                <h2 class="section-head__title display-2x mb-0">Discover what&rsquo;s happening</h2>
+            </div>
+            <a class="link-editorial" th:href="@{/events}">
+                All events <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            </a>
+        </div>
+
+        <!-- The same GET the listing page reads, so a search from here
+             lands on a page that understands every parameter. -->
+        <form class="discover-bar" method="get" th:action="@{/events}" role="search">
+            <div class="discover-bar__field">
+                <label class="discover-bar__label" for="q">Search</label>
+                <input class="discover-bar__input" type="search" id="q" name="keyword"
+                       placeholder="Event name or keyword" autocomplete="off">
+            </div>
+            <div class="discover-bar__field">
+                <label class="discover-bar__label" for="cat">Category</label>
+                <select class="discover-bar__input" id="cat" name="category">
+                    <option value="">All categories</option>
+                    <option th:each="c : ${categories}" th:value="${c}" th:text="${c}">Category</option>
+                </select>
+            </div>
+            <div class="discover-bar__field">
+                <label class="discover-bar__label" for="venue">Location</label>
+                <input class="discover-bar__input" type="text" id="venue" name="venue"
+                       placeholder="Any venue" autocomplete="off">
+            </div>
+            <div class="discover-bar__field">
+                <label class="discover-bar__label" for="from">From</label>
+                <input class="discover-bar__input" type="date" id="from" name="dateFrom">
+            </div>
+            <button class="btn btn-primary" type="submit">Search</button>
+        </form>
+
+        <div class="row g-4 mt-1" th:if="${events != null and !#lists.isEmpty(events)}">
+            <div class="col-lg-4 col-md-6" th:each="event, i : ${events}" th:if="${i.index < 6}">
+                <div th:replace="~{fragments/components :: eventCard(${event})}"></div>
+            </div>
+        </div>
+
+        <!--
+          The condition has to sit on a WRAPPER, not on the element that
+          carries th:replace.
+
+          Thymeleaf runs fragment inclusion (precedence 100) before
+          conditional evaluation (precedence 300), so a th:if on the same
+          tag as a th:replace is replaced away before it is ever read -
+          and the empty state renders underneath a full grid of events.
+        -->
+        <div th:if="${events == null or #lists.isEmpty(events)}">
+            <div th:replace="~{fragments/components :: emptyState(
+                    'fa-regular fa-calendar',
+                    'No events published yet',
+                    'Nothing is open for booking at the moment. New events appear here as soon as they are published.',
+                    '/register', 'Create an account')}"></div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ==================================================================
+     07 — HOW IT WORKS
+
+     A horizontal timeline: three steps on one rule.
+     ================================================================== -->
+<section class="section section--dark" data-reveal>
+    <div class="container-editorial">
+        <div class="section-head section-head--center">
+            <p class="eyebrow eyebrow--center eyebrow--light">How it works</p>
+            <h2 class="display-2x section-head__title">Three steps to a seat.</h2>
+        </div>
+
+        <ol class="timeline">
+            <li class="timeline__step">
+                <span class="timeline__num">01</span>
+                <h3 class="timeline__title">Discover</h3>
+                <p class="timeline__text">Find an event that fits &mdash; or create your own and open it for booking.</p>
+            </li>
+            <li class="timeline__step">
+                <span class="timeline__num">02</span>
+                <h3 class="timeline__title">Register</h3>
+                <p class="timeline__text">Reserve a seat for yourself or your whole party, and pay by card or on arrival.</p>
+            </li>
+            <li class="timeline__step">
+                <span class="timeline__num">03</span>
+                <h3 class="timeline__title">Experience</h3>
+                <p class="timeline__text">Show your ticket at the door, and enjoy an evening somebody planned properly.</p>
+            </li>
+        </ol>
+    </div>
+</section>
+
+
+<!-- ==================================================================
+     08 — WHY VERDANT EVENTS
+     ================================================================== -->
+<section class="section section--ivory" data-reveal>
+    <div class="container-editorial">
+        <div class="row g-5">
+            <div class="col-lg-4">
+                <p class="eyebrow">Why Verdant</p>
+                <h2 class="display-2x mb-4">Built by people<br>who run events.</h2>
+                <p class="text-meta text-muted-custom mb-0">
+                    Every rule in this platform exists because getting it wrong costs
+                    somebody an evening &mdash; a double-booked room, a seat sold twice,
+                    a ticket that will not scan.
+                </p>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="why-grid">
+                    <div class="why">
+                        <h3 class="why__title">Seamless management</h3>
+                        <p class="why__text">Draft, submit, approve, publish. Every state change is recorded and reversible where it should be.</p>
+                    </div>
+                    <div class="why">
+                        <h3 class="why__title">Honest availability</h3>
+                        <p class="why__text">Seats are held the moment somebody starts booking, so the number on the page is the number that exists.</p>
+                    </div>
+                    <div class="why">
+                        <h3 class="why__title">Party bookings</h3>
+                        <p class="why__text">One booking for the whole table. Capacity, price and the door all count people, not rows.</p>
+                    </div>
+                    <div class="why">
+                        <h3 class="why__title">Card or on arrival</h3>
+                        <p class="why__text">Settle at checkout, or reserve now and pay at the door. Both end in a confirmed booking.</p>
+                    </div>
+                    <div class="why">
+                        <h3 class="why__title">Real reporting</h3>
+                        <p class="why__text">Attendance, revenue and refunds computed from the live tables when you open the page.</p>
+                    </div>
+                    <div class="why">
+                        <h3 class="why__title">Nothing double-booked</h3>
+                        <p class="why__text">Venue clashes and duplicate registrations are refused by the database, not just the form.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ==================================================================
+     09 — OUR STORY  (split: image | text)
+     ================================================================== -->
+<section class="section section--white" id="about" data-reveal>
+    <div class="container-editorial">
+        <div class="split">
+            <div class="frame frame--tall">
+                <img th:src="@{/img/about.svg}"
+                     alt="An audience seated before a lit presentation screen" loading="lazy">
+            </div>
+            <div>
+                <p class="eyebrow">Our story</p>
+                <h2 class="display-2x mb-4">One platform for<br>both sides of the room.</h2>
+                <p class="lede mb-4">
+                    Most event tools serve either the organizer or the guest. Running an
+                    event through one and selling seats through another is how a room ends
+                    up double-booked and a guest ends up holding a ticket for an evening
+                    that moved.
+                </p>
+                <p class="text-meta text-muted-custom mb-4">
+                    Verdant Events keeps organizers, attendees, events and experiences in
+                    one system. The capacity an organizer sets is the capacity a guest
+                    sees. The seat a guest books is the seat the door expects. There is no
+                    second copy of the truth to disagree with the first.
+                </p>
+                <a class="link-editorial" th:href="@{/about}">
+                    Learn more <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ==================================================================
+     10 — WHAT PEOPLE SAY
+
+     Marked as illustrative, in as many words. This platform stores no
+     testimonials, so inventing named people and attributing quotes to
+     them would be fabricating endorsements - the panel says plainly
+     what these are.
+     ================================================================== -->
+<section class="section section--ivory" data-reveal>
+    <div class="container-editorial">
+        <div class="section-head">
+            <p class="eyebrow">In their words</p>
+            <h2 class="display-2x section-head__title mb-0">What organizers ask for.</h2>
+            <p class="section-head__text mt-3">
+                Illustrative of the problems this platform was built to solve. Verdant
+                Events does not yet collect customer reviews, so these are not attributed
+                to real people.
+            </p>
+        </div>
+
+        <div class="row g-5">
+            <div class="col-lg-4">
+                <blockquote class="quote">
+                    <p class="quote__text">Show me what is actually still available, not what was available this morning.</p>
+                    <div class="quote__who">Capacity that is current</div>
+                    <div class="quote__role">Conference organizer</div>
+                </blockquote>
+            </div>
+            <div class="col-lg-4">
+                <blockquote class="quote">
+                    <p class="quote__text">We book as a table of six. Stop making us fill in the form six times.</p>
+                    <div class="quote__who">Party bookings</div>
+                    <div class="quote__role">Corporate guest</div>
+                </blockquote>
+            </div>
+            <div class="col-lg-4">
+                <blockquote class="quote">
+                    <p class="quote__text">Half our guests want to pay at the door. That should not be a problem.</p>
+                    <div class="quote__who">Pay on arrival</div>
+                    <div class="quote__role">Private event host</div>
+                </blockquote>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ==================================================================
+     11 — FINAL CTA
+     ================================================================== -->
+<section class="section cta-band" data-reveal>
+    <div class="cta-band__media" aria-hidden="true">
+        <img th:src="@{/img/cta.svg}" alt="" loading="lazy">
+    </div>
+    <div class="cta-band__scrim" aria-hidden="true"></div>
+    <div class="container-narrow cta-band__inner">
+        <p class="eyebrow eyebrow--center eyebrow--light">Get started</p>
+        <h2 class="display-1x cta-band__title">
+            Your next great event<br>starts here.
+        </h2>
+        <p class="cta-band__text">
+            From intimate gatherings to large-scale experiences, Verdant Events helps
+            bring every detail together.
+        </p>
+        <div class="cta-band__actions">
+            <a class="btn btn-primary btn-lg" th:href="@{/register}" sec:authorize="!isAuthenticated()">Get Started</a>
+            <a class="btn btn-primary btn-lg" th:href="@{/my-registrations}" sec:authorize="isAuthenticated()">Go to dashboard</a>
+            <a class="btn btn-outline-light btn-lg" th:href="@{/events}">Explore Events</a>
+        </div>
+    </div>
+</section>
+
+</main>
+
+<div th:replace="~{fragments/footer :: foot}"></div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

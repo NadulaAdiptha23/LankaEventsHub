@@ -1,0 +1,1915 @@
+{
+ "about.html": {
+  "authorize": [
+   "!isAuthenticated()",
+   "isAuthenticated()"
+  ],
+  "fields": [],
+  "forms": [],
+  "fragments": [
+   "~{fragments/footer :: foot}",
+   "~{fragments/head :: head('About')}",
+   "~{fragments/navbar :: nav('about', true)}"
+  ],
+  "js_ids": [],
+  "model": [
+   "stats"
+  ],
+  "urls": [
+   "@{/events}",
+   "@{/img/about.svg}",
+   "@{/img/cta.svg}",
+   "@{/img/exp-wedding.svg}",
+   "@{/my-registrations}",
+   "@{/register}",
+   "@{/services}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "admin-announcements.html": {
+  "authorize": [],
+  "fields": [
+   "reason"
+  ],
+  "forms": [
+   {
+    "action": "@{/admin/announcements/{id}/approve(id=${a.id})}",
+    "fields": [],
+    "method": "post"
+   },
+   {
+    "action": "@{/admin/announcements/{id}/reject(id=${a.id})}",
+    "fields": [
+     "reason"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/components :: emptyState(\n                 'fa-circle-check',\n                 'Nothing waiting',\n                 'When an organizer submits an announcement it appears here, oldest first.',\n                 null, null)}",
+   "~{fragments/footer :: foot}",
+   "~{fragments/head :: head('Announcement Approvals')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('announcements')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "a",
+   "lists",
+   "pending"
+  ],
+  "urls": [
+   "@{/admin/announcements/{id}/approve(id=${a.id})}",
+   "@{/admin/announcements/{id}/reject(id=${a.id})}"
+  ]
+ },
+ "admin-audit.html": {
+  "authorize": [],
+  "fields": [
+   "action",
+   "actor",
+   "entityId",
+   "entityType"
+  ],
+  "forms": [
+   {
+    "action": "@{/admin/audit}",
+    "fields": [
+     "action",
+     "actor",
+     "entityId",
+     "entityType"
+    ],
+    "method": "get"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/components :: emptyState(\n                  'fa-clipboard-list',\n                  'Nothing matches',\n                  'No audit entry matches these filters.',\n                  '/admin/audit', 'Clear filters')}",
+   "~{fragments/head :: head('Audit log')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('audit')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "a",
+   "actions",
+   "criteria",
+   "e",
+   "entityTypes",
+   "entries",
+   "queryString",
+   "t"
+  ],
+  "urls": [
+   "@{/admin/audit}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "admin-bookings.html": {
+  "authorize": [],
+  "fields": [
+   "attendee",
+   "event",
+   "paymentStatus",
+   "reason",
+   "status",
+   "unpaidOnly"
+  ],
+  "forms": [
+   {
+    "action": "@{/admin/bookings/{id}/cancel(id=${b.registrationId})}",
+    "fields": [
+     "reason"
+    ],
+    "method": "post"
+   },
+   {
+    "action": "@{/admin/bookings}",
+    "fields": [
+     "attendee",
+     "event",
+     "paymentStatus",
+     "status",
+     "unpaidOnly"
+    ],
+    "method": "get"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/components :: confirmDelete(\n                      @{/admin/bookings/{id}/delete(id=${b.registrationId})},\n                      ${b.attendeeName}, 'booking',\n                      'Its payment and refund go with it, and its seats go back to the event.')}",
+   "~{fragments/components :: emptyState(\n                  'fa-ticket',\n                  'Nothing matches',\n                  'No booking matches these filters. Clear them to see everything.',\n                  '/admin/bookings', 'Clear filters')}",
+   "~{fragments/components :: paymentStatus(${b.paymentStatus})}",
+   "~{fragments/components :: refundStatus(${b.refundStatus})}",
+   "~{fragments/components :: registrationStatus(${b.status})}",
+   "~{fragments/head :: head('Bookings')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('bookings')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "b",
+   "bookings",
+   "criteria",
+   "numbers",
+   "p",
+   "paymentStatuses",
+   "queryString",
+   "s",
+   "statuses"
+  ],
+  "urls": [
+   "@{/admin/bookings/{id}/cancel(id=${b.registrationId})}",
+   "@{/admin/bookings}",
+   "@{/admin/refunds}",
+   "@{/events/{id}(id=${b.eventId})}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "admin-refunds.html": {
+  "authorize": [],
+  "fields": [],
+  "forms": [
+   {
+    "action": "@{/admin/refunds/{id}/advance(id=${r.id})}",
+    "fields": [],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/components :: emptyState(\n                  'fa-rotate-left',\n                  'No refunds',\n                  'Refunds appear here when an organizer cancels an event people paid for.',\n                  null, null)}",
+   "~{fragments/components :: refundStatus(${r.status})}",
+   "~{fragments/head :: head('Refunds')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('refunds')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "lists",
+   "numbers",
+   "r",
+   "refunds"
+  ],
+  "urls": [
+   "@{/admin/refunds/{id}/advance(id=${r.id})}",
+   "@{/admin/reports}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "admin-reports.html": {
+  "authorize": [],
+  "fields": [],
+  "forms": [],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/components :: emptyState(\n                      'fa-chart-simple',\n                      'Nothing to rank yet',\n                      'Once people start registering for published events, the leaders show up here.',\n                      @{/admin/events}, 'Review pending events')}",
+   "~{fragments/components :: emptyState(\n                      'fa-tags',\n                      'No categories yet',\n                      'Once events are created with a category, the split appears here.',\n                      null, null)}",
+   "~{fragments/head :: head('Reports and Analytics')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('reports')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "aggregates",
+   "entry",
+   "iter",
+   "lists",
+   "maps",
+   "numbers",
+   "row",
+   "summary",
+   "total"
+  ],
+  "urls": [
+   "@{/admin/events}",
+   "@{/admin/refunds}",
+   "@{/admin/reports.csv}",
+   "@{/admin/users}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "admin-user-edit.html": {
+  "authorize": [],
+  "fields": [
+   "email",
+   "fullName"
+  ],
+  "forms": [
+   {
+    "action": "@{/admin/users/{id}/edit(id=${editUser.id})}",
+    "fields": [
+     "email",
+     "fullName"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/head :: head('Edit User')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('users')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "editUser",
+   "error"
+  ],
+  "urls": [
+   "@{/admin/users/{id}/edit(id=${editUser.id})}",
+   "@{/admin/users}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "admin-user-form.html": {
+  "authorize": [],
+  "fields": [
+   "active",
+   "confirmPassword",
+   "email",
+   "fullName",
+   "password",
+   "role",
+   "verifiedStudent"
+  ],
+  "forms": [
+   {
+    "action": "@{/admin/users}",
+    "fields": [
+     "active",
+     "confirmPassword",
+     "email",
+     "fullName",
+     "password",
+     "role",
+     "verifiedStudent"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/head :: head('Add User')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('users')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "active",
+   "email",
+   "error",
+   "fullName",
+   "r",
+   "roles",
+   "verifiedStudent"
+  ],
+  "urls": [
+   "@{/admin/users}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "admin-users.html": {
+  "authorize": [],
+  "fields": [
+   "role",
+   "verified"
+  ],
+  "forms": [
+   {
+    "action": "@{/admin/users/{id}/role(id=${user.id})}",
+    "fields": [
+     "role"
+    ],
+    "method": "post"
+   },
+   {
+    "action": "@{/admin/users/{id}/toggle-active(id=${user.id})}",
+    "fields": [],
+    "method": "post"
+   },
+   {
+    "action": "@{/admin/users/{id}/verify-student(id=${user.id})}",
+    "fields": [
+     "verified"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/components :: confirmDelete(\n                      @{/admin/users/{id}/delete(id=${user.id})},\n                      ${user.fullName}, 'account',\n                      'Their bookings, payments, refunds, notifications and saved reports go with it. The audit trail is kept.')}",
+   "~{fragments/components :: emptyState(\n                  'fa-users',\n                  'No accounts yet',\n                  'Accounts appear here as soon as people register.',\n                  null, null)}",
+   "~{fragments/head :: head('Manage Users')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('users')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "lists",
+   "r",
+   "roles",
+   "strings",
+   "user",
+   "users"
+  ],
+  "urls": [
+   "@{/admin/events}",
+   "@{/admin/reports}",
+   "@{/admin/users/new}",
+   "@{/admin/users/{id}/edit(id=${user.id})}",
+   "@{/admin/users/{id}/role(id=${user.id})}",
+   "@{/admin/users/{id}/toggle-active(id=${user.id})}",
+   "@{/admin/users/{id}/verify-student(id=${user.id})}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "announcements.html": {
+  "authorize": [],
+  "fields": [
+   "eventId",
+   "message",
+   "submitNow",
+   "title"
+  ],
+  "forms": [
+   {
+    "action": "@{/announcements/{id}/delete(id=${a.id})}",
+    "fields": [
+     "eventId"
+    ],
+    "method": "post"
+   },
+   {
+    "action": "@{/announcements/{id}/publish(id=${a.id})}",
+    "fields": [
+     "eventId"
+    ],
+    "method": "post"
+   },
+   {
+    "action": "@{/announcements/{id}/submit(id=${a.id})}",
+    "fields": [
+     "eventId"
+    ],
+    "method": "post"
+   },
+   {
+    "action": "@{/announcements/{id}/update(id=${a.id})}",
+    "fields": [
+     "eventId",
+     "message",
+     "title"
+    ],
+    "method": "post"
+   },
+   {
+    "action": "@{/events/{id}/announcements(id=${eventId})}",
+    "fields": [
+     "message",
+     "submitNow",
+     "title"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/components :: announcementStatus(${a.status})}",
+   "~{fragments/components :: emptyState(\n                 'fa-bullhorn',\n                 'No announcements yet',\n                 'Anything written here reaches every attendee holding a place on this event.',\n                 null, null)}",
+   "~{fragments/footer :: foot}",
+   "~{fragments/head :: head('Announcements')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('myevents')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "a",
+   "announcements",
+   "event",
+   "eventId",
+   "isAdmin",
+   "lists",
+   "temporals"
+  ],
+  "urls": [
+   "@{/admin/announcements}",
+   "@{/announcements/{id}/delete(id=${a.id})}",
+   "@{/announcements/{id}/publish(id=${a.id})}",
+   "@{/announcements/{id}/submit(id=${a.id})}",
+   "@{/announcements/{id}/update(id=${a.id})}",
+   "@{/events/{id}(id=${eventId})}",
+   "@{/events/{id}/announcements(id=${eventId})}",
+   "@{/my-events}"
+  ]
+ },
+ "contact.html": {
+  "authorize": [
+   "!isAuthenticated()",
+   "isAuthenticated()"
+  ],
+  "fields": [
+   "email",
+   "guests",
+   "kind",
+   "message",
+   "name"
+  ],
+  "forms": [
+   {
+    "action": "",
+    "fields": [
+     "email",
+     "guests",
+     "kind",
+     "message",
+     "name"
+    ],
+    "method": "get"
+   }
+  ],
+  "fragments": [
+   "~{fragments/footer :: foot}",
+   "~{fragments/head :: head('Contact')}",
+   "~{fragments/navbar :: nav('contact', true)}"
+  ],
+  "js_ids": [
+   "enquiry",
+   "enquiry-error",
+   "enquiry-error-text"
+  ],
+  "model": [
+   "c",
+   "categories"
+  ],
+  "urls": [
+   "@{/events}",
+   "@{/img/exp-private.svg}",
+   "@{/login}",
+   "@{/my-registrations}",
+   "@{/services}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "discount-edit.html": {
+  "authorize": [],
+  "fields": [
+   "active",
+   "code",
+   "percentOff",
+   "type",
+   "validFrom",
+   "validTo"
+  ],
+  "forms": [
+   {
+    "action": "@{/discounts/{id}/update(id=${discount.id})}",
+    "fields": [
+     "active",
+     "code",
+     "percentOff",
+     "type",
+     "validFrom",
+     "validTo"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/head :: head('Edit Discount')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('discounts')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "discount",
+   "strings",
+   "t",
+   "temporals",
+   "types"
+  ],
+  "urls": [
+   "@{/discounts/{id}/update(id=${discount.id})}",
+   "@{/discounts}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "discounts.html": {
+  "authorize": [],
+  "fields": [
+   "active",
+   "code",
+   "eventId",
+   "percentOff",
+   "type",
+   "validFrom",
+   "validTo"
+  ],
+  "forms": [
+   {
+    "action": "@{/discounts/{id}/delete(id=${d.id})}",
+    "fields": [],
+    "method": "post"
+   },
+   {
+    "action": "@{/discounts/{id}/toggle(id=${d.id})}",
+    "fields": [
+     "active"
+    ],
+    "method": "post"
+   },
+   {
+    "action": "@{/discounts}",
+    "fields": [
+     "code",
+     "eventId",
+     "percentOff",
+     "type",
+     "validFrom",
+     "validTo"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/components :: emptyState(\n                  'fa-tags',\n                  'No discounts yet',\n                  'Add one above and it appears at checkout for that event straight away.',\n                  null, null)}",
+   "~{fragments/components :: statusPill(\n                      ${d.currentlyValid ? 'LIVE' : (d.active ? 'SCHEDULED' : 'OFF')},\n                      ${d.currentlyValid ? 'badge-success-soft'\n                        : (d.active ? 'badge-warning-soft' : 'badge-gray-soft')})}",
+   "~{fragments/head :: head('Discounts')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('discounts')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "d",
+   "discounts",
+   "e",
+   "lists",
+   "manageableEvents",
+   "strings",
+   "t",
+   "types"
+  ],
+  "urls": [
+   "@{/discounts/{id}/delete(id=${d.id})}",
+   "@{/discounts/{id}/edit(id=${d.id})}",
+   "@{/discounts/{id}/toggle(id=${d.id})}",
+   "@{/discounts}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "error.html": {
+  "authorize": [],
+  "fields": [],
+  "forms": [],
+  "fragments": [
+   "~{fragments/footer :: foot}",
+   "~{fragments/head :: head('Something went wrong')}",
+   "~{fragments/navbar :: nav('', true)}"
+  ],
+  "js_ids": [],
+  "model": [
+   "error",
+   "message",
+   "status"
+  ],
+  "urls": [
+   "@{/events}",
+   "@{/vendor/bootstrap.bundle.min.js}",
+   "@{/}"
+  ]
+ },
+ "event-attendees.html": {
+  "authorize": [],
+  "fields": [
+   "seatsArrived"
+  ],
+  "forms": [
+   {
+    "action": "@{/events/{eventId}/attendees/{id}/check-in(eventId=${event.id}, id=${r.id})}",
+    "fields": [
+     "seatsArrived"
+    ],
+    "method": "post"
+   },
+   {
+    "action": "@{/events/{eventId}/attendees/{id}/undo-check-in(eventId=${event.id}, id=${r.id})}",
+    "fields": [],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/components :: capacityMeter(${event.seatsTaken}, ${event.capacity})}",
+   "~{fragments/components :: emptyState(\n                  'fa-user-group',\n                  'Nobody has registered yet',\n                  'Once your event is published and people start registering, they appear here.',\n                  null, null)}",
+   "~{fragments/components :: registrationStatus(${r.status})}",
+   "~{fragments/head :: head('Attendees')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('myevents')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "attendanceRate",
+   "checkedInCount",
+   "confirmedCount",
+   "event",
+   "lists",
+   "n",
+   "numbers",
+   "r",
+   "registrations",
+   "temporals"
+  ],
+  "urls": [
+   "@{/events/{eventId}/attendees/{id}/check-in(eventId=${event.id}, id=${r.id})}",
+   "@{/events/{eventId}/attendees/{id}/undo-check-in(eventId=${event.id}, id=${r.id})}",
+   "@{/events/{id}(id=${event.id})}",
+   "@{/events/{id}/door(id=${event.id})}",
+   "@{/my-events}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "event-detail.html": {
+  "authorize": [
+   "!isAuthenticated()",
+   "isAuthenticated()"
+  ],
+  "fields": [
+   "seats"
+  ],
+  "forms": [
+   {
+    "action": "@{/events/{id}/cancel(id=${event.id})}",
+    "fields": [],
+    "method": "post"
+   },
+   {
+    "action": "@{/events/{id}/cancel(id=${event.id})}",
+    "fields": [],
+    "method": "post"
+   },
+   {
+    "action": "@{/events/{id}/register/review(id=${event.id})}",
+    "fields": [
+     "seats"
+    ],
+    "method": "get"
+   },
+   {
+    "action": "@{/events/{id}/request-invitation(id=${event.id})}",
+    "fields": [],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/components :: capacityMeter(${event.seatsTaken}, ${event.capacity})}",
+   "~{fragments/components :: eventStatus(${event.status})}",
+   "~{fragments/footer :: foot}",
+   "~{fragments/head :: head('Event Details')}",
+   "~{fragments/navbar :: nav('events', true)}"
+  ],
+  "js_ids": [],
+  "model": [
+   "availability",
+   "canManage",
+   "event",
+   "n",
+   "numbers",
+   "session",
+   "temporals"
+  ],
+  "urls": [
+   "@{/events/{id}/attendees(id=${event.id})}",
+   "@{/events/{id}/cancel(id=${event.id})}",
+   "@{/events/{id}/edit(id=${event.id})}",
+   "@{/events/{id}/invitations(id=${event.id})}",
+   "@{/events/{id}/register/review(id=${event.id})}",
+   "@{/events/{id}/request-invitation(id=${event.id})}",
+   "@{/events}",
+   "@{/login}",
+   "@{/register}",
+   "@{/registrations/{id}/pay(id=${availability.myRegistrationId})}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "event-door.html": {
+  "authorize": [],
+  "fields": [
+   "note"
+  ],
+  "forms": [
+   {
+    "action": "@{/events/{eventId}/door/{registrationId}/settle(\n                                   eventId=${event.id}, registrationId=${p.registrationId})}",
+    "fields": [
+     "note"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/components :: emptyState(\n              'fa-solid fa-circle-check',\n              'Nobody owes anything',\n              'Every booking on this event has been paid for. Anyone paying on arrival will appear here as soon as they reserve.',\n              null, null)}",
+   "~{fragments/head :: head('At the door')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('myevents')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "event",
+   "lists",
+   "numbers",
+   "owed",
+   "p"
+  ],
+  "urls": [
+   "@{/events/{eventId}/door/{registrationId}/settle(\n                                   eventId=${event.id}, registrationId=${p.registrationId})}",
+   "@{/events/{id}/attendees(id=${event.id})}",
+   "@{/my-events}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "event-edit.html": {
+  "authorize": [],
+  "fields": [
+   "bannerUrl",
+   "capacity",
+   "category",
+   "contactDetails",
+   "contactPerson",
+   "description",
+   "endDatetime",
+   "endTime",
+   "eventType",
+   "fee",
+   "name",
+   "registrationDeadline",
+   "registrationOpenDate",
+   "speaker",
+   "specialInstructions",
+   "startDatetime",
+   "startTime",
+   "title",
+   "venue"
+  ],
+  "forms": [
+   {
+    "action": "@{/events/{eid}/sessions/{sid}/delete(eid=${event.id}, sid=${s.id})}",
+    "fields": [],
+    "method": "post"
+   },
+   {
+    "action": "@{/events/{eid}/sessions/{sid}/update(eid=${event.id}, sid=${s.id})}",
+    "fields": [
+     "description",
+     "endTime",
+     "speaker",
+     "startTime",
+     "title"
+    ],
+    "method": "post"
+   },
+   {
+    "action": "@{/events/{id}/edit(id=${event.id})}",
+    "fields": [
+     "bannerUrl",
+     "capacity",
+     "category",
+     "contactDetails",
+     "contactPerson",
+     "description",
+     "endDatetime",
+     "eventType",
+     "fee",
+     "name",
+     "registrationDeadline",
+     "registrationOpenDate",
+     "specialInstructions",
+     "startDatetime",
+     "venue"
+    ],
+    "method": "post"
+   },
+   {
+    "action": "@{/events/{id}/sessions(id=${event.id})}",
+    "fields": [
+     "description",
+     "endTime",
+     "speaker",
+     "startTime",
+     "title"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/components :: emptyState(\n                      'fa-list-check',\n                      'No sessions yet',\n                      'Add one below. An event with no sessions simply shows its own time and venue.',\n                      null, null)}",
+   "~{fragments/head :: head('Edit Event')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('myevents')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "event",
+   "lists",
+   "s",
+   "sessions",
+   "temporals"
+  ],
+  "urls": [
+   "@{/events/{eid}/sessions/{sid}/delete(eid=${event.id}, sid=${s.id})}",
+   "@{/events/{eid}/sessions/{sid}/update(eid=${event.id}, sid=${s.id})}",
+   "@{/events/{id}(id=${event.id})}",
+   "@{/events/{id}/edit(id=${event.id})}",
+   "@{/events/{id}/sessions(id=${event.id})}",
+   "@{/my-events}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "event-form.html": {
+  "authorize": [],
+  "fields": [
+   "action",
+   "bannerUrl",
+   "capacity",
+   "category",
+   "contactDetails",
+   "contactPerson",
+   "description",
+   "endDatetime",
+   "eventType",
+   "fee",
+   "name",
+   "registrationDeadline",
+   "registrationOpenDate",
+   "specialInstructions",
+   "startDatetime",
+   "venue"
+  ],
+  "forms": [
+   {
+    "action": "@{/events/new}",
+    "fields": [
+     "action",
+     "bannerUrl",
+     "capacity",
+     "category",
+     "contactDetails",
+     "contactPerson",
+     "description",
+     "endDatetime",
+     "eventType",
+     "fee",
+     "name",
+     "registrationDeadline",
+     "registrationOpenDate",
+     "specialInstructions",
+     "startDatetime",
+     "venue"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/head :: head('Create Event')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('create')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "c",
+   "form",
+   "temporals"
+  ],
+  "urls": [
+   "@{/events/new}",
+   "@{/my-events}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "event-list.html": {
+  "authorize": [],
+  "fields": [
+   "availableOnly",
+   "category",
+   "dateFrom",
+   "dateTo",
+   "eventType",
+   "keyword",
+   "maxFee",
+   "venue"
+  ],
+  "forms": [
+   {
+    "action": "@{/events}",
+    "fields": [
+     "availableOnly",
+     "category",
+     "dateFrom",
+     "dateTo",
+     "eventType",
+     "keyword",
+     "maxFee",
+     "venue"
+    ],
+    "method": "get"
+   }
+  ],
+  "fragments": [
+   "~{fragments/components :: emptyState(\n                            'fa-calendar-days',\n                            'No events published yet',\n                            'There is nothing on the calendar right now. Check back soon.',\n                            null, null)}",
+   "~{fragments/components :: emptyState(\n                            'fa-calendar-xmark',\n                            'No events match these filters',\n                            'Try widening the date range, raising the maximum price, or clearing a filter.',\n                            @{/events}, 'Clear all filters')}",
+   "~{fragments/components :: eventCard(${event})}",
+   "~{fragments/footer :: foot}",
+   "~{fragments/head :: head('Events')}",
+   "~{fragments/navbar :: nav('events', true)}"
+  ],
+  "js_ids": [],
+  "model": [
+   "cat",
+   "categories",
+   "criteria",
+   "event",
+   "eventTypes",
+   "events",
+   "lists",
+   "type"
+  ],
+  "urls": [
+   "@{/events}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "events-admin.html": {
+  "authorize": [],
+  "fields": [],
+  "forms": [
+   {
+    "action": "@{/admin/events/{id}/approve(id=${event.id})}",
+    "fields": [],
+    "method": "post"
+   },
+   {
+    "action": "@{/admin/events/{id}/approve(id=${event.id})}",
+    "fields": [],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/components :: capacityMeter(${event.seatsTaken}, ${event.capacity})}",
+   "~{fragments/components :: confirmDelete(\n                      @{/admin/events/{id}/delete(id=${event.id})},\n                      ${event.name}, 'event',\n                      'Its registrations, payments, refunds, announcements, discounts, sessions and invitations go with it.')}",
+   "~{fragments/components :: emptyState(\n                  'fa-calendar-xmark',\n                  'No events yet',\n                  'Events submitted by organizers will appear here for review.',\n                  null, null)}",
+   "~{fragments/components :: eventStatus(${event.status})}",
+   "~{fragments/head :: head('Event Approvals')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('approvals')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "event",
+   "events",
+   "lists"
+  ],
+  "urls": [
+   "@{/admin/events/{id}/approve(id=${event.id})}",
+   "@{/admin/reports}",
+   "@{/admin/users}",
+   "@{/events/{id}(id=${event.id})}",
+   "@{/events/{id}/attendees(id=${event.id})}",
+   "@{/my-events}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "forgot-password.html": {
+  "authorize": [],
+  "fields": [
+   "email"
+  ],
+  "forms": [
+   {
+    "action": "@{/forgot-password}",
+    "fields": [
+     "email"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/head :: head('Forgot Password')}",
+   "~{fragments/navbar :: mark}"
+  ],
+  "js_ids": [],
+  "model": [
+   "devMode",
+   "devResetLink",
+   "submitted"
+  ],
+  "urls": [
+   "@{${devResetLink}}",
+   "@{/forgot-password}",
+   "@{/img/auth.svg}",
+   "@{/login}",
+   "@{/vendor/bootstrap.bundle.min.js}",
+   "@{/}"
+  ]
+ },
+ "fragments/alerts.html": {
+  "authorize": [],
+  "fields": [],
+  "forms": [],
+  "fragments": [],
+  "js_ids": [],
+  "model": [
+   "error",
+   "flashError",
+   "flashSuccess"
+  ],
+  "urls": []
+ },
+ "fragments/components.html": {
+  "authorize": [],
+  "fields": [
+   "reason"
+  ],
+  "forms": [
+   {
+    "action": "${action}",
+    "fields": [
+     "reason"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/components :: statusPill(${s},\n              ${s == 'APPROVED' ? 'badge-success-soft'\n              : (s == 'PENDING' ? 'badge-warning-soft' : 'badge-danger-soft')})}",
+   "~{fragments/components :: statusPill(${s},\n              ${s == 'COMPLETED' ? 'badge-success-soft'\n              : (s == 'PENDING' ? 'badge-warning-soft'\n              : (s == 'FAILED' ? 'badge-danger-soft' : 'badge-gray-soft'))})}",
+   "~{fragments/components :: statusPill(${s},\n              ${s == 'COMPLETED' ? 'badge-success-soft'\n              : (s == 'PROCESSED' ? 'badge-primary-soft' : 'badge-warning-soft')})}",
+   "~{fragments/components :: statusPill(${s},\n              ${s == 'CONFIRMED' ? 'badge-success-soft'\n              : (s == 'WAITLISTED' or s == 'PENDING_PAYMENT' ? 'badge-warning-soft'\n              : 'badge-danger-soft')})}",
+   "~{fragments/components :: statusPill(${s},\n              ${s == 'PUBLISHED' ? 'badge-success-soft'\n              : (s == 'PENDING_APPROVAL' ? 'badge-warning-soft'\n              : (s == 'CANCELLED' ? 'badge-danger-soft' : 'badge-gray-soft'))})}",
+   "~{fragments/components :: statusPill(${s},\n              ${s == 'PUBLISHED' ? 'badge-success-soft'\n              : (s == 'PENDING_APPROVAL' ? 'badge-warning-soft'\n              : (s == 'REJECTED' ? 'badge-danger-soft' : 'badge-gray-soft'))})}"
+  ],
+  "js_ids": [],
+  "model": [
+   "action",
+   "actionLabel",
+   "actionUrl",
+   "c",
+   "capacity",
+   "category",
+   "detail",
+   "event",
+   "fallback",
+   "icon",
+   "icons",
+   "name",
+   "numbers",
+   "pct",
+   "s",
+   "status",
+   "strings",
+   "t",
+   "taken",
+   "text",
+   "title",
+   "tone",
+   "what"
+  ],
+  "urls": [
+   "@{/events/{id}(id=${event.id})}"
+  ]
+ },
+ "fragments/footer.html": {
+  "authorize": [],
+  "fields": [],
+  "forms": [],
+  "fragments": [
+   "~{fragments/navbar :: mark}"
+  ],
+  "js_ids": [],
+  "model": [],
+  "urls": [
+   "@{/about}",
+   "@{/contact}",
+   "@{/events}",
+   "@{/forgot-password}",
+   "@{/login}",
+   "@{/my-registrations}",
+   "@{/register}",
+   "@{/services}",
+   "@{/}"
+  ]
+ },
+ "fragments/head.html": {
+  "authorize": [],
+  "fields": [
+   "_csrf",
+   "_csrf_header",
+   "description",
+   "theme-color",
+   "viewport"
+  ],
+  "forms": [],
+  "fragments": [],
+  "js_ids": [],
+  "model": [
+   "metaDescription",
+   "title"
+  ],
+  "urls": [
+   "@{/css/theme.css}",
+   "@{/img/verdant-logo.png}",
+   "@{/js/app.js}",
+   "@{/vendor/bootstrap.min.css}",
+   "@{/vendor/fa/all.min.css}",
+   "@{/vendor/fonts.css}"
+  ]
+ },
+ "fragments/navbar.html": {
+  "authorize": [
+   "!isAuthenticated()",
+   "hasRole('ADMIN')",
+   "hasRole('ATTENDEE')",
+   "hasRole('ORGANIZER')",
+   "isAuthenticated()"
+  ],
+  "fields": [],
+  "forms": [
+   {
+    "action": "@{/logout}",
+    "fields": [],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/navbar :: mark}"
+  ],
+  "js_ids": [],
+  "model": [
+   "active",
+   "solid",
+   "strings"
+  ],
+  "urls": [
+   "@{/about}",
+   "@{/admin/reports}",
+   "@{/contact}",
+   "@{/events}",
+   "@{/login}",
+   "@{/logout}",
+   "@{/my-events}",
+   "@{/my-registrations}",
+   "@{/notifications}",
+   "@{/profile}",
+   "@{/register}",
+   "@{/services}",
+   "@{/}"
+  ]
+ },
+ "fragments/sidebar.html": {
+  "authorize": [
+   "hasRole('ADMIN')",
+   "hasRole('ATTENDEE')",
+   "hasRole('ORGANIZER')"
+  ],
+  "fields": [],
+  "forms": [
+   {
+    "action": "@{/logout}",
+    "fields": [],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/navbar :: mark}"
+  ],
+  "js_ids": [],
+  "model": [
+   "active",
+   "pendingAnnouncements",
+   "strings",
+   "unreadNotifications"
+  ],
+  "urls": [
+   "@{/admin/announcements}",
+   "@{/admin/audit}",
+   "@{/admin/bookings}",
+   "@{/admin/discounts}",
+   "@{/admin/events}",
+   "@{/admin/refunds}",
+   "@{/admin/reports}",
+   "@{/admin/users}",
+   "@{/discounts}",
+   "@{/events/new}",
+   "@{/events}",
+   "@{/logout}",
+   "@{/my-events}",
+   "@{/my-registrations}",
+   "@{/notifications}",
+   "@{/profile}",
+   "@{/reports}",
+   "@{/}"
+  ]
+ },
+ "home.html": {
+  "authorize": [
+   "!isAuthenticated()",
+   "isAuthenticated()"
+  ],
+  "fields": [
+   "category",
+   "dateFrom",
+   "keyword",
+   "venue"
+  ],
+  "forms": [
+   {
+    "action": "@{/events}",
+    "fields": [
+     "category",
+     "dateFrom",
+     "keyword",
+     "venue"
+    ],
+    "method": "get"
+   }
+  ],
+  "fragments": [
+   "~{fragments/components :: emptyState(\n                    'fa-regular fa-calendar',\n                    'No events published yet',\n                    'Nothing is open for booking at the moment. New events appear here as soon as they are published.',\n                    '/register', 'Create an account')}",
+   "~{fragments/components :: eventCard(${event})}",
+   "~{fragments/footer :: foot}",
+   "~{fragments/head :: head('Event Management & Discovery')}",
+   "~{fragments/navbar :: nav('home', false)}"
+  ],
+  "js_ids": [],
+  "model": [
+   "alts",
+   "art",
+   "c",
+   "categories",
+   "event",
+   "events",
+   "f",
+   "featured",
+   "i",
+   "lists",
+   "span",
+   "spans",
+   "stats",
+   "tileStyle"
+  ],
+  "urls": [
+   "@{'/img/' + ${art[slot]} + '.svg'}",
+   "@{/about}",
+   "@{/contact}",
+   "@{/events(category=${f.name})}",
+   "@{/events}",
+   "@{/img/about.svg}",
+   "@{/img/cta.svg}",
+   "@{/img/hero.svg}",
+   "@{/my-registrations}",
+   "@{/register}",
+   "@{/services}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "invitations.html": {
+  "authorize": [],
+  "fields": [
+   "decision",
+   "invitationIds"
+  ],
+  "forms": [
+   {
+    "action": "@{/events/{id}/invitations/bulk(id=${eventId})}",
+    "fields": [
+     "decision",
+     "invitationIds"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/components :: emptyState(\n                  'fa-envelope-open',\n                  'No invitation requests yet',\n                  'When attendees ask for access to this event, their requests appear here.',\n                  null, null)}",
+   "~{fragments/components :: invitationStatus(${inv.status})}",
+   "~{fragments/head :: head('Invitation Requests')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('myevents')}"
+  ],
+  "js_ids": [
+   "select-all"
+  ],
+  "model": [
+   "event",
+   "eventId",
+   "inv",
+   "invitations",
+   "lists",
+   "strings"
+  ],
+  "urls": [
+   "@{/events/{id}(id=${eventId})}",
+   "@{/events/{id}/invitations/bulk(id=${eventId})}",
+   "@{/my-events}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "login.html": {
+  "authorize": [],
+  "fields": [
+   "password",
+   "username"
+  ],
+  "forms": [
+   {
+    "action": "@{/login}",
+    "fields": [
+     "password",
+     "username"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/head :: head('Sign in')}",
+   "~{fragments/navbar :: mark}"
+  ],
+  "js_ids": [
+   "eyeIcon",
+   "password",
+   "pwdToggle"
+  ],
+  "model": [
+   "param"
+  ],
+  "urls": [
+   "@{/forgot-password}",
+   "@{/img/auth.svg}",
+   "@{/login}",
+   "@{/register}",
+   "@{/vendor/bootstrap.bundle.min.js}",
+   "@{/}"
+  ]
+ },
+ "my-events.html": {
+  "authorize": [
+   "!hasRole('ADMIN')",
+   "hasRole('ADMIN')"
+  ],
+  "fields": [],
+  "forms": [
+   {
+    "action": "@{/events/{id}/cancel-event(id=${event.id})}",
+    "fields": [],
+    "method": "post"
+   },
+   {
+    "action": "@{/events/{id}/cancel-event(id=${event.id})}",
+    "fields": [],
+    "method": "post"
+   },
+   {
+    "action": "@{/events/{id}/complete(id=${event.id})}",
+    "fields": [],
+    "method": "post"
+   },
+   {
+    "action": "@{/events/{id}/submit(id=${event.id})}",
+    "fields": [],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/components :: capacityMeter(${event.seatsTaken}, ${event.capacity})}",
+   "~{fragments/components :: emptyState(\n                  'fa-calendar-plus',\n                  'No events yet',\n                  'Create your first event and submit it for approval \u2014 it takes about a minute.',\n                  @{/events/new}, 'Create event')}",
+   "~{fragments/components :: eventStatus(${event.status})}",
+   "~{fragments/head :: head('My Events')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('myevents')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "aggregates",
+   "event",
+   "events",
+   "lists",
+   "param"
+  ],
+  "urls": [
+   "@{/events/new}",
+   "@{/events/{id}(id=${event.id})}",
+   "@{/events/{id}/announcements(id=${event.id})}",
+   "@{/events/{id}/attendees(id=${event.id})}",
+   "@{/events/{id}/cancel-event(id=${event.id})}",
+   "@{/events/{id}/complete(id=${event.id})}",
+   "@{/events/{id}/edit(id=${event.id})}",
+   "@{/events/{id}/invitations(id=${event.id})}",
+   "@{/events/{id}/submit(id=${event.id})}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "my-registrations.html": {
+  "authorize": [],
+  "fields": [],
+  "forms": [],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/components :: emptyState(\n                      'fa-ticket',\n                      'No registrations yet',\n                      'When you register for an event it will appear here, along with its ticket.',\n                      @{/events}, 'Browse events')}",
+   "~{fragments/components :: registrationStatus(${row.registration.status})}",
+   "~{fragments/head :: head('My Registrations')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('dashboard')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "lists",
+   "numbers",
+   "row",
+   "rows",
+   "temporals",
+   "unreadNotifications"
+  ],
+  "urls": [
+   "@{/events/{id}(id=${row.registration.eventId})}",
+   "@{/events}",
+   "@{/notifications}",
+   "@{/registrations/{id}/edit(id=${row.registration.id})}",
+   "@{/registrations/{id}/pay(id=${row.registration.id})}",
+   "@{/registrations/{id}/ticket(id=${row.registration.id})}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "notifications.html": {
+  "authorize": [],
+  "fields": [],
+  "forms": [
+   {
+    "action": "@{/notifications/read-all}",
+    "fields": [],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/components :: emptyState(\n                      'fa-bell',\n                      'You are all caught up',\n                      'Register for an event and updates about it will show up here.',\n                      @{/events}, 'Browse events')}",
+   "~{fragments/head :: head('Notifications')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('notifications')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "lists",
+   "n",
+   "notifications",
+   "strings",
+   "unreadNotifications"
+  ],
+  "urls": [
+   "@{/notifications/read-all}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "payment-form.html": {
+  "authorize": [],
+  "fields": [
+   "cardHolder",
+   "cardNumber",
+   "discountId",
+   "enteredCode",
+   "expiryMonth",
+   "expiryYear",
+   "method",
+   "securityCode"
+  ],
+  "forms": [
+   {
+    "action": "@{/registrations/{id}/pay(id=${registration.id})}",
+    "fields": [
+     "cardHolder",
+     "cardNumber",
+     "discountId",
+     "enteredCode",
+     "expiryMonth",
+     "expiryYear",
+     "method",
+     "securityCode"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/head :: head('Complete Payment')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('registrations')}"
+  ],
+  "js_ids": [
+   "arrival-panel",
+   "card-panel",
+   "cardHolder",
+   "cardNumber",
+   "cp-brand",
+   "cp-expiry",
+   "cp-holder",
+   "cp-number",
+   "discountId",
+   "enteredCode",
+   "expiryMonth",
+   "expiryYear",
+   "group-field",
+   "input",
+   "method-arrival",
+   "pay-button",
+   "pay-verb",
+   "payTotal",
+   "promo-field",
+   "q-discount",
+   "q-final",
+   "q-original",
+   "quote-error",
+   "quote-error-text",
+   "securityCode"
+  ],
+  "model": [
+   "approvingCard",
+   "c",
+   "cardHolder",
+   "d",
+   "decliningCards",
+   "discounts",
+   "enteredCode",
+   "lists",
+   "numbers",
+   "registration",
+   "registrationId",
+   "selectedDiscountId",
+   "selectedMethod"
+  ],
+  "urls": [
+   "@{/my-registrations}",
+   "@{/registrations/{id}/pay(id=${registration.id})}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "profile.html": {
+  "authorize": [],
+  "fields": [
+   "confirmPassword",
+   "contactNumber",
+   "currentPassword",
+   "fullName",
+   "newPassword"
+  ],
+  "forms": [
+   {
+    "action": "@{/profile/password}",
+    "fields": [
+     "confirmPassword",
+     "currentPassword",
+     "newPassword"
+    ],
+    "method": "post"
+   },
+   {
+    "action": "@{/profile}",
+    "fields": [
+     "contactNumber",
+     "fullName"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/head :: head('My Profile')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('profile')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "profile"
+  ],
+  "urls": [
+   "@{/profile/password}",
+   "@{/profile}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "register.html": {
+  "authorize": [],
+  "fields": [
+   "confirmPassword",
+   "email",
+   "fullName",
+   "password",
+   "role"
+  ],
+  "forms": [
+   {
+    "action": "@{/register}",
+    "fields": [
+     "confirmPassword",
+     "email",
+     "fullName",
+     "password",
+     "role"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/head :: head('Create an account')}",
+   "~{fragments/navbar :: mark}"
+  ],
+  "js_ids": [],
+  "model": [
+   "email",
+   "error",
+   "fullName",
+   "role"
+  ],
+  "urls": [
+   "@{/img/auth.svg}",
+   "@{/login}",
+   "@{/register}",
+   "@{/vendor/bootstrap.bundle.min.js}",
+   "@{/}"
+  ]
+ },
+ "registration-edit.html": {
+  "authorize": [],
+  "fields": [
+   "seats"
+  ],
+  "forms": [
+   {
+    "action": "@{/registrations/{id}/edit(id=${registration.id})}",
+    "fields": [
+     "seats"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/head :: head('Edit Booking')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('dashboard')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "error",
+   "n",
+   "numbers",
+   "registration",
+   "temporals"
+  ],
+  "urls": [
+   "@{/my-registrations}",
+   "@{/registrations/{id}/edit(id=${registration.id})}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "registration-review.html": {
+  "authorize": [],
+  "fields": [
+   "seats"
+  ],
+  "forms": [
+   {
+    "action": "@{/events/{id}/register(id=${event.id})}",
+    "fields": [
+     "seats"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/head :: head('Review Registration')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('dashboard')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "attendeeEmail",
+   "attendeeName",
+   "event",
+   "feePerSeat",
+   "numbers",
+   "seats",
+   "wouldWaitlist"
+  ],
+  "urls": [
+   "@{/events/{id}(id=${event.id})}",
+   "@{/events/{id}/register(id=${event.id})}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "reset-password.html": {
+  "authorize": [],
+  "fields": [
+   "confirmPassword",
+   "newPassword",
+   "token"
+  ],
+  "forms": [
+   {
+    "action": "@{/reset-password}",
+    "fields": [
+     "confirmPassword",
+     "newPassword",
+     "token"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/head :: head('Reset Password')}",
+   "~{fragments/navbar :: mark}"
+  ],
+  "js_ids": [],
+  "model": [
+   "error",
+   "token"
+  ],
+  "urls": [
+   "@{/img/auth.svg}",
+   "@{/login}",
+   "@{/reset-password}",
+   "@{/vendor/bootstrap.bundle.min.js}",
+   "@{/}"
+  ]
+ },
+ "saved-report-view.html": {
+  "authorize": [],
+  "fields": [],
+  "forms": [],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/footer :: foot}",
+   "~{fragments/head :: head('Report')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('savedreports')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "f",
+   "result",
+   "row",
+   "temporals"
+  ],
+  "urls": [
+   "@{/reports}"
+  ]
+ },
+ "saved-reports.html": {
+  "authorize": [],
+  "fields": [
+   "dateFrom",
+   "dateTo",
+   "eventId",
+   "reportType",
+   "title"
+  ],
+  "forms": [
+   {
+    "action": "@{/reports/{id}/delete(id=${r.id})}",
+    "fields": [],
+    "method": "post"
+   },
+   {
+    "action": "@{/reports/{id}/update(id=${r.id})}",
+    "fields": [
+     "dateFrom",
+     "dateTo",
+     "eventId",
+     "reportType",
+     "title"
+    ],
+    "method": "post"
+   },
+   {
+    "action": "@{/reports}",
+    "fields": [
+     "dateFrom",
+     "dateTo",
+     "eventId",
+     "reportType",
+     "title"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/components :: emptyState(\n                 'fa-chart-simple',\n                 'No saved reports yet',\n                 'Save a question above and it will be waiting here, answered with current data.',\n                 null, null)}",
+   "~{fragments/footer :: foot}",
+   "~{fragments/head :: head('My Reports')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('savedreports')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "e",
+   "lists",
+   "manageableEvents",
+   "r",
+   "reports",
+   "t",
+   "temporals",
+   "types"
+  ],
+  "urls": [
+   "@{/reports/{id}(id=${r.id})}",
+   "@{/reports/{id}/delete(id=${r.id})}",
+   "@{/reports/{id}/update(id=${r.id})}",
+   "@{/reports}"
+  ]
+ },
+ "services.html": {
+  "authorize": [],
+  "fields": [],
+  "forms": [],
+  "fragments": [
+   "~{fragments/footer :: foot}",
+   "~{fragments/head :: head('Services')}",
+   "~{fragments/navbar :: nav('services', true)}"
+  ],
+  "js_ids": [],
+  "model": [],
+  "urls": [
+   "@{/contact}",
+   "@{/events}",
+   "@{/img/cta.svg}",
+   "@{/img/exp-corporate.svg}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ },
+ "ticket.html": {
+  "authorize": [],
+  "fields": [],
+  "forms": [],
+  "fragments": [
+   "~{fragments/head :: head('My Digital Ticket')}",
+   "~{fragments/sidebar :: mobileBar}",
+   "~{fragments/sidebar :: side('registrations')}"
+  ],
+  "js_ids": [
+   "add-to-calendar",
+   "qr-fallback",
+   "qrcode"
+  ],
+  "model": [
+   "numbers",
+   "payment",
+   "registration"
+  ],
+  "urls": [
+   "@{/my-registrations}",
+   "@{/vendor/bootstrap.bundle.min.js}"
+  ]
+ }
+}

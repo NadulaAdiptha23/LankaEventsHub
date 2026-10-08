@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Events')}"></head>
+<body>
+<a class="skip-link" href="#results">Skip to results</a>
+<div th:replace="~{fragments/navbar :: nav('events', true)}"></div>
+
+<main class="container py-5">
+
+    <div class="page-header">
+        <div>
+            <p class="section-eyebrow">The Verdant Events calendar</p>
+            <h1 class="page-header__title">Browse events</h1>
+            <p class="page-header__sub">Every published event, filtered however you like.</p>
+        </div>
+        <!-- Only rendered under 992px; on desktop the panel is always open. -->
+        <div class="page-header__actions">
+            <button type="button" class="btn btn-light-custom filter-toggle" data-filters-open
+                    aria-controls="filters" aria-expanded="false">
+                <i class="fa-solid fa-sliders" aria-hidden="true"></i> Filters
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- ==========================================================
+             FILTERS
+             Every control here maps to a real parameter on GET /events.
+             There are no filters the server would quietly ignore.
+             Under 992px the whole panel becomes a bottom sheet.
+             ========================================================== -->
+        <div class="col-lg-3">
+            <form class="filter-panel" id="filters" method="get" th:action="@{/events}"
+                  aria-label="Filter events">
+                <div class="filter-panel__head">
+                    <h2>Filters</h2>
+                    <div class="d-flex align-items-center gap-2">
+                        <a th:href="@{/events}" class="text-meta">Clear all</a>
+                        <button type="button" class="btn btn-icon btn-ghost filter-panel__close"
+                                data-filters-close aria-label="Close filters">
+                            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-group__label" for="f-keyword">Search</label>
+                    <div class="input-icon">
+                        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                        <input type="text" id="f-keyword" name="keyword" class="form-control"
+                               placeholder="Name or description"
+                               th:value="${criteria != null ? criteria.keyword : ''}">
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-group__label" for="f-category">Category</label>
+                    <select id="f-category" name="category" class="form-select">
+                        <option value="">All categories</option>
+                        <!-- Built from the categories that published events
+                             actually use, so this can never offer a filter with
+                             nothing behind it. -->
+                        <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}"
+                                th:selected="${criteria != null and cat == criteria.category}">Category</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-group__label" for="f-venue">Location</label>
+                    <div class="input-icon">
+                        <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                        <input type="text" id="f-venue" name="venue" class="form-control"
+                               placeholder="Venue or city"
+                               th:value="${criteria != null ? criteria.venue : ''}">
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <span class="filter-group__label">Date</span>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <input type="date" id="f-from" name="dateFrom" class="form-control"
+                                   th:value="${criteria != null and criteria.dateFrom != null ? criteria.dateFrom : ''}"
+                                   aria-label="Earliest date">
+                        </div>
+                        <div class="col-6">
+                            <input type="date" id="f-to" name="dateTo" class="form-control"
+                                   th:value="${criteria != null and criteria.dateTo != null ? criteria.dateTo : ''}"
+                                   aria-label="Latest date">
+                        </div>
+                    </div>
+                    <p class="form-text">Both days are included.</p>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-group__label" for="f-fee">Maximum price</label>
+                    <div class="input-icon">
+                        <i class="fa-solid fa-tag" aria-hidden="true"></i>
+                        <input type="number" id="f-fee" name="maxFee" class="form-control"
+                               min="0" step="100" placeholder="Any price"
+                               th:value="${criteria != null and criteria.maxFee != null ? criteria.maxFee : ''}">
+                    </div>
+                    <p class="form-text">Free events always match.</p>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-group__label" for="f-type">Event type</label>
+                    <select id="f-type" name="eventType" class="form-select">
+                        <option value="">Any type</option>
+                        <option th:each="type : ${eventTypes}" th:value="${type}"
+                                th:selected="${criteria != null and type == criteria.eventType}"
+                                th:text="${type.name() == 'RESTRICTED' ? 'Invite only' : 'Open to everyone'}">Type</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <span class="filter-group__label">Availability</span>
+                    <label class="check-row" for="f-available">
+                        <input type="checkbox" id="f-available" name="availableOnly" value="true"
+                               th:checked="${criteria != null and criteria.availableOnly}">
+                        Only events with seats left
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block mt-4">
+                    <i class="fa-solid fa-filter" aria-hidden="true"></i> Apply filters
+                </button>
+            </form>
+        </div>
+
+        <!-- ==========================================================
+             RESULTS
+             ========================================================== -->
+        <div class="col-lg-9" id="results">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+                <p class="mb-0 text-meta text-muted-custom">
+                    <strong class="text-heading tnum" th:text="${#lists.size(events)}">0</strong>
+                    <span th:text="${#lists.size(events) == 1 ? 'event found' : 'events found'}">events found</span>
+                </p>
+            </div>
+
+            <!-- Nothing matched. Which of the two situations it is changes
+                 what the visitor should do next, so they get different
+                 wording and a different action. -->
+            <div th:if="${#lists.isEmpty(events)}" class="card-custom">
+                <div th:if="${criteria != null and !criteria.isEmpty()}">
+                    <div
+                         th:replace="~{fragments/components :: emptyState(
+                            'fa-calendar-xmark',
+                            'No events match these filters',
+                            'Try widening the date range, raising the maximum price, or clearing a filter.',
+                            @{/events}, 'Clear all filters')}"></div>
+                </div>
+                <div th:if="${criteria == null or criteria.isEmpty()}">
+                    <div
+                         th:replace="~{fragments/components :: emptyState(
+                            'fa-calendar-days',
+                            'No events published yet',
+                            'There is nothing on the calendar right now. Check back soon.',
+                            null, null)}"></div>
+                </div>
+            </div>
+
+            <div class="row g-4" th:unless="${#lists.isEmpty(events)}">
+                <div class="col-xl-4 col-md-6" th:each="event : ${events}">
+                    <div th:replace="~{fragments/components :: eventCard(${event})}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: foot}"></div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

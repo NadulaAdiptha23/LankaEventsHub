@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Edit User')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('users')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">Edit user</h1>
+        <p class="page-header__sub">
+          Name and email only. Role, active status and student verification
+          are changed from the users list itself.
+        </p>
+      </div>
+      <div class="page-header__actions">
+        <a th:href="@{/admin/users}" class="btn btn-light-custom">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Users
+        </a>
+      </div>
+    </div>
+
+    <div class="alert-custom alert-error" th:if="${error}" role="alert">
+      <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
+      <span th:text="${error}">Error</span>
+    </div>
+
+    <div class="row">
+      <div class="col-xl-7">
+        <section class="card-custom card-pad mb-4">
+          <form method="post" data-busy th:action="@{/admin/users/{id}/edit(id=${editUser.id})}">
+            <div class="mb-4">
+              <label class="form-label" for="fullName">Full name <span class="req">*</span></label>
+              <input type="text" id="fullName" name="fullName" class="form-control" required
+                     maxlength="150" th:value="${editUser.fullName}">
+            </div>
+            <div class="mb-4">
+              <label class="form-label" for="email">Email <span class="req">*</span></label>
+              <input type="email" id="email" name="email" class="form-control" required
+                     maxlength="150" th:value="${editUser.email}">
+            </div>
+            <div class="d-flex gap-3">
+              <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Save changes
+              </button>
+              <a th:href="@{/admin/users}" class="btn btn-light-custom">Cancel</a>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Reports and Analytics')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('reports')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">System overview</h1>
+        <p class="page-header__sub">
+          Live figures from the database. Every number here is one the data supports.
+        </p>
+      </div>
+      <div class="page-header__actions">
+        <a class="btn btn-light-custom" th:href="@{/admin/reports.csv}">
+          <i class="fa-solid fa-file-csv" aria-hidden="true"></i> Export CSV
+        </a>
+        <a th:href="@{/admin/events}" class="btn btn-light-custom">
+          <i class="fa-solid fa-circle-check" aria-hidden="true"></i> Approvals
+        </a>
+        <a th:href="@{/admin/users}" class="btn btn-light-custom">
+          <i class="fa-solid fa-users" aria-hidden="true"></i> Users
+        </a>
+        <a th:href="@{/admin/refunds}" class="btn btn-light-custom">
+          <i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Refunds
+        </a>
+      </div>
+    </div>
+
+    <div th:replace="~{fragments/alerts :: flash}"></div>
+
+    <!-- ============================================================
+         HEADLINE FIGURES
+         ============================================================ -->
+    <div class="row g-4 mb-4">
+      <div class="col-sm-6 col-xl">
+        <div class="stat-card">
+          <span class="stat-icon"><i class="fa-solid fa-calendar-days" aria-hidden="true"></i></span>
+          <div class="stat-value" th:text="${summary.totalEvents}">0</div>
+          <div class="stat-label">Total events</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl">
+        <div class="stat-card">
+          <span class="stat-icon is-success"><i class="fa-solid fa-ticket" aria-hidden="true"></i></span>
+          <div class="stat-value" th:text="${summary.confirmedRegistrations}">0</div>
+          <div class="stat-label">Confirmed registrations</div>
+        </div>
+      </div>
+      <!-- Registrations and attendance sit next to each other on
+           purpose. On their own, "1,240 confirmed registrations" reads
+           like 1,240 people in rooms; beside a turnout figure it reads
+           like what it is. -->
+      <div class="col-sm-6 col-xl">
+        <div class="stat-card">
+          <span class="stat-icon is-success"><i class="fa-solid fa-user-check" aria-hidden="true"></i></span>
+          <div class="stat-value" th:text="${summary.attendedRegistrations}">0</div>
+          <div class="stat-label">Attended</div>
+          <div class="text-micro mt-2" style="color:var(--muted);"
+               th:if="${summary.confirmedRegistrations > 0}">
+            <span th:text="${summary.attendanceRate} + '% turnout'">0%</span>
+            &middot;
+            <span th:text="${summary.noShows} + ' no-shows'">0</span>
+          </div>
+          <div class="text-micro mt-2" style="color:var(--muted);"
+               th:if="${summary.confirmedRegistrations == 0}">
+            Nobody has booked yet.
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl">
+        <div class="stat-card">
+          <span class="stat-icon is-neutral"><i class="fa-solid fa-money-bill-wave" aria-hidden="true"></i></span>
+          <div class="stat-value tnum"
+               th:text="'LKR ' + ${#numbers.formatDecimal(summary.totalRevenue, 1, 'COMMA', 0, 'POINT')}">0</div>
+          <div class="stat-label">Gross revenue</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl">
+        <div class="stat-card">
+          <span class="stat-icon is-warning"><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i></span>
+          <div class="stat-value" th:text="${summary.pendingApprovalEvents}">0</div>
+          <div class="stat-label">Awaiting approval</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+
+      <!-- ==========================================================
+           EVENTS BY STATUS
+           A four-part breakdown of one total, so it is drawn as
+           proportions of that total rather than as four unrelated
+           bars.
+           ========================================================== -->
+      <div class="col-lg-6">
+        <section class="card-custom h-100">
+          <div class="card-head"><h2>Events by status</h2></div>
+          <div class="card-pad">
+            <div class="bar-chart"
+                 th:with="total=${summary.totalEvents > 0 ? summary.totalEvents : 1}">
+              <div class="bar-row">
+                <span class="bar-row__label">Published</span>
+                <span class="bar-row__value" th:text="${summary.publishedEvents}">0</span>
+                <div class="bar-row__track">
+                  <div class="bar-row__fill"
+                       th:style="'width:' + ${summary.publishedEvents * 100 / total} + '%'"></div>
+                </div>
+              </div>
+              <div class="bar-row">
+                <span class="bar-row__label">Awaiting approval</span>
+                <span class="bar-row__value" th:text="${summary.pendingApprovalEvents}">0</span>
+                <div class="bar-row__track">
+                  <div class="bar-row__fill tone-2"
+                       th:style="'width:' + ${summary.pendingApprovalEvents * 100 / total} + '%'"></div>
+                </div>
+              </div>
+              <div class="bar-row">
+                <span class="bar-row__label">Completed</span>
+                <span class="bar-row__value" th:text="${summary.completedEvents}">0</span>
+                <div class="bar-row__track">
+                  <div class="bar-row__fill tone-3"
+                       th:style="'width:' + ${summary.completedEvents * 100 / total} + '%'"></div>
+                </div>
+              </div>
+              <div class="bar-row">
+                <span class="bar-row__label">Cancelled</span>
+                <span class="bar-row__value" th:text="${summary.cancelledEvents}">0</span>
+                <div class="bar-row__track">
+                  <div class="bar-row__fill tone-4"
+                       th:style="'width:' + ${summary.cancelledEvents * 100 / total} + '%'"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ==========================================================
+           REGISTRATIONS BY STATE
+           ========================================================== -->
+      <div class="col-lg-6">
+        <section class="card-custom h-100">
+          <div class="card-head"><h2>Registrations by state</h2></div>
+          <div class="card-pad">
+            <div class="bar-chart"
+                 th:with="total=${(summary.confirmedRegistrations + summary.waitlistedRegistrations
+                                   + summary.cancelledRegistrations) > 0
+                                  ? (summary.confirmedRegistrations + summary.waitlistedRegistrations
+                                     + summary.cancelledRegistrations) : 1}">
+              <div class="bar-row">
+                <span class="bar-row__label">Confirmed</span>
+                <span class="bar-row__value" th:text="${summary.confirmedRegistrations}">0</span>
+                <div class="bar-row__track">
+                  <div class="bar-row__fill"
+                       th:style="'width:' + ${summary.confirmedRegistrations * 100 / total} + '%'"></div>
+                </div>
+              </div>
+              <div class="bar-row">
+                <span class="bar-row__label">Waitlisted</span>
+                <span class="bar-row__value" th:text="${summary.waitlistedRegistrations}">0</span>
+                <div class="bar-row__track">
+                  <div class="bar-row__fill tone-2"
+                       th:style="'width:' + ${summary.waitlistedRegistrations * 100 / total} + '%'"></div>
+                </div>
+              </div>
+              <div class="bar-row">
+                <span class="bar-row__label">Cancelled</span>
+                <span class="bar-row__value" th:text="${summary.cancelledRegistrations}">0</span>
+                <div class="bar-row__track">
+                  <div class="bar-row__fill tone-4"
+                       th:style="'width:' + ${summary.cancelledRegistrations * 100 / total} + '%'"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ==========================================================
+           MONEY
+           Gross, refunded and net. Net is the one that matters, so it
+           is the one set at display size.
+           ========================================================== -->
+      <div class="col-lg-6">
+        <section class="card-custom h-100">
+          <div class="card-head"><h2>Revenue</h2></div>
+          <div class="card-pad">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="text-meta">Gross revenue</span>
+              <span class="text-meta tnum fw-semibold text-heading"
+                    th:text="'LKR ' + ${#numbers.formatDecimal(summary.totalRevenue, 1, 'COMMA', 2, 'POINT')}">LKR 0.00</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-3"
+                 style="color:var(--danger-ink);">
+              <span class="text-meta">Refunded</span>
+              <span class="text-meta tnum fw-semibold"
+                    th:text="'− LKR ' + ${#numbers.formatDecimal(summary.totalRefunded, 1, 'COMMA', 2, 'POINT')}">− LKR 0.00</span>
+            </div>
+            <hr class="divider" style="margin:var(--s-4) 0;">
+            <div class="d-flex justify-content-between align-items-end">
+              <span class="fw-bold text-heading">Net revenue</span>
+              <span class="booking-price tnum"
+                    th:text="'LKR ' + ${#numbers.formatDecimal(summary.netRevenue, 1, 'COMMA', 2, 'POINT')}">LKR 0.00</span>
+            </div>
+            <p class="text-micro mt-4 mb-0" style="color:var(--muted);">
+              Gross counts completed payments only; refunded counts refunds that have
+              reached COMPLETED, not those still queued.
+            </p>
+          </div>
+        </section>
+      </div>
+
+      <!-- ==========================================================
+           CATEGORIES
+           ========================================================== -->
+      <div class="col-lg-6">
+        <section class="card-custom h-100">
+          <div class="card-head"><h2>Events by category</h2></div>
+
+          <div th:if="${#maps.isEmpty(summary.eventsByCategory)}">
+              <div
+                   th:replace="~{fragments/components :: emptyState(
+                      'fa-tags',
+                      'No categories yet',
+                      'Once events are created with a category, the split appears here.',
+                      null, null)}"></div>
+          </div>
+
+          <div class="card-pad" th:unless="${#maps.isEmpty(summary.eventsByCategory)}">
+            <!-- Each bar is that category's share of all categorised
+                 events, so the widths add up to the whole rather than
+                 being scaled against whichever category happens to be
+                 largest. -->
+            <div class="bar-chart"
+                 th:with="total=${#aggregates.sum(summary.eventsByCategory.values())}">
+              <div class="bar-row" th:each="entry, iter : ${summary.eventsByCategory}">
+                <span class="bar-row__label" th:text="${entry.key}">Category</span>
+                <span class="bar-row__value" th:text="${entry.value}">0</span>
+                <div class="bar-row__track">
+                  <div class="bar-row__fill"
+                       th:classappend="${'tone-' + (iter.index % 5 + 1)}"
+                       th:style="'width:' + ${total > 0 ? (entry.value * 100 / total) : 0} + '%'"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ==========================================================
+           MOST POPULAR EVENTS
+           Confirmed headcount against capacity - the fill percentage
+           is computed in the DTO, not here.
+           ========================================================== -->
+      <div class="col-12">
+        <section class="card-custom">
+          <div class="card-head">
+            <div>
+              <h2>Most popular events</h2>
+              <p class="text-micro mb-0" style="color:var(--muted);">
+                Published events, ranked by confirmed registrations
+              </p>
+            </div>
+          </div>
+
+          <div th:if="${#lists.isEmpty(summary.mostPopularEvents)}">
+              <div
+                   th:replace="~{fragments/components :: emptyState(
+                      'fa-chart-simple',
+                      'Nothing to rank yet',
+                      'Once people start registering for published events, the leaders show up here.',
+                      @{/admin/events}, 'Review pending events')}"></div>
+          </div>
+
+          <div class="table-responsive" th:unless="${#lists.isEmpty(summary.mostPopularEvents)}">
+            <table class="table-modern">
+              <caption class="visually-hidden-focusable">Events ranked by confirmed registrations</caption>
+              <thead>
+                <tr>
+                  <th scope="col" style="width:1%;">#</th>
+                  <th scope="col">Event</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">Confirmed</th>
+                  <th scope="col">Attended</th>
+                  <th scope="col" style="min-width:180px;">Fill</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="row, iter : ${summary.mostPopularEvents}">
+                  <td class="text-muted-custom tnum" th:text="${iter.index + 1}">1</td>
+                  <td class="cell-title" th:text="${row.eventName}">Event</td>
+                  <td>
+                    <span class="badge-custom badge-gray-soft badge-plain"
+                          th:text="${row.category ?: 'Uncategorised'}">Category</span>
+                  </td>
+                  <td class="tnum" th:text="${row.confirmedRegistrations}">0</td>
+                  <td class="tnum">
+                    <span th:text="${row.attended}">0</span>
+                    <span class="text-micro" style="color:var(--muted);"
+                          th:if="${row.confirmedRegistrations > 0}"
+                          th:text="'(' + ${row.attendanceRate} + '%)'">(0%)</span>
+                  </td>
+                  <td>
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="meter flex-grow-1">
+                        <div class="meter__fill"
+                             th:classappend="${row.fillPercent >= 100 ? 'is-full'
+                                              : (row.fillPercent >= 80 ? 'is-warning' : '')}"
+                             th:style="'width:' + ${row.fillPercent} + '%'"></div>
+                      </div>
+                      <span class="text-micro text-muted-custom tnum"
+                            th:text="${row.fillPercent} + '%'">0%</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!--
+      Said out loud rather than filled in with a plausible-looking line
+      chart: nothing in the reporting model is time-stamped in a way that
+      would let this page draw a trend, so it does not pretend to.
+    -->
+    <p class="text-micro mt-5 mb-0" style="color:var(--muted);">
+      <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>
+      These are current totals, not trends. The reporting model does not
+      expose registrations or revenue over time, so no time-series chart is
+      shown here rather than one built from invented data.
+    </p>
+  </main>
+</div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

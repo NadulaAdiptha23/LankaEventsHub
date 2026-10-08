@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Audit log')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('audit')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">Audit log</h1>
+        <p class="page-header__sub">
+          Who did what, to which record, and when. Read-only.
+        </p>
+      </div>
+      <div class="page-header__actions">
+        <a class="btn btn-light-custom"
+           th:href="|/admin/audit.csv${queryString != '' ? '?' + #strings.substring(queryString, 1) : ''}|">
+          <i class="fa-solid fa-file-csv" aria-hidden="true"></i> Export CSV
+        </a>
+      </div>
+    </div>
+
+    <div th:replace="~{fragments/alerts :: flash}"></div>
+
+    <section class="card-custom mb-4">
+      <form method="get" th:action="@{/admin/audit}" class="card-pad">
+        <div class="row g-3 align-items-end">
+          <div class="col-12 col-md-4">
+            <label class="form-label" for="a-actor">Who</label>
+            <input class="form-control" id="a-actor" type="search" name="actor"
+                   placeholder="Name or e-mail" th:value="${criteria.actor}">
+          </div>
+          <div class="col-12 col-md-3">
+            <label class="form-label" for="a-action">Action</label>
+            <select class="form-select" id="a-action" name="action">
+              <option value="">Any</option>
+              <option th:each="a : ${actions}" th:value="${a}" th:text="${a}"
+                      th:selected="${criteria.action != null and criteria.action == a}">ACTION</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-2">
+            <label class="form-label" for="a-type">Record type</label>
+            <select class="form-select" id="a-type" name="entityType">
+              <option value="">Any</option>
+              <option th:each="t : ${entityTypes}" th:value="${t}" th:text="${t}"
+                      th:selected="${criteria.entityType != null and criteria.entityType == t}">Type</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-1">
+            <label class="form-label" for="a-id">Id</label>
+            <input class="form-control" id="a-id" type="number" name="entityId" min="1"
+                   th:value="${criteria.entityId}">
+          </div>
+          <div class="col-12 col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary w-100">
+              <i class="fa-solid fa-filter" aria-hidden="true"></i> Filter
+            </button>
+            <a th:href="@{/admin/audit}" class="btn btn-light-custom"
+               th:if="${!criteria.empty}" title="Clear filters">
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <section class="card-custom">
+      <div class="card-head">
+        <div>
+          <h2>
+            <span th:text="${entries.totalElements}">0</span>
+            <span th:text="${entries.totalElements == 1} ? 'entry' : 'entries'">entries</span>
+          </h2>
+          <p class="text-micro mb-0" style="color:var(--muted);">
+            Newest first. Entries are never edited or removed.
+          </p>
+        </div>
+      </div>
+
+      <div th:if="${entries.totalElements == 0}">
+          <div
+               th:replace="~{fragments/components :: emptyState(
+                  'fa-clipboard-list',
+                  'Nothing matches',
+                  'No audit entry matches these filters.',
+                  '/admin/audit', 'Clear filters')}"></div>
+      </div>
+
+      <div class="table-responsive" th:if="${entries.totalElements > 0}">
+        <table class="table-modern">
+          <caption class="visually-hidden-focusable">Audit trail</caption>
+          <thead>
+            <tr>
+              <th scope="col">When</th>
+              <th scope="col">Who</th>
+              <th scope="col">Action</th>
+              <th scope="col">Record</th>
+              <th scope="col">Detail</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="e : ${entries.content}">
+              <td class="text-micro" style="color:var(--muted);white-space:nowrap;"
+                  th:text="${e.createdAt != null
+                            ? #temporals.format(e.createdAt, 'd MMM yyyy, HH:mm') : ''}">When</td>
+              <td>
+                <div th:unless="${e.actorDeleted}">
+                  <div class="cell-title" th:text="${e.actorName}">Who</div>
+                  <div class="text-micro" style="color:var(--muted);" th:text="${e.actorEmail}">mail</div>
+                </div>
+                <!-- The account is gone; the record of what it did is not. -->
+                <span th:if="${e.actorDeleted}" class="text-micro" style="color:var(--muted);">
+                  Account deleted
+                </span>
+              </td>
+              <td><code th:text="${e.action}">ACTION</code></td>
+              <td class="text-micro" style="color:var(--muted);white-space:nowrap;">
+                <span th:text="${e.entityType}">Type</span>
+                <span th:if="${e.entityId != null}" th:text="'#' + ${e.entityId}">#0</span>
+              </td>
+              <td th:text="${e.details}">Detail</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card-pad d-flex align-items-center justify-content-between"
+           style="border-top:1px solid var(--border);"
+           th:if="${entries.totalPages > 1}">
+        <span class="text-micro" style="color:var(--muted);">
+          Page <span th:text="${entries.number + 1}">1</span>
+          of <span th:text="${entries.totalPages}">1</span>
+        </span>
+        <div class="d-flex gap-2">
+          <a class="btn btn-light-custom btn-sm" th:if="${entries.hasPrevious()}"
+             th:href="|/admin/audit?page=${entries.number - 1}${queryString}|">Previous</a>
+          <a class="btn btn-light-custom btn-sm" th:if="${entries.hasNext()}"
+             th:href="|/admin/audit?page=${entries.number + 1}${queryString}|">Next</a>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

@@ -1,0 +1,2342 @@
+/* =====================================================================
+   Verdant Events Design System
+   ---------------------------------------------------------------------
+   One file, one system. Every page composes the classes below; no page
+   invents its own font size, spacing or shade of grey. If something is
+   needed twice it belongs here, and if it is needed once it probably
+   belongs here anyway so the second use is consistent.
+
+   Contents
+     1.  Tokens
+     2.  Base & typography
+     3.  Layout primitives
+     4.  Buttons
+     5.  Forms
+     6.  Badges & pills
+     7.  Cards
+     8.  Event cards
+     9.  Stat cards & meters
+     10. Tables & action menus
+     11. Empty states
+     12. Toasts & alerts
+     13. Steppers
+     14. Public navbar
+     15. Hero & search
+     16. Dashboard shell & sidebar
+     17. Filter sidebar & drawer
+     18. Event detail
+     19. Ticket
+     20. Notifications
+     21. Auth
+     22. Footer
+     23. Charts (CSS-drawn, no library)
+     24. Motion & utilities
+     25. Responsive
+     26. Print
+   ===================================================================== */
+
+/* =====================================================================
+   1. TOKENS
+   ===================================================================== */
+:root {
+  /* Brand ------------------------------------------------------------
+     VERDANT EVENTS.
+
+     The accent is the deep forest green of the mark, with the mark's
+     gold kept for hairlines, rules and small emphasis only - gold is
+     expensive precisely because it is rare on the page.
+
+     Everything downstream reads --primary. Repointing these five lines
+     at another accent (burgundy #7A1F2B / #5E1721, say) re-skins the
+     entire product without touching a component.
+
+     There is deliberately NO BLUE anywhere in this file. */
+  --primary: #14432C;
+  --primary-hover: #0C2B1C;
+  --primary-soft: #F0F3F0;
+  --primary-soft-2: #DDE6DF;
+  --primary-ink: #0C2B1C;
+
+  /* The mark's gold. Used sparingly: rules, eyebrows, small accents. */
+  --gold: #B08D57;
+  --gold-soft: #EFE6D8;
+
+  --success: #2F7A52;
+  --success-soft: #E3EFE7;
+  --success-ink: #1F5637;
+  --warning: #B4801F;
+  --warning-soft: #F6EEDC;
+  --warning-ink: #8A5E12;
+  --danger: #9B2C2C;
+  --danger-soft: #F5E4E4;
+  --danger-ink: #7A1F2B;
+  /* Darker steps, used only where white TEXT sits on the colour. The mid
+     tones above stay for fills, meters and borders, which carry no text:
+     white on #10B981 is 2.54:1 and on #EF4444 is 3.76:1, both short of
+     the 4.5:1 AA needs. These clear it (5.48:1 and 4.83:1). */
+  --success-strong: #1F5637;
+  --danger-strong: #7A1F2B;
+  --neutral-soft: #F1EFEA;
+  --neutral-ink: #56524B;
+
+  /* Surfaces ---------------------------------------------------------
+     Ivory is the ground of this brand, not white. White is reserved for
+     the surfaces that sit ON the ivory, which is what gives the pages
+     their depth without a single shadow. */
+  --bg: #F7F5F0;          /* IVORY  */
+  --card: #FFFFFF;        /* WHITE  */
+  --surface-2: #F2EFE8;
+  --sidebar: #111111;     /* OBSIDIAN */
+  --sidebar-2: #1C1C1C;   /* CHARCOAL */
+  --obsidian: #111111;
+  --charcoal: #1C1C1C;
+  --ivory: #F7F5F0;
+
+  /* Ink -------------------------------------------------------------- */
+  --heading: #111111;
+  --body-text: #4A4741;
+  /* var(--muted-on-dark) was the original secondary-text colour and it fails WCAG AA
+     on every surface in this product (2.56:1 against white, where 4.5 is
+     required). Darkened to slate-500, which clears AA on both the white
+     card and the off-white page background (4.76:1 and 4.58:1) while
+     reading the same at a glance. The old value survives as
+     --muted-on-dark, where a LIGHT grey is what contrasts. */
+  --muted: #6B6863;            /* WARM GRAY */
+  --muted-on-dark: #A9A49B;
+  --border: #DDD9D2;           /* LIGHT BORDER */
+  --border-strong: #C7C2B8;
+  --hairline: rgba(17, 17, 17, 0.08);
+
+  /* Spacing scale — every gap in the product is one of these --------- */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4rem;
+
+  /* Radii ------------------------------------------------------------ */
+  /* Modest radii. A premium editorial page is built from straight
+     edges and hairlines; heavy rounding is what makes a layout read as
+     a template. */
+  --r-sm: 2px;
+  --r-md: 3px;
+  --r-lg: 4px;
+  --r-xl: 6px;
+  --r-2xl: 8px;
+  --r-pill: 999px;
+
+  /* Elevation -------------------------------------------------------- */
+  --shadow-xs: 0 1px 2px rgba(17, 17, 17, 0.04);
+  --shadow-sm: 0 1px 3px rgba(17, 17, 17, 0.05);
+  --shadow-md: 0 4px 16px rgba(17, 17, 17, 0.07);
+  --shadow-lg: 0 12px 32px rgba(17, 17, 17, 0.10);
+  --shadow-xl: 0 24px 56px rgba(17, 17, 17, 0.14);
+  --ring: 0 0 0 3px rgba(20, 67, 44, 0.20);
+
+  /* Type scale — fixed sizes, referenced by name, never re-picked ---- */
+  --t-display: clamp(2.7rem, 1.5rem + 3.9vw, 5rem);    /* editorial hero */
+  --t-hero: clamp(2.25rem, 1.4rem + 3.4vw, 3.5rem);
+  --t-page: clamp(1.9rem, 1.35rem + 1.6vw, 2.6rem);
+  --t-section: clamp(1.6rem, 1.2rem + 1.1vw, 2.15rem);
+  --t-card: 1.05rem;
+  --t-body: 0.95rem;
+  --t-meta: 0.85rem;
+  --t-micro: 0.78rem;
+
+  /* The eyebrow: small, wide-tracked, uppercase. Used above section
+     headings throughout, and it is most of what makes the pages read
+     as editorial rather than as a dashboard. */
+  --track-wide: 0.18em;
+  --track-wider: 0.28em;
+
+  /* Editorial vertical rhythm for public sections. */
+  --section-y: clamp(5rem, 3rem + 6vw, 11rem);
+
+  --speed: 0.16s;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* =====================================================================
+   2. BASE & TYPOGRAPHY
+   ===================================================================== */
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--body-text);
+  font-size: var(--t-body);
+  font-weight: 400;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  /* Nothing on this site is allowed to scroll the page sideways. */
+  overflow-x: hidden;
+}
+
+/*
+  Headings are Playfair, and they are NOT bold.
+
+  An editorial page gets its hierarchy from size, leading and space, not
+  from weight - setting a display serif at 700 is what makes a page look
+  like a template rather than like a magazine. Regular and medium do all
+  the work here.
+*/
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  color: var(--heading);
+  font-weight: 400;
+  line-height: 1.16;
+  letter-spacing: -0.012em;
+  text-wrap: balance;
+}
+h1 { font-size: var(--t-page); }
+h2 { font-size: var(--t-section); }
+h3 { font-size: 1.35rem; }
+h4 { font-size: var(--t-card); font-weight: 500; }
+h5 { font-size: 1rem; font-weight: 500; }
+h6 { font-size: var(--t-meta); font-weight: 500; }
+
+/*
+  Inside the application - dashboards, tables, forms - a serif heading on
+  a dense data screen reads as decoration rather than as structure. The
+  working surfaces keep DM Sans; only the public site is editorial.
+*/
+.app-shell h1, .app-shell h2, .app-shell h3,
+.app-shell h4, .app-shell h5, .app-shell h6,
+.card-head h2, .card-head h3, .stat-value, .table-modern th {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.008em;
+}
+/* ...except the page title, which is the one editorial note the
+   application keeps so it still feels like the same brand. */
+.app-shell .page-header__title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.012em;
+}
+
+/* The eyebrow. Small, wide-tracked, uppercase, sitting above a heading.
+   More than any other single rule, this is what makes the sections read
+   as art-directed. */
+.eyebrow {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: var(--track-wider);
+  color: var(--muted);
+  margin: 0 0 var(--s-4);
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+/* A short gold rule leading into the eyebrow - the one place gold is
+   used routinely, and it is 1px tall. */
+.eyebrow::before {
+  content: '';
+  width: 2.25rem; height: 1px; background: var(--gold); flex-shrink: 0;
+}
+.eyebrow--plain::before { display: none; }
+.eyebrow--center { justify-content: center; }
+.eyebrow--light { color: var(--muted-on-dark); }
+
+/* Editorial display sizes, used on the public pages only. */
+.display-1x {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: var(--t-display);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.028em;
+}
+.display-2x {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(2.1rem, 1.3rem + 2.6vw, 3.4rem);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.serif-italic { font-style: italic; }
+.lede {
+  font-size: clamp(1rem, 0.94rem + 0.3vw, 1.18rem);
+  line-height: 1.7;
+  color: var(--body-text);
+  max-width: 62ch;
+}
+
+p { margin-bottom: var(--s-3); }
+
+a { color: var(--primary); text-decoration: none; transition: color var(--speed) var(--ease); }
+a:hover { color: var(--primary-hover); }
+
+small, .text-meta { font-size: var(--t-meta); }
+.text-micro { font-size: var(--t-micro); }
+.text-muted-custom { color: var(--muted) !important; }
+.text-heading { color: var(--heading) !important; }
+.mono {
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* Focus is never removed — only made to match the system. */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+/* Screen-reader-only, for labels a sighted user gets from context. */
+.visually-hidden-focusable:not(:focus):not(:focus-within) {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+/* Skip link, first thing in the tab order on every page. */
+.skip-link {
+  position: absolute; left: var(--s-4); top: -3rem; z-index: 2000;
+  background: var(--primary); color: #fff; padding: var(--s-2) var(--s-4);
+  border-radius: var(--r-md); font-weight: 600;
+  transition: top var(--speed) var(--ease);
+}
+.skip-link:focus { top: var(--s-4); color: #fff; }
+
+/* =====================================================================
+   3. LAYOUT PRIMITIVES
+   ===================================================================== */
+
+/* Page header: title, optional subtitle, optional actions. Used at the
+   top of every dashboard page so they all start the same way. */
+.page-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: var(--s-4); flex-wrap: wrap; margin-bottom: var(--s-5);
+}
+.page-header__title { margin: 0; font-size: var(--t-page); }
+.page-header__sub { margin: var(--s-1) 0 0; color: var(--muted); font-size: var(--t-meta); }
+.page-header__actions { display: flex; gap: var(--s-2); flex-wrap: wrap; }
+
+/* Section header: used between blocks within a page. */
+.section-header {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  gap: var(--s-4); flex-wrap: wrap; margin-bottom: var(--s-4);
+}
+.section-header__title { margin: 0; font-size: var(--t-section); }
+.section-eyebrow {
+  color: var(--primary); font-weight: 700; letter-spacing: 0.09em;
+  font-size: var(--t-micro); text-transform: uppercase; margin: 0 0 var(--s-1);
+}
+.section-header__sub { margin: var(--s-1) 0 0; color: var(--muted); font-size: var(--t-meta); }
+
+.stack > * + * { margin-top: var(--s-4); }
+.divider { height: 1px; background: var(--border); border: 0; margin: var(--s-5) 0; }
+
+/* =====================================================================
+   4. BUTTONS
+   ===================================================================== */
+.btn {
+  --btn-bg: transparent;
+  --btn-fg: var(--heading);
+  --btn-border: transparent;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
+  border-radius: var(--r-md);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  font-size: 0.78rem;
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  line-height: 1.2;
+  padding: 0.78rem 1.5rem;
+  border: 1.5px solid var(--btn-border);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  transition: background var(--speed) var(--ease), border-color var(--speed) var(--ease),
+              box-shadow var(--speed) var(--ease), transform var(--speed) var(--ease);
+  cursor: pointer;
+  text-decoration: none;
+  /* A button label never wraps mid-word into two ragged lines. */
+  white-space: nowrap;
+}
+/* No lift and no shadow on hover.
+
+   A button that jumps a pixel and grows a drop shadow is the single most
+   "bootstrap template" gesture in a UI. Premium buttons change colour
+   and nothing else. */
+.btn:hover { transform: none; box-shadow: none; }
+.btn:active { transform: none; box-shadow: none; }
+.btn:disabled, .btn.disabled {
+  opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none;
+}
+
+.btn-primary { --btn-bg: var(--primary); --btn-fg: #fff; --btn-border: var(--primary); }
+.btn-primary:hover { --btn-bg: var(--primary-hover); --btn-border: var(--primary-hover); color: #fff; }
+.btn-outline-primary { --btn-fg: var(--primary); --btn-border: var(--primary); }
+.btn-outline-primary:hover { --btn-bg: var(--primary); --btn-fg: #fff; color: #fff; }
+.btn-success { --btn-bg: var(--success-strong); --btn-fg: #fff; --btn-border: var(--success-strong); }
+.btn-success:hover { color: #fff; }
+.btn-danger { --btn-bg: var(--danger-strong); --btn-fg: #fff; --btn-border: var(--danger-strong); }
+.btn-danger:hover { color: #fff; }
+.btn-outline-danger { --btn-fg: var(--danger-ink); --btn-border: var(--danger); }
+.btn-outline-danger:hover { --btn-bg: var(--danger-strong); --btn-fg: #fff; color: #fff; }
+.btn-light-custom { --btn-bg: var(--card); --btn-fg: var(--heading); --btn-border: var(--border); }
+.btn-light-custom:hover { --btn-bg: var(--neutral-soft); }
+.btn-ghost { --btn-fg: var(--body-text); --btn-border: transparent; }
+.btn-ghost:hover { --btn-bg: var(--neutral-soft); --btn-fg: var(--heading); }
+/* On a dark or photographic background. */
+.btn-on-dark {
+  --btn-bg: rgba(255, 255, 255, 0.12); --btn-fg: #fff;
+  --btn-border: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(6px);
+}
+.btn-on-dark:hover { --btn-bg: rgba(255, 255, 255, 0.2); color: #fff; }
+
+/* Outlined, for use over photography - the hero's secondary action. */
+.btn-outline-light {
+  --btn-bg: transparent; --btn-fg: #fff; --btn-border: rgba(255,255,255,0.55);
+}
+.btn-outline-light:hover {
+  --btn-bg: #fff; --btn-fg: var(--obsidian); --btn-border: #fff; color: var(--obsidian);
+}
+
+/* The size used on the public pages' primary actions. */
+.btn-lg { padding: 1rem 2.1rem; font-size: 0.8rem; letter-spacing: var(--track-wide); }
+
+.btn-sm { padding: 0.4rem 0.85rem; font-size: var(--t-meta); }
+.btn-block { width: 100%; }
+.btn-icon { padding: 0.5rem; width: 2.25rem; height: 2.25rem; }
+
+/* Busy state: the label is replaced by a spinner so the button cannot be
+   read as "nothing happened", and its width is held so the layout does
+   not jump. Driven by the `is-busy` class from setBusy() in app.js. */
+.btn.is-busy { position: relative; color: transparent !important; pointer-events: none; }
+.btn.is-busy::after {
+  content: ''; position: absolute; inset: 0; margin: auto;
+  width: 1.05rem; height: 1.05rem; border-radius: 50%;
+  border: 2px solid currentColor; border-top-color: transparent;
+  color: #fff;
+  animation: spin 0.6s linear infinite;
+}
+.btn-light-custom.is-busy::after, .btn-outline-primary.is-busy::after { color: var(--primary); }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* =====================================================================
+   5. FORMS
+   ===================================================================== */
+label, .form-label {
+  font-weight: 600; color: var(--heading);
+  font-size: var(--t-meta); margin-bottom: var(--s-2); display: inline-block;
+}
+.form-label .req { color: var(--danger-ink); margin-left: 2px; }
+
+.form-control, .form-select {
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--border);
+  padding: 0.6rem 0.85rem;
+  font-size: var(--t-body);
+  color: var(--heading);
+  background-color: var(--card);
+  transition: border-color var(--speed) var(--ease), box-shadow var(--speed) var(--ease);
+}
+.form-control::placeholder { color: var(--muted); }
+.form-control:focus, .form-select:focus {
+  border-color: var(--primary);
+  box-shadow: var(--ring);
+  outline: none;
+}
+.form-control:disabled, .form-select:disabled { background: var(--surface-2); color: var(--muted); }
+.form-control.is-invalid, .form-select.is-invalid { border-color: var(--danger); }
+
+.form-text { font-size: var(--t-micro); color: var(--muted); margin-top: var(--s-1); }
+.form-error { font-size: var(--t-micro); color: var(--danger-ink); margin-top: var(--s-1); font-weight: 600; }
+
+/* An input with a leading icon. */
+.input-icon { position: relative; }
+.input-icon > i {
+  position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%);
+  color: var(--muted); font-size: var(--t-meta); pointer-events: none;
+}
+.input-icon > .form-control, .input-icon > .form-select { padding-left: 2.4rem; }
+
+/* Long forms are grouped rather than presented as one endless column. */
+.form-section { border-top: 1px solid var(--border); padding-top: var(--s-5); margin-top: var(--s-5); }
+.form-section:first-of-type { border-top: 0; padding-top: 0; margin-top: 0; }
+.form-section__head { display: flex; align-items: center; gap: var(--s-3); margin-bottom: var(--s-4); }
+.form-section__num {
+  width: 30px; height: 30px; background: var(--primary-soft); border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--primary); font-weight: 700; font-size: var(--t-meta); flex-shrink: 0;
+}
+.form-section__title { margin: 0; font-size: 1rem; }
+.form-section__sub { margin: 2px 0 0; font-size: var(--t-micro); color: var(--muted); }
+
+/* Checkbox / radio rows in a filter or preference list. */
+.check-row {
+  display: flex; align-items: center; gap: var(--s-2);
+  padding: 0.3rem 0; font-size: var(--t-meta); color: var(--body-text); cursor: pointer;
+}
+.check-row input { accent-color: var(--primary); width: 1rem; height: 1rem; flex-shrink: 0; }
+.check-row:hover { color: var(--heading); }
+
+/* A choice between two roles is not a checkbox in a list - it decides
+   what the whole account is for, so it gets room to explain itself.
+   The radio stays in the markup and stays keyboard-operable; the card
+   is only what you see. */
+.choice-grid { display: grid; gap: var(--s-3); grid-template-columns: 1fr 1fr; }
+@media (max-width: 480px) { .choice-grid { grid-template-columns: 1fr; } }
+.choice-card {
+  position: relative; display: block; cursor: pointer;
+  border: 1px solid var(--border); border-radius: var(--r-md);
+  padding: var(--s-4); background: var(--card);
+  transition: border-color .15s ease, background .15s ease;
+}
+.choice-card:hover { border-color: var(--primary); }
+.choice-card input {
+  position: absolute; top: var(--s-3); right: var(--s-3);
+  accent-color: var(--primary); width: 1rem; height: 1rem; margin: 0;
+}
+.choice-card__title {
+  display: block; font-weight: 600; color: var(--heading);
+  font-size: var(--t-meta); margin-bottom: 2px; padding-right: 1.5rem;
+}
+.choice-card__sub { display: block; font-size: var(--t-micro); color: var(--muted); }
+/* :has is what lights up the selected card without any script. Where
+   it is unsupported the radio itself still shows the choice, so
+   nothing is lost - the card simply stays plain. */
+.choice-card:has(input:checked) { border-color: var(--primary); background: var(--primary-soft); }
+.choice-card:has(input:focus-visible) { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* =====================================================================
+   6. BADGES & PILLS
+   ===================================================================== */
+.badge-custom {
+  display: inline-flex; align-items: center; gap: 0.35em;
+  padding: 0.28rem 0.7rem; border-radius: var(--r-pill);
+  font-size: var(--t-micro); font-weight: 600; line-height: 1.4;
+  white-space: nowrap;
+}
+.badge-custom::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor; flex-shrink: 0; opacity: 0.75;
+}
+/* A category or count pill is a label, not a status — no dot. */
+.badge-custom.badge-plain::before { display: none; }
+
+.badge-primary-soft { background: var(--primary-soft-2); color: var(--primary-ink); }
+.badge-success-soft { background: var(--success-soft); color: var(--success-ink); }
+.badge-warning-soft { background: var(--warning-soft); color: var(--warning-ink); }
+.badge-danger-soft  { background: var(--danger-soft);  color: var(--danger-ink); }
+.badge-gray-soft    { background: var(--neutral-soft); color: var(--neutral-ink); }
+
+/* One pill design for every status in the system. The mapping from a
+   status value to one of these lives in fragments/components.html, so
+   PUBLISHED looks identical on the admin table and the event card. */
+
+/* =====================================================================
+   7. CARDS
+   ===================================================================== */
+.card-custom {
+  background: var(--card);
+  border-radius: var(--r-xl);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow var(--speed) var(--ease), transform var(--speed) var(--ease),
+              border-color var(--speed) var(--ease);
+}
+.card-hover:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
+}
+.card-pad { padding: var(--s-5); }
+.card-head {
+  padding: var(--s-4) var(--s-5); border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center; gap: var(--s-3);
+}
+.card-head h2, .card-head h3, .card-head h5 { margin: 0; font-size: 1rem; }
+.card-body-flush { padding: 0; }
+
+/* =====================================================================
+   8. EVENT CARDS
+   ===================================================================== */
+.event-card {
+  overflow: hidden; display: flex; flex-direction: column; height: 100%;
+}
+.event-card__media {
+  position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: var(--neutral-soft);
+}
+.event-card__media img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 0.45s var(--ease);
+}
+.event-card:hover .event-card__media img { transform: scale(1.045); }
+.event-card__badges {
+  position: absolute; top: var(--s-3); left: var(--s-3); right: var(--s-3);
+  display: flex; justify-content: space-between; align-items: flex-start; gap: var(--s-2);
+}
+.event-card__badges .badge-custom {
+  background: rgba(255, 255, 255, 0.94); color: var(--heading);
+  box-shadow: var(--shadow-sm); backdrop-filter: blur(4px);
+}
+.event-card__body { padding: var(--s-4) var(--s-5) var(--s-5); display: flex; flex-direction: column; flex: 1; }
+.event-card__date {
+  display: flex; align-items: center; gap: 0.4rem;
+  color: var(--primary); font-weight: 700; font-size: var(--t-micro);
+  text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--s-2);
+}
+.event-card__title {
+  font-size: var(--t-card); font-weight: 700; color: var(--heading);
+  margin: 0 0 var(--s-2); line-height: 1.35;
+  /* Two lines maximum, so a long title cannot make one card taller than
+     its neighbours and break the row. */
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.event-card__meta {
+  font-size: var(--t-meta); color: var(--muted);
+  display: flex; align-items: center; gap: 0.4rem; margin-bottom: var(--s-1);
+}
+.event-card__meta i { width: 14px; text-align: center; flex-shrink: 0; }
+.event-card__meta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.event-card__foot {
+  margin-top: auto; padding-top: var(--s-4);
+  display: flex; justify-content: space-between; align-items: center; gap: var(--s-3);
+}
+.event-card__price { font-weight: 700; color: var(--heading); font-size: 1.02rem; }
+.event-card__price .free { color: var(--success-ink); }
+
+/* Seats-left line. Turns amber when it is nearly gone, which is a real
+   signal from real numbers, not decoration. */
+.seats-left { font-size: var(--t-micro); font-weight: 600; color: var(--muted); }
+.seats-left.is-low { color: var(--warning-ink); }
+.seats-left.is-full { color: var(--danger-ink); }
+
+/* =====================================================================
+   9. STAT CARDS & METERS
+   ===================================================================== */
+.stat-card {
+  background: var(--card); border-radius: var(--r-xl); border: 1px solid var(--border);
+  padding: var(--s-5); box-shadow: var(--shadow-xs); height: 100%;
+}
+.stat-icon {
+  width: 40px; height: 40px; border-radius: var(--r-md); display: inline-flex;
+  align-items: center; justify-content: center; font-size: 1rem; margin-bottom: var(--s-4);
+  background: var(--primary-soft); color: var(--primary);
+}
+.stat-icon.is-success { background: var(--success-soft); color: var(--success-ink); }
+.stat-icon.is-warning { background: var(--warning-soft); color: var(--warning-ink); }
+.stat-icon.is-danger  { background: var(--danger-soft);  color: var(--danger-ink); }
+.stat-icon.is-neutral { background: var(--neutral-soft); color: var(--neutral-ink); }
+.stat-value {
+  font-size: 1.85rem; font-weight: 700; color: var(--heading); line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.stat-label { color: var(--muted); font-size: var(--t-meta); margin-top: var(--s-2); }
+
+/* Capacity meter — seats taken against capacity. */
+.meter { height: 6px; background: var(--neutral-soft); border-radius: var(--r-pill); overflow: hidden; }
+.meter__fill { height: 100%; background: var(--primary); border-radius: inherit; transition: width 0.4s var(--ease); }
+.meter__fill.is-warning { background: var(--warning); }
+.meter__fill.is-full { background: var(--danger); }
+
+/* =====================================================================
+   10. TABLES & ACTION MENUS
+   ===================================================================== */
+.table-modern { border-collapse: separate; border-spacing: 0; width: 100%; margin: 0; }
+.table-modern thead th {
+  background: var(--surface-2); color: var(--muted);
+  font-size: var(--t-micro); text-transform: uppercase; letter-spacing: 0.06em;
+  font-weight: 700; border-bottom: 1px solid var(--border);
+  padding: var(--s-3) var(--s-4); white-space: nowrap; text-align: left;
+}
+.table-modern tbody td {
+  padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--border);
+  font-size: var(--t-meta); vertical-align: middle; color: var(--body-text);
+}
+.table-modern tbody td .cell-title { color: var(--heading); font-weight: 600; }
+.table-modern tbody td .cell-sub { color: var(--muted); font-size: var(--t-micro); }
+.table-modern tbody tr:last-child td { border-bottom: none; }
+.table-modern tbody tr { transition: background var(--speed) var(--ease); }
+.table-modern tbody tr:hover { background: var(--surface-2); }
+.table-modern .col-actions { width: 1%; white-space: nowrap; text-align: right; }
+.table-responsive { -webkit-overflow-scrolling: touch; }
+.table-responsive > .table-modern { min-width: 720px; }
+
+/* A row of four or five buttons is noise. One trigger, a menu behind it. */
+.action-menu { position: relative; display: inline-block; }
+.action-menu__trigger {
+  width: 2rem; height: 2rem; border-radius: var(--r-sm); border: 1px solid transparent;
+  background: transparent; color: var(--muted); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: background var(--speed) var(--ease), color var(--speed) var(--ease);
+}
+.action-menu__trigger:hover { background: var(--neutral-soft); color: var(--heading); }
+.action-menu__trigger[aria-expanded="true"] { background: var(--neutral-soft); color: var(--heading); }
+/* Absolute by default so the menu still appears in the right place with
+   JavaScript disabled. app.js switches an OPEN menu to position:fixed,
+   because .table-responsive is a scroll container and would otherwise
+   clip the menu at the bottom edge of the table. The z-index has to clear
+   the sticky sidebar (1050) for the fixed case. */
+.action-menu__list {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 1060;
+  min-width: 190px; background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r-lg); box-shadow: var(--shadow-lg); padding: var(--s-2);
+  opacity: 0; visibility: hidden; transform: translateY(-4px);
+  transition: opacity var(--speed) var(--ease), transform var(--speed) var(--ease),
+              visibility var(--speed) var(--ease);
+}
+.action-menu.is-open .action-menu__list { opacity: 1; visibility: visible; transform: translateY(0); }
+.action-menu__list a,
+.action-menu__list button {
+  display: flex; align-items: center; gap: var(--s-3); width: 100%;
+  padding: 0.5rem 0.7rem; border-radius: var(--r-sm); border: 0; background: none;
+  color: var(--body-text); font-size: var(--t-meta); font-weight: 500;
+  text-align: left; cursor: pointer; white-space: nowrap;
+}
+.action-menu__list a:hover, .action-menu__list button:hover {
+  background: var(--neutral-soft); color: var(--heading);
+}
+.action-menu__list .is-danger { color: var(--danger-ink); }
+.action-menu__list .is-danger:hover { background: var(--danger-soft); }
+.action-menu__list i { width: 15px; text-align: center; opacity: 0.8; }
+.action-menu__sep { height: 1px; background: var(--border); margin: var(--s-2) 0; }
+.action-menu__list form { margin: 0; }
+
+/* =====================================================================
+   11. EMPTY STATES
+   ===================================================================== */
+/* The status code on the error page. Large because "404" tells a reader
+   more at a glance than a sentence does. */
+.error-code {
+  font-size: 3.5rem; font-weight: 700; color: var(--primary);
+  line-height: 1; letter-spacing: -0.03em;
+}
+
+.empty-state { text-align: center; padding: var(--s-7) var(--s-5); }
+.empty-state__icon {
+  width: 64px; height: 64px; border-radius: var(--r-xl); margin: 0 auto var(--s-4);
+  background: var(--neutral-soft); color: var(--muted);
+  display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+}
+.empty-state__title { font-size: 1.05rem; margin: 0 0 var(--s-2); color: var(--heading); }
+.empty-state__text {
+  color: var(--muted); font-size: var(--t-meta); margin: 0 auto var(--s-4); max-width: 34ch;
+}
+.empty-state .btn { margin-top: var(--s-1); }
+
+/* =====================================================================
+   12. TOASTS & ALERTS
+   ===================================================================== */
+.toast-stack {
+  position: fixed; top: var(--s-4); right: var(--s-4); z-index: 1080;
+  display: flex; flex-direction: column; gap: var(--s-2);
+  max-width: min(380px, calc(100vw - 2rem));
+  pointer-events: none;
+}
+.toast-item {
+  display: flex; align-items: flex-start; gap: var(--s-3);
+  background: var(--card); border: 1px solid var(--border); border-left: 4px solid var(--muted);
+  border-radius: var(--r-lg); box-shadow: var(--shadow-lg);
+  padding: var(--s-3) var(--s-4); pointer-events: auto;
+  animation: toastIn 0.24s var(--ease);
+}
+.toast-item.is-leaving { animation: toastOut 0.2s var(--ease) forwards; }
+.toast-item__icon { flex-shrink: 0; margin-top: 1px; }
+.toast-item__body { font-size: var(--t-meta); color: var(--heading); flex: 1; }
+.toast-item__close {
+  background: none; border: 0; color: var(--muted); cursor: pointer;
+  padding: 0 0 0 var(--s-2); font-size: var(--t-meta); line-height: 1;
+}
+.toast-item__close:hover { color: var(--heading); }
+.toast-success { border-left-color: var(--success); }
+.toast-success .toast-item__icon { color: var(--success); }
+.toast-error { border-left-color: var(--danger); }
+.toast-error .toast-item__icon { color: var(--danger); }
+.toast-warning { border-left-color: var(--warning); }
+.toast-warning .toast-item__icon { color: var(--warning); }
+.toast-info { border-left-color: var(--primary); }
+.toast-info .toast-item__icon { color: var(--primary); }
+
+@keyframes toastIn { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+@keyframes toastOut { to { opacity: 0; transform: translateX(16px); } }
+
+/* Inline alerts stay for things the user must read and act on — a form
+   error, a blocked action. Successes are toasts. */
+.alert-custom {
+  display: flex; gap: var(--s-3); align-items: flex-start;
+  border-radius: var(--r-lg); padding: var(--s-4);
+  font-size: var(--t-meta); border: 1px solid transparent; margin-bottom: var(--s-4);
+}
+.alert-custom i { margin-top: 2px; flex-shrink: 0; }
+.alert-error { background: var(--danger-soft); border-color: #FECACA; color: var(--danger-ink); }
+.alert-warning { background: var(--warning-soft); border-color: #FDE68A; color: var(--warning-ink); }
+.alert-info { background: var(--primary-soft); border-color: var(--primary-soft-2); color: var(--primary-ink); }
+.alert-success { background: var(--success-soft); border-color: #A7F3D0; color: var(--success-ink); }
+.alert-custom strong { color: inherit; }
+
+/* =====================================================================
+   13. STEPPERS
+   ===================================================================== */
+.stepper { display: flex; align-items: center; gap: var(--s-2); margin-bottom: var(--s-5); }
+.stepper__step { display: flex; align-items: center; gap: var(--s-2); flex-shrink: 0; }
+.stepper__dot {
+  width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--t-micro); font-weight: 700;
+  background: var(--neutral-soft); color: var(--body-text);
+}
+.stepper__label { font-size: var(--t-micro); font-weight: 600; color: var(--body-text); white-space: nowrap; }
+.stepper__line { height: 2px; background: var(--border); flex: 1; min-width: 12px; border-radius: 2px; }
+.stepper__step.is-done .stepper__dot { background: var(--success-soft); color: var(--success-ink); }
+.stepper__step.is-done .stepper__label { color: var(--body-text); }
+.stepper__step.is-current .stepper__dot { background: var(--primary); color: #fff; box-shadow: var(--ring); }
+.stepper__step.is-current .stepper__label { color: var(--heading); }
+
+/* =====================================================================
+   14. PUBLIC NAVBAR
+   ===================================================================== */
+/*
+  Two states, one element.
+
+  At the top of the homepage the bar is transparent and sits ON the hero
+  image, in white. The moment the page scrolls it becomes ivory with
+  obsidian text, a hairline under it and slightly less height. The class
+  is toggled from app.js against a scroll threshold; everything visual
+  is here, so the script only ever adds or removes one class.
+
+  position: sticky rather than fixed, so the bar participates in layout
+  and no page needs a hand-tuned top padding to compensate for it.
+*/
+.navbar-public {
+  position: sticky; top: 0; z-index: 1030;
+  padding: 1.35rem 0;
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition:
+    background 300ms var(--ease-editorial),
+    padding 300ms var(--ease-editorial),
+    border-color 300ms var(--ease-editorial),
+    box-shadow 300ms var(--ease-editorial);
+}
+
+/* --- Scrolled / solid state ------------------------------------- */
+.navbar-public.is-solid {
+  background: rgba(247, 245, 240, 0.94);
+  backdrop-filter: saturate(150%) blur(14px);
+  -webkit-backdrop-filter: saturate(150%) blur(14px);
+  border-bottom-color: var(--border);
+  padding: 0.85rem 0;
+  box-shadow: 0 1px 24px rgba(17, 17, 17, 0.05);
+}
+
+/*
+  Pages that are not the homepage have no hero behind the bar, so they
+  start solid and never run the transparent state at all. Set by the
+  template, not guessed by the script.
+*/
+.navbar-public.navbar-public--solid {
+  background: rgba(247, 245, 240, 0.94);
+  backdrop-filter: saturate(150%) blur(14px);
+  -webkit-backdrop-filter: saturate(150%) blur(14px);
+  border-bottom-color: var(--border);
+  padding: 0.85rem 0;
+}
+
+/* --- The wordmark. A real link, to "/", on every page ----------- */
+.navbar-public .navbar-brand {
+  display: inline-flex; align-items: center; gap: 0.7rem;
+  padding: 0; margin: 0;
+  color: var(--heading);
+  transition: opacity var(--speed) var(--ease);
+}
+.navbar-public .navbar-brand:hover { opacity: 0.72; }
+.navbar-public .navbar-brand:focus-visible {
+  outline: 2px solid var(--gold); outline-offset: 6px;
+}
+.brand-mark {
+  width: 34px; height: 34px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.brand-mark svg { width: 100%; height: 100%; display: block; }
+.brand-word {
+  display: flex; flex-direction: column; line-height: 1;
+}
+.brand-word__name {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.16rem; font-weight: 500; letter-spacing: 0.11em;
+  text-transform: uppercase; color: inherit;
+}
+.brand-word__sub {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.55rem; font-weight: 500; letter-spacing: var(--track-wider);
+  text-transform: uppercase; color: var(--muted); margin-top: 4px;
+}
+
+/* --- Links ------------------------------------------------------- */
+.navbar-public .nav-link {
+  position: relative;
+  color: var(--body-text);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  font-size: 0.78rem;
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  padding: 0.5rem 0;
+  margin: 0 1.05rem;
+  border-radius: 0;
+  transition: color 200ms var(--ease);
+}
+.navbar-public .nav-link:hover { color: var(--heading); }
+
+/*
+  The active marker is a 1px rule that draws itself from the left, not a
+  pill. It is the same gesture as the eyebrow rule, which is what keeps
+  the navigation feeling like part of the same system.
+*/
+.navbar-public .nav-link::after {
+  content: ''; position: absolute; left: 0; bottom: 0;
+  width: 0; height: 1px; background: var(--primary);
+  transition: width 260ms var(--ease-editorial);
+}
+.navbar-public .nav-link:hover::after { width: 100%; }
+.navbar-public .nav-link.active { color: var(--primary); }
+.navbar-public .nav-link.active::after { width: 100%; }
+
+/* --- On the transparent hero state, everything inverts ---------- */
+.navbar-public:not(.is-solid):not(.navbar-public--solid) .navbar-brand,
+.navbar-public:not(.is-solid):not(.navbar-public--solid) .brand-word__name { color: #fff; }
+.navbar-public:not(.is-solid):not(.navbar-public--solid) .brand-word__sub { color: rgba(255,255,255,0.72); }
+.navbar-public:not(.is-solid):not(.navbar-public--solid) .nav-link { color: rgba(255,255,255,0.86); }
+.navbar-public:not(.is-solid):not(.navbar-public--solid) .nav-link:hover,
+.navbar-public:not(.is-solid):not(.navbar-public--solid) .nav-link.active { color: #fff; }
+.navbar-public:not(.is-solid):not(.navbar-public--solid) .nav-link::after { background: var(--gold); }
+.navbar-public:not(.is-solid):not(.navbar-public--solid) .btn-ghost {
+  color: #fff; border-color: rgba(255,255,255,0.4);
+}
+.navbar-public:not(.is-solid):not(.navbar-public--solid) .btn-ghost:hover {
+  background: rgba(255,255,255,0.12); border-color: #fff; color: #fff;
+}
+.navbar-public:not(.is-solid):not(.navbar-public--solid) .btn-light-custom {
+  background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.3);
+}
+.navbar-public:not(.is-solid):not(.navbar-public--solid) .action-menu__trigger { color: #fff; }
+
+/* The two navbar CTAs, sized for the bar rather than for a form. */
+.navbar-public .btn {
+  font-size: 0.72rem; letter-spacing: var(--track-wide); text-transform: uppercase;
+  padding: 0.62rem 1.25rem;
+}
+
+.navbar-toggler { border: 1px solid var(--border); border-radius: var(--r-sm); padding: 0.35rem 0.55rem; }
+.navbar-toggler:focus { box-shadow: var(--ring); }
+.navbar-public:not(.is-solid):not(.navbar-public--solid) .navbar-toggler {
+  border-color: rgba(255,255,255,0.4);
+}
+.navbar-public:not(.is-solid):not(.navbar-public--solid) .navbar-toggler-icon {
+  filter: invert(1) brightness(2);
+}
+
+/* =====================================================================
+   14b. EDITORIAL SYSTEM — the public site's layout vocabulary
+
+   Everything the public pages are built from lives here: the section
+   rhythm, the rules, the numbered lists, the image frames, the reveal.
+   The application screens do not use any of it, which is what keeps the
+   dashboards workmanlike while the public site stays editorial.
+   ===================================================================== */
+
+/* --- Containers ---------------------------------------------------- */
+.container-editorial {
+  width: 100%;
+  max-width: 1320px;
+  margin-inline: auto;
+  padding-inline: clamp(1.5rem, 1rem + 2.5vw, 4rem);
+}
+.container-narrow {
+  width: 100%;
+  max-width: 940px;
+  margin-inline: auto;
+  padding-inline: clamp(1.5rem, 1rem + 2.5vw, 4rem);
+}
+
+/* --- Section rhythm ------------------------------------------------ */
+.section {
+  padding-block: var(--section-y);
+  position: relative;
+}
+.section--tight { padding-block: calc(var(--section-y) * 0.6); }
+.section--ivory { background: var(--ivory); }
+.section--white { background: var(--card); }
+.section--dark  { background: var(--obsidian); color: var(--muted-on-dark); }
+.section--dark h1, .section--dark h2, .section--dark h3, .section--dark h4 { color: #fff; }
+
+/* Sticky-navbar-safe anchor targets. Without this every in-page link
+   lands with its heading tucked under the bar. */
+[id] { scroll-margin-top: 6rem; }
+
+/* --- Rules. A hairline is this brand's main structural device. ----- */
+.rule { height: 1px; background: var(--border); border: 0; margin: 0; }
+.rule--dark { background: rgba(255,255,255,0.14); }
+.rule--gold { background: var(--gold); opacity: 0.55; }
+
+/* --- Section heading block ---------------------------------------- */
+.section-head { max-width: 62ch; margin-bottom: clamp(2.5rem, 1.5rem + 2.5vw, 4.5rem); }
+.section-head--center { margin-inline: auto; text-align: center; }
+.section-head__title { margin: 0 0 var(--s-4); }
+.section-head__text { color: var(--muted); font-size: 1.02rem; line-height: 1.7; margin: 0; }
+.section--dark .section-head__text { color: var(--muted-on-dark); }
+
+/* A heading and its link, sitting on one baseline with a rule between. */
+.section-bar {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: var(--s-6); flex-wrap: wrap;
+  padding-bottom: var(--s-4); border-bottom: 1px solid var(--border);
+  margin-bottom: clamp(2rem, 1.2rem + 2vw, 3.5rem);
+}
+.section--dark .section-bar { border-bottom-color: rgba(255,255,255,0.14); }
+
+/* --- Text links with the editorial underline ----------------------- */
+.link-editorial {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  font-size: 0.76rem; font-weight: 500; letter-spacing: var(--track-wide);
+  text-transform: uppercase; color: var(--heading);
+  padding-bottom: 0.35rem; border-bottom: 1px solid var(--heading);
+  transition: color 200ms var(--ease), border-color 200ms var(--ease), gap 200ms var(--ease);
+}
+.link-editorial:hover { color: var(--primary); border-color: var(--primary); gap: 0.95rem; }
+.section--dark .link-editorial { color: #fff; border-color: rgba(255,255,255,0.5); }
+.section--dark .link-editorial:hover { color: var(--gold); border-color: var(--gold); }
+
+/* --- The numbered editorial list (WHAT WE DO, HOW IT WORKS) -------- */
+.numbered { border-top: 1px solid var(--border); }
+.section--dark .numbered { border-top-color: rgba(255,255,255,0.14); }
+
+.numbered__row {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: clamp(1.5rem, 1rem + 2vw, 4rem);
+  align-items: start;
+  padding-block: clamp(2rem, 1.2rem + 2vw, 3.25rem);
+  border-bottom: 1px solid var(--border);
+  transition: background 320ms var(--ease-editorial);
+}
+.section--dark .numbered__row { border-bottom-color: rgba(255,255,255,0.14); }
+.numbered__row:hover { background: rgba(20, 67, 44, 0.025); }
+.section--dark .numbered__row:hover { background: rgba(255,255,255,0.03); }
+
+.numbered__num {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 2.4rem; line-height: 1; font-weight: 400;
+  color: var(--border-strong);
+  transition: color 320ms var(--ease-editorial);
+}
+.numbered__row:hover .numbered__num { color: var(--gold); }
+.section--dark .numbered__num { color: rgba(255,255,255,0.22); }
+
+.numbered__title {
+  margin: 0; font-size: clamp(1.3rem, 1rem + 0.9vw, 1.85rem);
+  transition: transform 320ms var(--ease-editorial);
+}
+.numbered__row:hover .numbered__title { transform: translateX(8px); }
+.numbered__text { margin: 0; color: var(--muted); line-height: 1.75; }
+.section--dark .numbered__text { color: var(--muted-on-dark); }
+
+/* --- Statistics row ------------------------------------------------ */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.section--dark .stat-row { border-color: rgba(255,255,255,0.14); }
+.stat-row__item {
+  padding: clamp(2rem, 1.2rem + 2vw, 3.25rem) var(--s-5);
+  border-right: 1px solid var(--border);
+  text-align: center;
+}
+.section--dark .stat-row__item { border-right-color: rgba(255,255,255,0.14); }
+.stat-row__item:last-child { border-right: 0; }
+.stat-row__value {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(2.4rem, 1.6rem + 2.4vw, 3.9rem);
+  font-weight: 400; line-height: 1; color: var(--heading);
+  font-variant-numeric: tabular-nums;
+}
+.section--dark .stat-row__value { color: #fff; }
+.stat-row__label {
+  margin-top: var(--s-3);
+  font-size: 0.68rem; font-weight: 500; letter-spacing: var(--track-wider);
+  text-transform: uppercase; color: var(--muted);
+}
+.section--dark .stat-row__label { color: var(--muted-on-dark); }
+
+/* --- Editorial image frames ---------------------------------------- */
+/* Deliberately square-cornered. Rounded photography is the single most
+   template-looking thing a layout can do. */
+.frame { position: relative; overflow: hidden; background: var(--surface-2); }
+.frame img, .frame svg { width: 100%; height: 100%; object-fit: cover; display: block; }
+.frame--tall   { aspect-ratio: 4 / 5; }
+.frame--wide   { aspect-ratio: 16 / 10; }
+.frame--square { aspect-ratio: 1 / 1; }
+.frame--hero   { aspect-ratio: 21 / 9; }
+
+/* --- Featured experiences: an asymmetric grid, not a card row ------ */
+.experience-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: clamp(1rem, 0.6rem + 1.2vw, 1.75rem);
+}
+.experience { position: relative; overflow: hidden; display: block; background: var(--obsidian); }
+.experience img, .experience svg {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 700ms var(--ease-editorial);
+}
+.experience:hover img, .experience:hover svg { transform: scale(1.045); }
+.experience::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(17,17,17,0.82) 0%, rgba(17,17,17,0.18) 45%, rgba(17,17,17,0) 70%);
+  transition: opacity 400ms var(--ease);
+}
+.experience:hover::after { opacity: 0.92; }
+.experience__body {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+  padding: clamp(1.25rem, 0.8rem + 1.2vw, 2rem);
+  color: #fff;
+}
+.experience__cat {
+  font-size: 0.64rem; font-weight: 500; letter-spacing: var(--track-wider);
+  text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 0.5rem;
+}
+.experience__title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.1rem, 0.9rem + 0.6vw, 1.5rem); font-weight: 400;
+  color: #fff; margin: 0;
+}
+.experience__more {
+  display: block; margin-top: 0.7rem;
+  font-size: 0.68rem; letter-spacing: var(--track-wide); text-transform: uppercase;
+  color: rgba(255,255,255,0.78);
+  opacity: 0; transform: translateY(6px);
+  transition: opacity 320ms var(--ease), transform 320ms var(--ease-editorial);
+}
+.experience:hover .experience__more { opacity: 1; transform: translateY(0); }
+
+/* --- Split (image | text) ------------------------------------------ */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(2rem, 1rem + 4vw, 5.5rem);
+  align-items: center;
+}
+.split--text-first > :first-child { order: 2; }
+.split--text-first > :last-child  { order: 1; }
+
+/* --- Pull quote / testimonial -------------------------------------- */
+.quote { position: relative; padding-top: var(--s-6); }
+.quote::before {
+  content: '“';
+  font-family: 'Playfair Display', Georgia, serif;
+  position: absolute; top: -0.35em; left: -0.06em;
+  font-size: 6rem; line-height: 1; color: var(--gold); opacity: 0.35;
+}
+.quote__text {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.15rem, 0.95rem + 0.7vw, 1.6rem);
+  font-weight: 400; font-style: italic; line-height: 1.55;
+  color: var(--heading); margin: 0 0 var(--s-5); position: relative;
+}
+.section--dark .quote__text { color: #fff; }
+.quote__who { font-size: 0.82rem; font-weight: 500; color: var(--heading); letter-spacing: 0.02em; }
+.section--dark .quote__who { color: #fff; }
+.quote__role {
+  font-size: 0.7rem; letter-spacing: var(--track-wide); text-transform: uppercase;
+  color: var(--muted); margin-top: 0.3rem;
+}
+.section--dark .quote__role { color: var(--muted-on-dark); }
+
+/* --- Reveal -------------------------------------------------------- */
+/* Applied by app.js only. Absent = visible, which is the state with no
+   JavaScript and the state for prefers-reduced-motion. */
+.reveal-pending { opacity: 0; transform: translateY(22px); }
+.reveal-in {
+  opacity: 1; transform: none;
+  transition: opacity 700ms var(--ease-editorial), transform 700ms var(--ease-editorial);
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-pending { opacity: 1 !important; transform: none !important; }
+}
+
+/* =====================================================================
+   15. CINEMATIC HERO & SEARCH
+   ===================================================================== */
+
+/*
+  The hero is a full-bleed image with a controlled dark wash and the
+  headline set large over it. It is sized in viewport height but capped
+  and floored in rem, so it is cinematic on a 1920 display without
+  becoming a letterbox slot on a 1366 one.
+
+  The navbar sits ON this - hence the negative top margin equal to the
+  bar's height, and the padding that puts the content back below it.
+*/
+.hero {
+  position: relative;
+  margin-top: calc(-1 * (1.35rem * 2 + 44px));   /* pull under the sticky bar */
+  min-height: min(92vh, 980px);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  background: var(--obsidian);
+  isolation: isolate;
+}
+.hero__media {
+  position: absolute; inset: 0; z-index: 0;
+}
+.hero__media img, .hero__media svg {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  /* A very slow, very small push. Enough to stop the image reading as a
+     flat backdrop, small enough that nobody notices it as an effect. */
+  animation: heroDrift 26s ease-in-out infinite alternate;
+}
+@keyframes heroDrift {
+  from { transform: scale(1.04) translate3d(0, 0, 0); }
+  to   { transform: scale(1.10) translate3d(-1.2%, -1%, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero__media img, .hero__media svg { animation: none; transform: scale(1.04); }
+}
+
+/* Two washes: one across, one up. The second is what keeps the headline
+   legible without darkening the whole photograph. */
+.hero__scrim {
+  position: absolute; inset: 0; z-index: 1;
+  background:
+    linear-gradient(100deg, rgba(17,17,17,0.90) 0%, rgba(17,17,17,0.62) 44%, rgba(17,17,17,0.18) 100%),
+    linear-gradient(to top, rgba(17,17,17,0.80) 0%, rgba(17,17,17,0.10) 48%, rgba(17,17,17,0) 72%);
+}
+
+.hero__inner {
+  position: relative; z-index: 2;
+  width: 100%;
+  padding-top: clamp(9rem, 7rem + 6vw, 13rem);
+  padding-bottom: clamp(3.5rem, 2.5rem + 3vw, 6rem);
+}
+.hero__content { max-width: 60ch; }
+
+.hero__eyebrow {
+  display: flex; align-items: center; gap: var(--s-3);
+  font-size: 0.7rem; font-weight: 500; letter-spacing: var(--track-wider);
+  text-transform: uppercase; color: rgba(255,255,255,0.78);
+  margin-bottom: clamp(1.25rem, 1rem + 0.8vw, 2rem);
+}
+.hero__eyebrow::before {
+  content: ''; width: 2.75rem; height: 1px; background: var(--gold); flex-shrink: 0;
+}
+
+.hero__title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: var(--t-display);
+  font-weight: 400;
+  line-height: 1.015;
+  letter-spacing: -0.03em;
+  color: #fff;
+  margin: 0 0 clamp(1.25rem, 1rem + 1vw, 2rem);
+  /* Wide enough that the line breaks fall where the <br> puts them
+     rather than wherever 15ch happened to land - the headline is
+     composed in two lines, so it has to be allowed to set as two. */
+  max-width: 22ch;
+}
+.hero__title .accent { color: var(--gold); font-style: italic; }
+
+.hero__subtitle {
+  color: rgba(255,255,255,0.80);
+  font-size: clamp(1rem, 0.94rem + 0.35vw, 1.2rem);
+  line-height: 1.7;
+  max-width: 54ch;
+  margin: 0 0 clamp(2rem, 1.5rem + 1.5vw, 3rem);
+}
+
+.hero__actions { display: flex; gap: var(--s-4); flex-wrap: wrap; align-items: center; }
+
+/* A thin ivory rule and the stat row, sitting at the foot of the image. */
+.hero__foot {
+  margin-top: clamp(3rem, 2rem + 3vw, 5.5rem);
+  padding-top: var(--s-5);
+  border-top: 1px solid rgba(255,255,255,0.18);
+  display: flex; gap: clamp(2rem, 1rem + 4vw, 5rem); flex-wrap: wrap;
+}
+.hero__stat-value {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.9rem; font-weight: 400; color: #fff; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.hero__stat-label {
+  font-size: 0.66rem; letter-spacing: var(--track-wider); text-transform: uppercase;
+  color: rgba(255,255,255,0.62); margin-top: 0.55rem;
+}
+
+/* The scroll cue - a 1px line that travels down its own track. */
+.hero__cue {
+  position: absolute; z-index: 2; left: 50%; bottom: 2rem; transform: translateX(-50%);
+  width: 1px; height: 3.5rem; background: rgba(255,255,255,0.22); overflow: hidden;
+}
+.hero__cue::after {
+  content: ''; position: absolute; inset: 0; background: var(--gold);
+  animation: cueTravel 2.6s var(--ease-editorial) infinite;
+}
+@keyframes cueTravel {
+  0%   { transform: translateY(-100%); }
+  60%  { transform: translateY(100%); }
+  100% { transform: translateY(100%); }
+}
+@media (prefers-reduced-motion: reduce) { .hero__cue::after { animation: none; } }
+
+/* The search panel is the main interaction on the landing page, so it
+   sits on top of the hero rather than below the fold. */
+.search-panel {
+  position: relative; z-index: 3; margin-top: -44px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r-2xl); box-shadow: var(--shadow-xl);
+  padding: var(--s-4);
+}
+.search-panel__field { position: relative; }
+.search-panel__field + .search-panel__field::before {
+  content: ''; position: absolute; left: -0.5rem; top: 20%; bottom: 20%;
+  width: 1px; background: var(--border);
+}
+.search-panel .form-control, .search-panel .form-select {
+  border: 0; padding-left: 2.3rem; background: transparent; font-size: var(--t-body);
+}
+.search-panel .form-control:focus, .search-panel .form-select:focus {
+  box-shadow: none; background: var(--surface-2); border-radius: var(--r-md);
+}
+.search-panel__label {
+  font-size: var(--t-micro); font-weight: 700; color: var(--heading);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  margin: 0 0 2px 2.3rem; display: block;
+}
+.search-panel .input-icon > i { top: auto; bottom: 0.72rem; transform: none; }
+
+/* Category tiles. Each category gets its own icon and tint — the same
+   star on all six read as unfinished. */
+.category-tile {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: var(--s-2); padding: var(--s-5) var(--s-3); height: 100%;
+  border-radius: var(--r-xl); border: 1px solid var(--border); background: var(--card);
+  text-align: center; transition: all var(--speed) var(--ease);
+}
+.category-tile:hover {
+  transform: translateY(-3px); box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
+}
+.category-tile__icon {
+  width: 46px; height: 46px; border-radius: var(--r-lg);
+  display: flex; align-items: center; justify-content: center; font-size: 1.15rem;
+  /* One treatment, set here rather than eight inline tints set in the
+     template. The glyph distinguishes the category; colour does not
+     have to say the same thing a second time. */
+  background: var(--surface-2); color: var(--heading);
+  border: 1px solid var(--border);
+  transition: background var(--speed) var(--ease), color var(--speed) var(--ease);
+}
+.category-tile:hover .category-tile__icon {
+  background: var(--primary); color: #fff; border-color: var(--primary);
+}
+.category-tile__name { font-weight: 600; font-size: var(--t-meta); color: var(--heading); }
+
+/* The "how it works" row. */
+.feature-item { display: flex; gap: var(--s-4); align-items: flex-start; }
+.feature-item__icon {
+  width: 44px; height: 44px; border-radius: var(--r-lg); flex-shrink: 0;
+  background: var(--primary-soft); color: var(--primary);
+  display: flex; align-items: center; justify-content: center; font-size: 1.05rem;
+}
+.feature-item__title { font-size: 1rem; margin: 0 0 var(--s-1); }
+.feature-item__text { font-size: var(--t-meta); color: var(--muted); margin: 0; }
+
+.cta-panel {
+  border-radius: var(--r-2xl); padding: var(--s-7) var(--s-6); color: #fff;
+  background: linear-gradient(135deg, var(--primary) 0%, #1E40AF 55%, #312E81 100%);
+  position: relative; overflow: hidden;
+}
+.cta-panel::after {
+  content: ''; position: absolute; right: -60px; top: -60px;
+  width: 260px; height: 260px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+}
+.cta-panel h2 { color: #fff; margin-bottom: var(--s-2); }
+.cta-panel p { color: rgba(255, 255, 255, 0.82); margin: 0; }
+.cta-panel > .row { position: relative; z-index: 1; }
+
+/* =====================================================================
+   15b. HOMEPAGE SECTIONS — discover bar, timeline, why grid, CTA band
+   ===================================================================== */
+
+/* --- The discovery search bar -------------------------------------
+   A single ruled row rather than a floating rounded panel: it belongs
+   to the section it sits in, and it posts to the same GET the listing
+   page already reads. */
+.discover-bar {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 0.9fr auto;
+  gap: 0;
+  border: 1px solid var(--border);
+  background: var(--card);
+  margin-bottom: clamp(2rem, 1.2rem + 2vw, 3rem);
+}
+.discover-bar__field {
+  padding: var(--s-4) var(--s-5);
+  border-right: 1px solid var(--border);
+  min-width: 0;
+}
+.discover-bar__label {
+  display: block;
+  font-size: 0.62rem; font-weight: 500; letter-spacing: var(--track-wider);
+  text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem;
+}
+.discover-bar__input {
+  width: 100%; border: 0; background: transparent; padding: 0;
+  font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--heading);
+}
+.discover-bar__input::placeholder { color: var(--muted); opacity: 0.75; }
+.discover-bar__input:focus { outline: none; }
+.discover-bar__field:focus-within { background: var(--surface-2); }
+.discover-bar .btn { border-radius: 0; padding-inline: 2.25rem; }
+
+/* --- How it works: a horizontal timeline on one rule --------------- */
+.timeline {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(1.5rem, 1rem + 2vw, 3.5rem);
+  list-style: none;
+  margin: 0; padding: 0;
+  border-top: 1px solid rgba(255,255,255,0.18);
+}
+.timeline__step { padding-top: clamp(2rem, 1.2rem + 2vw, 3.25rem); position: relative; }
+/* The node sitting on the rule above each step. */
+.timeline__step::before {
+  content: ''; position: absolute; top: -4px; left: 0;
+  width: 7px; height: 7px; background: var(--gold); border-radius: 50%;
+}
+.timeline__num {
+  display: block;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 2.1rem; line-height: 1; color: var(--gold);
+  margin-bottom: var(--s-4);
+}
+.timeline__title { font-size: 1.5rem; margin: 0 0 var(--s-3); color: #fff; }
+.timeline__text { color: var(--muted-on-dark); line-height: 1.75; margin: 0; max-width: 34ch; }
+
+/* --- Why Verdant: a ruled grid, not six cards ---------------------- */
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  border-top: 1px solid var(--border);
+}
+.why {
+  padding: clamp(1.5rem, 1rem + 1.5vw, 2.25rem) 0;
+  padding-right: clamp(1.5rem, 1rem + 2vw, 3rem);
+  border-bottom: 1px solid var(--border);
+}
+.why:nth-child(odd) {
+  border-right: 1px solid var(--border);
+  padding-right: clamp(1.5rem, 1rem + 2vw, 3rem);
+}
+.why:nth-child(even) { padding-left: clamp(1.5rem, 1rem + 2vw, 3rem); }
+.why__title { font-size: 1.12rem; margin: 0 0 var(--s-2); }
+.why__text { font-size: var(--t-meta); color: var(--muted); line-height: 1.7; margin: 0; }
+
+/* --- Final CTA band ------------------------------------------------ */
+.cta-band {
+  position: relative; overflow: hidden; background: var(--obsidian);
+  text-align: center; isolation: isolate;
+}
+.cta-band__media { position: absolute; inset: 0; z-index: 0; }
+.cta-band__media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cta-band__scrim {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(to bottom, rgba(17,17,17,0.80), rgba(17,17,17,0.92));
+}
+.cta-band__inner { position: relative; z-index: 2; }
+.cta-band__title { color: #fff; margin: 0 0 var(--s-5); }
+.cta-band__text {
+  color: rgba(255,255,255,0.78); font-size: 1.08rem; line-height: 1.7;
+  max-width: 54ch; margin: 0 auto var(--s-6);
+}
+.cta-band__actions { display: flex; gap: var(--s-4); justify-content: center; flex-wrap: wrap; }
+
+/* --- Marketing page pieces (Services / About / Contact) ------------ */
+.page-hero {
+  position: relative; background: var(--obsidian); overflow: hidden; isolation: isolate;
+  padding-block: clamp(6rem, 4rem + 8vw, 11rem) clamp(3.5rem, 2.5rem + 4vw, 6rem);
+  margin-top: calc(-1 * (0.85rem * 2 + 44px));
+}
+.page-hero__media { position: absolute; inset: 0; z-index: 0; opacity: 0.75; }
+.page-hero__media img { width: 100%; height: 100%; object-fit: cover; }
+.page-hero__scrim {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(105deg, rgba(17,17,17,0.94) 0%, rgba(17,17,17,0.70) 60%, rgba(17,17,17,0.45) 100%);
+}
+.page-hero__inner { position: relative; z-index: 2; padding-top: 3.5rem; }
+.page-hero__title { color: #fff; margin: 0 0 var(--s-4); max-width: 18ch; }
+.page-hero__text { color: rgba(255,255,255,0.78); font-size: 1.1rem; line-height: 1.7; max-width: 58ch; margin: 0; }
+
+/* A definition-style fact list, used on About and Contact. */
+.facts { border-top: 1px solid var(--border); }
+.facts__row {
+  display: grid; grid-template-columns: 12rem minmax(0, 1fr);
+  gap: var(--s-5);
+  padding-block: var(--s-5);
+  border-bottom: 1px solid var(--border);
+}
+.facts__key {
+  font-size: 0.68rem; letter-spacing: var(--track-wider); text-transform: uppercase;
+  color: var(--muted); padding-top: 0.25rem;
+}
+.facts__val { margin: 0; color: var(--heading); }
+.facts__val a { color: var(--primary); border-bottom: 1px solid transparent; }
+.facts__val a:hover { border-bottom-color: var(--primary); }
+
+/* =====================================================================
+   16. DASHBOARD SHELL & SIDEBAR
+   ===================================================================== */
+.app-shell { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: 258px; flex-shrink: 0; background: var(--sidebar); color: var(--muted-on-dark);
+  display: flex; flex-direction: column;
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+}
+.sidebar__brand {
+  padding: var(--s-5) var(--s-5) var(--s-4);
+  display: flex; align-items: center; gap: var(--s-3);
+}
+.sidebar__brand { transition: opacity var(--speed) var(--ease); }
+.sidebar__brand:hover { opacity: 0.78; }
+.sidebar__brand:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.sidebar__brand-name {
+  color: #fff; font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 500; font-size: 1.02rem; line-height: 1.2; letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.sidebar__brand-role {
+  font-size: 0.6rem; color: var(--gold); font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.sidebar__nav { flex: 1; padding: 0 var(--s-3) var(--s-4); }
+.sidebar__group + .sidebar__group { margin-top: var(--s-4); }
+.sidebar__group-label {
+  font-size: 0.64rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase;
+  color: #8A857C; padding: 0 var(--s-3); margin-bottom: var(--s-2); display: block;
+}
+.sidebar__nav a {
+  display: flex; align-items: center; gap: var(--s-3);
+  padding: 0.58rem var(--s-3); border-radius: var(--r-md);
+  color: var(--muted-on-dark); font-weight: 500; font-size: 0.9rem; margin-bottom: 2px;
+  transition: background var(--speed) var(--ease), color var(--speed) var(--ease);
+}
+.sidebar__nav a:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
+.sidebar__nav a.active { background: var(--primary); color: #fff; font-weight: 600; }
+.sidebar__nav a.active i { opacity: 1; }
+.sidebar__nav a i { width: 17px; text-align: center; opacity: 0.7; font-size: 0.9rem; flex-shrink: 0; }
+.sidebar__count {
+  margin-left: auto; background: var(--danger); color: #fff;
+  font-size: 0.66rem; font-weight: 700; border-radius: var(--r-pill);
+  padding: 1px 7px; min-width: 19px; text-align: center;
+}
+.sidebar__nav a.active .sidebar__count { background: rgba(255, 255, 255, 0.25); }
+.sidebar__foot {
+  padding: var(--s-4) var(--s-5); border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex; align-items: center; gap: var(--s-3);
+}
+.avatar {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--primary); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; font-size: var(--t-meta);
+}
+.avatar-sm { width: 28px; height: 28px; font-size: var(--t-micro); }
+.avatar-lg { width: 48px; height: 48px; font-size: var(--t-card); }
+.avatar-xl { width: 52px; height: 52px; font-size: 1.1rem; }
+.sidebar__user { min-width: 0; flex: 1; }
+.sidebar__user-name { color: #fff; font-size: var(--t-micro); font-weight: 600; }
+.sidebar__logout {
+  background: none; border: 0; padding: 0; color: #8A857C;
+  font-size: var(--t-micro); cursor: pointer;
+}
+.sidebar__logout:hover { color: #fff; }
+
+.main-content { flex: 1; padding: var(--s-6) var(--s-7); min-width: 0; }
+
+/* The mobile header that replaces the sidebar under 992px. */
+.mobile-bar {
+  display: none; position: sticky; top: 0; z-index: 1040;
+  background: var(--sidebar); color: #fff;
+  padding: var(--s-3) var(--s-4);
+  align-items: center; justify-content: space-between; gap: var(--s-3);
+}
+.mobile-bar__brand { display: flex; align-items: center; gap: var(--s-2); color: #fff; font-weight: 700; }
+.mobile-bar__toggle {
+  background: rgba(255, 255, 255, 0.1); border: 0; color: #fff;
+  width: 38px; height: 38px; border-radius: var(--r-md); cursor: pointer;
+}
+.drawer-backdrop {
+  position: fixed; inset: 0; background: rgba(17, 17, 17, 0.55); z-index: 1045;
+  opacity: 0; visibility: hidden; transition: opacity var(--speed) var(--ease), visibility var(--speed) var(--ease);
+}
+body.drawer-open .drawer-backdrop { opacity: 1; visibility: visible; }
+body.drawer-open { overflow: hidden; }
+
+/* =====================================================================
+   17. FILTER SIDEBAR & DRAWER
+   ===================================================================== */
+.filter-panel {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r-xl); padding: var(--s-5); box-shadow: var(--shadow-xs);
+}
+.filter-panel__head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: var(--s-4); padding-bottom: var(--s-3); border-bottom: 1px solid var(--border);
+}
+.filter-panel__head h2 { font-size: 1rem; margin: 0; }
+.filter-group + .filter-group { margin-top: var(--s-5); }
+.filter-group__label {
+  font-size: var(--t-micro); font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--muted); margin-bottom: var(--s-3); display: block;
+}
+.filter-toggle { display: none; }
+
+/* Under 992px the filter panel becomes a bottom sheet. */
+@media (max-width: 991.98px) {
+  .filter-toggle { display: inline-flex; }
+  .filter-panel {
+    position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 1050;
+    border-radius: var(--r-2xl) var(--r-2xl) 0 0;
+    max-height: 85vh; overflow-y: auto;
+    transform: translateY(101%);
+    transition: transform 0.25s var(--ease);
+    box-shadow: var(--shadow-xl);
+  }
+  body.filters-open .filter-panel { transform: translateY(0); }
+  body.filters-open { overflow: hidden; }
+  .filter-panel__close { display: inline-flex !important; }
+}
+.filter-panel__close { display: none; }
+
+/* =====================================================================
+   18. EVENT DETAIL
+   ===================================================================== */
+.event-hero { position: relative; height: 440px; overflow: hidden; background: var(--obsidian); }
+.event-hero img { width: 100%; height: 100%; object-fit: cover; }
+.event-hero__scrim {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(17,17,17,0.94) 12%, rgba(17,17,17,0.52) 58%, rgba(17,17,17,0.18) 100%);
+}
+.event-hero__body { position: absolute; bottom: 0; left: 0; right: 0; padding-bottom: var(--s-6); }
+.event-hero__title {
+  font-size: clamp(1.6rem, 1.1rem + 2.2vw, 2.5rem); color: #fff;
+  margin: var(--s-3) 0 var(--s-3); letter-spacing: -0.02em; max-width: 22ch;
+}
+.event-hero__meta {
+  display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-5);
+  color: var(--muted-on-dark); font-size: var(--t-meta);
+}
+.event-hero__meta span { display: inline-flex; align-items: center; gap: 0.45rem; }
+
+/* The row of facts that makes an event immediately understandable. */
+.fact-row {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--s-4); padding: var(--s-5); margin-bottom: var(--s-5);
+}
+.fact { display: flex; gap: var(--s-3); align-items: flex-start; min-width: 0; }
+.fact__icon {
+  width: 36px; height: 36px; border-radius: var(--r-md); flex-shrink: 0;
+  background: var(--primary-soft); color: var(--primary);
+  display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
+}
+.fact__label {
+  font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--muted); margin-bottom: 1px;
+}
+.fact__value { font-size: var(--t-meta); font-weight: 600; color: var(--heading); word-break: break-word; }
+
+.sticky-panel { position: sticky; top: 84px; }
+
+.booking-price { font-size: 2rem; font-weight: 700; color: var(--heading); line-height: 1; }
+.booking-price .unit { font-size: 1rem; font-weight: 600; color: var(--muted); }
+
+/* Agenda / sessions list. */
+.session-row {
+  display: flex; gap: var(--s-4); padding: var(--s-4) 0; border-bottom: 1px solid var(--border);
+}
+.session-row:last-child { border-bottom: 0; padding-bottom: 0; }
+.session-row__time {
+  flex-shrink: 0; width: 84px; font-size: var(--t-micro); font-weight: 700;
+  color: var(--primary); font-variant-numeric: tabular-nums;
+}
+.session-row__title { font-size: var(--t-body); font-weight: 600; color: var(--heading); margin: 0 0 2px; }
+.session-row__meta { font-size: var(--t-micro); color: var(--muted); margin: 0; }
+
+/* =====================================================================
+   19. TICKET
+   ===================================================================== */
+.ticket {
+  background: var(--sidebar); border-radius: var(--r-2xl); overflow: hidden;
+  box-shadow: var(--shadow-lg); position: relative; color: #E8E4DC;
+}
+.ticket__stripe {
+  background: linear-gradient(90deg, var(--primary), #7C3AED);
+  padding: var(--s-4) var(--s-5);
+  display: flex; justify-content: space-between; align-items: center; gap: var(--s-3);
+  color: #fff; font-size: var(--t-micro); letter-spacing: 0.14em; font-weight: 700;
+  text-transform: uppercase;
+}
+.ticket__main { padding: var(--s-6) var(--s-5); }
+.ticket__event { font-size: 1.5rem; color: #fff; margin: 0 0 var(--s-2); letter-spacing: -0.02em; }
+.ticket__when {
+  color: var(--gold); font-size: var(--t-micro); font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: var(--s-5);
+}
+.ticket__grid { display: flex; gap: var(--s-6); flex-wrap: wrap; align-items: flex-start; }
+/* Two columns when the ticket is wide enough, one when it is not - four
+   short values stacked down one side of a wide ticket leaves the right
+   half empty. */
+.ticket__details {
+  flex: 1; min-width: 200px; display: grid; gap: var(--s-4) var(--s-5);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  align-content: start;
+}
+.ticket__label {
+  color: var(--muted-on-dark); font-size: 0.66rem; text-transform: uppercase;
+  letter-spacing: 0.1em; font-weight: 700; margin-bottom: 2px;
+}
+.ticket__value { color: #F1F5F9; font-size: var(--t-body); font-weight: 600; }
+.ticket__qr {
+  background: #fff; padding: 12px; border-radius: var(--r-lg); flex-shrink: 0;
+  width: 168px; height: 168px; display: flex; align-items: center; justify-content: center;
+}
+.ticket__qr canvas, .ticket__qr img, .ticket__qr svg { width: 100%; height: 100%; display: block; }
+
+/* The perforation between the ticket body and its stub. */
+.ticket__perf { position: relative; height: 1px; background: none; margin: var(--s-5) 0 0; }
+.ticket__perf::before {
+  content: ''; position: absolute; inset: 0;
+  border-top: 2px dashed rgba(255, 255, 255, 0.18);
+}
+.ticket__perf::after {
+  content: ''; position: absolute; left: calc(var(--s-5) * -1 - 11px); top: -11px;
+  width: 22px; height: 22px; border-radius: 50%; background: var(--bg);
+}
+.ticket__perf-right {
+  position: absolute; right: calc(var(--s-5) * -1 - 11px); top: -11px;
+  width: 22px; height: 22px; border-radius: 50%; background: var(--bg);
+}
+.ticket__stub {
+  padding: var(--s-4) var(--s-5) var(--s-5);
+  display: flex; justify-content: space-between; align-items: center;
+  gap: var(--s-4); flex-wrap: wrap;
+}
+.ticket__code {
+  background: rgba(255, 255, 255, 0.07); border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4); color: #E8E4DC;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--t-meta); letter-spacing: 0.06em; word-break: break-all;
+}
+.ticket__status {
+  color: #fff; padding: 0.35rem 1rem; border-radius: var(--r-pill);
+  font-size: var(--t-micro); font-weight: 700; letter-spacing: 0.06em;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+}
+
+/* A ticket for a cancelled event: still readable as a record, obviously
+   not usable as a pass. */
+.ticket.is-void { filter: grayscale(0.9); }
+.ticket.is-void .ticket__stripe { background: linear-gradient(90deg, #7F1D1D, #991B1B); }
+.ticket__void-note {
+  background: var(--danger-soft); color: var(--danger-ink);
+  border-radius: var(--r-lg); padding: var(--s-4);
+  display: flex; gap: var(--s-3); align-items: flex-start;
+  font-size: var(--t-meta); margin-bottom: var(--s-4);
+}
+
+/* =====================================================================
+   20. NOTIFICATIONS
+   ===================================================================== */
+.notification-row {
+  display: flex; gap: var(--s-4); align-items: flex-start;
+  padding: var(--s-4) var(--s-5); border-bottom: 1px solid var(--border);
+  transition: background var(--speed) var(--ease);
+}
+.notification-row:last-child { border-bottom: none; }
+.notification-row:hover { background: var(--surface-2); }
+.notification-row.is-unread { background: var(--primary-soft); }
+.notification-row.is-unread:hover { background: var(--primary-soft-2); }
+.notification-row__icon {
+  width: 36px; height: 36px; border-radius: var(--r-md); flex-shrink: 0;
+  background: var(--card); border: 1px solid var(--border); color: var(--primary);
+  display: flex; align-items: center; justify-content: center; font-size: var(--t-meta);
+}
+.notification-row__text { font-size: var(--t-meta); color: var(--heading); margin: 0; }
+.notification-row__time { font-size: var(--t-micro); color: var(--muted); margin: var(--s-1) 0 0; }
+.notification-row__dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--primary);
+  flex-shrink: 0; margin-top: 0.55rem;
+}
+.notification-day {
+  font-size: var(--t-micro); font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--muted);
+  padding: var(--s-3) var(--s-5); background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+
+/* =====================================================================
+   21. AUTH
+   ===================================================================== */
+.auth-shell { min-height: 100vh; display: flex; }
+.auth-form-side {
+  flex: 1 1 52%; display: flex; align-items: center; justify-content: center;
+  padding: var(--s-7) var(--s-5); background: var(--ivory);
+}
+.auth-form-inner { width: 100%; max-width: 420px; }
+.auth-aside {
+  flex: 1 1 48%; padding: var(--s-7); color: #fff; position: relative; overflow: hidden;
+  background: var(--obsidian);
+  display: flex; flex-direction: column; justify-content: center;
+}
+/* The photograph, rather than the gradient-and-blob that was here. A
+   soft-focus circle of colour in a corner is the decorative gesture the
+   brief calls out by name - and this one was BLUE. */
+.auth-aside__media { position: absolute; inset: 0; z-index: 0; }
+.auth-aside__media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.auth-aside::after {
+  content: ''; position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(160deg, rgba(17,17,17,0.90) 0%, rgba(17,17,17,0.66) 55%, rgba(20,67,44,0.62) 100%);
+}
+.auth-aside__inner { position: relative; z-index: 2; max-width: 420px; }
+.auth-aside h2 {
+  color: #fff; font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.9rem, 1.4rem + 1.4vw, 2.6rem); font-weight: 400;
+  line-height: 1.12; margin-bottom: var(--s-4);
+}
+.auth-aside p { color: var(--muted-on-dark); }
+.auth-point { display: flex; gap: var(--s-3); align-items: flex-start; margin-top: var(--s-4); }
+.auth-point i { color: var(--gold); margin-top: 3px; }
+.auth-point span { color: var(--muted-on-dark); font-size: var(--t-meta); }
+@media (max-width: 991.98px) { .auth-aside { display: none; } }
+
+/* =====================================================================
+   22. FOOTER
+   ===================================================================== */
+.footer-dark {
+  background: var(--obsidian); color: var(--muted-on-dark);
+  padding: clamp(4rem, 3rem + 3vw, 6.5rem) 0 var(--s-6);
+}
+.footer-dark__top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: clamp(2rem, 1rem + 4vw, 6rem); flex-wrap: wrap;
+  margin-bottom: clamp(2.5rem, 2rem + 2vw, 4rem);
+}
+.footer-brand { display: flex; align-items: center; gap: var(--s-4); color: #fff; }
+.footer-brand__mark { width: 52px; height: 52px; flex-shrink: 0; display: block; }
+.footer-brand__mark svg { width: 100%; height: 100%; }
+.footer-brand__name {
+  display: block;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.6rem; font-weight: 500; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #fff; line-height: 1;
+}
+.footer-brand__tag {
+  display: block; margin-top: 0.6rem;
+  font-size: 0.6rem; letter-spacing: var(--track-wider); text-transform: uppercase;
+  color: var(--gold);
+}
+.footer-dark__lede {
+  max-width: 44ch; margin: 0; color: var(--muted-on-dark);
+  font-size: var(--t-meta); line-height: 1.8;
+}
+.footer-dark__cols { margin-top: clamp(2.5rem, 2rem + 2vw, 4rem); }
+.footer-dark h6 {
+  color: #fff; font-family: 'DM Sans', sans-serif;
+  font-size: 0.66rem; font-weight: 500; letter-spacing: var(--track-wider);
+  text-transform: uppercase; margin-bottom: var(--s-4);
+}
+.footer-dark li { margin-bottom: 0.65rem; font-size: var(--t-meta); }
+.footer-dark a {
+  color: var(--muted-on-dark); font-size: var(--t-meta);
+  display: inline-block; border-bottom: 1px solid transparent;
+  transition: color 200ms var(--ease), border-color 200ms var(--ease);
+}
+.footer-dark a:hover { color: #fff; border-bottom-color: var(--gold); }
+.footer-dark__note { font-size: var(--t-meta); line-height: 1.8; color: var(--muted-on-dark); }
+.footer-dark__bottom {
+  margin-top: clamp(3rem, 2rem + 2vw, 4.5rem);
+  padding-top: var(--s-5);
+  border-top: 1px solid rgba(255,255,255,0.12);
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--s-3);
+  font-size: var(--t-micro); color: var(--muted-on-dark);
+}
+
+/* =====================================================================
+   23. CHARTS — drawn in CSS from real numbers, no library
+   ===================================================================== */
+.bar-chart { display: grid; gap: var(--s-4); }
+.bar-row { display: grid; grid-template-columns: 1fr auto; gap: var(--s-2) var(--s-4); align-items: center; }
+.bar-row__label { font-size: var(--t-meta); color: var(--heading); font-weight: 600; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-row__value { font-size: var(--t-meta); color: var(--muted); font-variant-numeric: tabular-nums; }
+.bar-row__track {
+  grid-column: 1 / -1; height: 8px; background: var(--neutral-soft);
+  border-radius: var(--r-pill); overflow: hidden;
+}
+.bar-row__fill {
+  height: 100%; border-radius: inherit; background: var(--primary);
+  transition: width 0.5s var(--ease);
+}
+/*
+  A sequential ramp in ONE hue, not five unrelated colours.
+
+  These were indigo and three violets - four accent colours that belong
+  to no part of this brand, on a chart whose categories have no inherent
+  colour meaning. A single hue stepping from the brand green down to a
+  warm neutral reads as "more" and "less", which is what a ranked bar
+  chart is actually saying.
+*/
+.bar-row__fill.tone-2 { background: #2F7A52; }
+.bar-row__fill.tone-3 { background: #5E9B78; }
+.bar-row__fill.tone-4 { background: var(--gold); }
+.bar-row__fill.tone-5 { background: #C7C2B8; }
+
+/* =====================================================================
+   24. MOTION & UTILITIES
+   ===================================================================== */
+.fade-in { animation: fadeIn 0.35s var(--ease); }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.skeleton {
+  background: linear-gradient(90deg, var(--neutral-soft) 25%, #E9EEF5 37%, var(--neutral-soft) 63%);
+  background-size: 400% 100%; animation: shimmer 1.3s ease infinite; border-radius: var(--r-sm);
+}
+@keyframes shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+
+.spinner-inline {
+  display: inline-block; width: 0.9em; height: 0.9em; vertical-align: -0.1em;
+  border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+/* Anyone who has asked their system for less motion gets none of it. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .card-hover:hover, .btn:hover { transform: none; }
+  .event-card:hover .event-card__media img { transform: none; }
+}
+
+.surface-2 { background: var(--surface-2); }
+.rounded-card { border-radius: var(--r-xl); }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* =====================================================================
+   25. RESPONSIVE
+   ===================================================================== */
+@media (max-width: 1199.98px) {
+  .main-content { padding: var(--s-6) var(--s-5); }
+}
+
+@media (max-width: 991.98px) {
+  /* The sidebar becomes an off-canvas drawer rather than a 258px column
+     squeezing the content, or a wrapped strip of pills at the top. */
+  .app-shell { display: block; }
+  .mobile-bar { display: flex; }
+  .sidebar {
+    position: fixed; top: 0; bottom: 0; left: 0; height: 100dvh; z-index: 1050;
+    transform: translateX(-100%);
+    transition: transform 0.25s var(--ease);
+    box-shadow: var(--shadow-xl);
+  }
+  body.drawer-open .sidebar { transform: translateX(0); }
+  .main-content { padding: var(--s-5) var(--s-4); }
+  .hero { min-height: 440px; }
+  .search-panel { margin-top: var(--s-5); }
+  .search-panel__field + .search-panel__field::before { display: none; }
+  .event-hero { height: 260px; }
+  /* A sticky panel on a phone can pin the content off-screen. */
+  .sticky-panel { position: static; }
+  .fact-row { padding: var(--s-4); }
+}
+
+@media (max-width: 767.98px) {
+  .ticket__grid { flex-direction: column; }
+  .ticket__qr { margin: 0 auto; }
+  .page-header { flex-direction: column; align-items: stretch; }
+  .page-header__actions .btn { flex: 1; }
+  .stepper__label { display: none; }
+  .stepper__step.is-current .stepper__label { display: inline; }
+}
+
+@media (max-width: 575.98px) {
+  .main-content { padding: var(--s-4) var(--s-3); }
+  .stat-value { font-size: 1.5rem; }
+  .card-pad { padding: var(--s-4); }
+  .btn-lg { font-size: var(--t-body); padding: 0.75rem 1.25rem; }
+  .toast-stack { left: var(--s-3); right: var(--s-3); max-width: none; }
+  .hero { min-height: 400px; padding: var(--s-7) 0 var(--s-6); }
+  .ticket__main { padding: var(--s-5) var(--s-4); }
+  .ticket__stub { padding: var(--s-4); }
+}
+
+/* =====================================================================
+   25b. CHECKOUT — the two payment methods, the card, the door code
+
+   A checkout has to make the choice between paying now and paying at the
+   door obvious BEFORE anything is typed, because the two lead to
+   different outcomes: one issues a ticket, the other issues a promise.
+   Two tiles rather than a dropdown, for that reason - a select hides the
+   alternative behind a click.
+   ===================================================================== */
+.method-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--s-3);
+}
+
+.method-tile {
+  position: relative;
+  display: block;
+  padding: var(--s-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-md);
+  background: var(--card);
+  cursor: pointer;
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+.method-tile:hover { border-color: var(--primary); }
+
+/* The whole tile is the control, so the radio itself is off-screen
+   rather than display:none - a hidden input cannot be reached by a
+   keyboard, and this one still can. */
+.method-tile input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.method-tile:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.method-tile.is-selected {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+/* The label's content, held apart from the off-screen radio so the tile
+   lays out as if the input were not inside it at all. */
+.method-tile__body { display: block; }
+
+.method-tile__icon {
+  display: block;
+  font-size: 1.35rem;
+  color: var(--primary-ink);
+  margin-bottom: var(--s-2);
+}
+
+.method-tile__title {
+  display: block;
+  font-weight: 600;
+  color: var(--heading);
+}
+
+.method-tile__sub {
+  display: block;
+  font-size: .8125rem;
+  color: var(--muted);
+  margin-top: var(--s-1);
+}
+
+/* The card preview. Its job is to let somebody check what they typed
+   against the thing in their hand, which is why the digits are grouped
+   in fours and set in the tabular face. */
+.card-preview {
+  position: relative;
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  margin-bottom: var(--s-5);
+  color: #FFFFFF;
+  background: linear-gradient(135deg, #111111 0%, #1C2A20 55%, #14432C 100%);
+  box-shadow: 0 10px 24px rgba(17, 17, 17, .25);
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card-preview__brand {
+  position: absolute;
+  top: var(--s-5);
+  right: var(--s-5);
+  font-weight: 700;
+  letter-spacing: .08em;
+  font-size: .8125rem;
+  color: #E8E4DC;
+}
+
+.card-preview__chip {
+  width: 42px;
+  height: 32px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #FCD34D, #D97706);
+}
+
+.card-preview__number {
+  font-size: 1.25rem;
+  letter-spacing: .12em;
+  margin: var(--s-4) 0;
+  word-break: break-all;
+}
+
+.card-preview__foot {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-4);
+}
+
+.card-preview__label {
+  font-size: .625rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--muted-on-dark);
+}
+
+.card-preview__value {
+  font-size: .875rem;
+  font-weight: 600;
+  color: #F1F5F9;
+}
+
+/* Where the door code will be. Hatched rather than a fake QR square: a
+   drawn-on placeholder that looks like a real code invites somebody to
+   try scanning it. */
+.qr-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-3);
+  min-height: 180px;
+  margin-bottom: var(--s-4);
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--r-md);
+  background: repeating-linear-gradient(
+      45deg, var(--surface-2), var(--surface-2) 10px,
+      var(--card) 10px, var(--card) 20px);
+  color: var(--muted);
+  font-size: .875rem;
+  text-align: center;
+  padding: var(--s-4);
+}
+
+.qr-placeholder i { font-size: 2rem; }
+
+.test-cards summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--primary-ink);
+}
+
+.test-cards__body {
+  margin-top: var(--s-3);
+  padding: var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  font-size: .875rem;
+}
+
+.test-cards__body code {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+
+/* =====================================================================
+   25c. PERMANENT DELETE — the one control in the product that cannot be
+   undone, so it is the one control that asks twice.
+   ===================================================================== */
+.purge { margin-top: var(--s-3); }
+
+.purge__open {
+  cursor: pointer;
+  color: var(--danger-ink);
+  font-size: .875rem;
+  font-weight: 600;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-2) 0;
+}
+
+.purge__open::-webkit-details-marker { display: none; }
+
+.purge__open:focus-visible {
+  outline: 2px solid var(--danger);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+.purge__panel {
+  margin-top: var(--s-2);
+  padding: var(--s-4);
+  border: 1px solid var(--danger);
+  border-radius: var(--r-md);
+  background: var(--danger-soft);
+  /* Bounded by its container as well as by 28rem. In a table's actions
+     cell the fixed width was widening the whole table past its scroll
+     container, which body's overflow-x:hidden then quietly clipped -
+     the page looked fine and 25px of the last column was simply gone. */
+  max-width: min(28rem, 100%);
+}
+
+.purge__warn {
+  display: flex;
+  gap: var(--s-2);
+  align-items: flex-start;
+  color: var(--danger-ink);
+  font-size: .875rem;
+  margin-bottom: var(--s-4);
+}
+
+/* The disabled state has to LOOK disabled, or the guard reads as a
+   broken button rather than as one waiting for something. */
+.purge__panel .btn[disabled] {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+/* =====================================================================
+   26. PRINT — the ticket is the one page people actually print
+   ===================================================================== */
+@media print {
+  .no-print, .sidebar, .mobile-bar, .navbar-public, .footer-dark,
+  .toast-stack, .drawer-backdrop { display: none !important; }
+  body { background: #fff; }
+  .app-shell { display: block; }
+  .main-content { padding: 0; }
+  .ticket {
+    box-shadow: none;
+    /* Backgrounds are dropped by default when printing, which would turn
+       a dark ticket into unreadable white-on-white. */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  a[href]::after { content: ''; }
+}
+
+
+/* =====================================================================
+   27. PUBLIC SITE — NARROWER DESKTOPS AND BELOW
+
+   The brief is desktop-first and the layouts above are tuned for
+   1366-1920. These are the few places that would otherwise overflow or
+   crush below that, written as max-width so they never affect the
+   desktop rules they are correcting.
+   ===================================================================== */
+@media (max-width: 1199.98px) {
+  .numbered__row { grid-template-columns: 5rem minmax(0, 1fr); }
+  .numbered__row > .numbered__text { grid-column: 2; }
+  .discover-bar { grid-template-columns: 1fr 1fr 1fr; }
+  .discover-bar__field:nth-child(3),
+  .discover-bar__field:nth-child(4) { border-bottom: 1px solid var(--border); }
+  .discover-bar .btn { grid-column: 1 / -1; }
+
+  /* The navbar collapses into Bootstrap's drawer from here down (the
+     fragment uses navbar-expand-xl - see the comment there for why).
+     The drawer is opaque, so the transparent-over-hero treatment has to
+     stop with it. */
+  .navbar-public .navbar-collapse {
+    background: var(--ivory); border: 1px solid var(--border);
+    padding: var(--s-4); margin-top: var(--s-3);
+  }
+  .navbar-public .navbar-collapse .nav-link { color: var(--body-text) !important; }
+  .navbar-public .nav-link { margin: 0; padding: 0.6rem 0; }
+
+  /* The bar is still in its transparent-over-hero state while the
+     drawer is open, and that state paints every control white for a
+     dark hero behind it. Inside the drawer the ground is ivory, so
+     those have to be put back or Sign In is white text on near-white
+     and the account controls disappear with it.
+     The :not() chain is repeated so these outrank the transparent-state
+     rules on specificity rather than on !important. */
+  .navbar-public:not(.is-solid):not(.navbar-public--solid) .navbar-collapse .btn-ghost {
+    color: var(--body-text); border-color: transparent;
+  }
+  .navbar-public:not(.is-solid):not(.navbar-public--solid) .navbar-collapse .btn-ghost:hover {
+    background: var(--neutral-soft); border-color: transparent; color: var(--heading);
+  }
+  .navbar-public:not(.is-solid):not(.navbar-public--solid) .navbar-collapse .btn-light-custom {
+    background: var(--card); color: var(--heading); border-color: var(--border);
+  }
+  .navbar-public:not(.is-solid):not(.navbar-public--solid) .navbar-collapse .action-menu__trigger {
+    color: var(--muted);
+  }
+}
+
+@media (max-width: 991.98px) {
+  .split { grid-template-columns: 1fr; }
+  .split--text-first > :first-child,
+  .split--text-first > :last-child { order: 0; }
+  .timeline { grid-template-columns: 1fr; }
+  .why-grid { grid-template-columns: 1fr; }
+  .why:nth-child(odd) { border-right: 0; padding-right: 0; }
+  .why:nth-child(even) { padding-left: 0; }
+  /* One tile per row here, so every tile gets its own aspect ratio back.
+     height:100% is cleared because the tiles that carry it inline are the
+     ones that stretch to a SIBLING's height on wide screens - with no
+     sibling left in the row it would resolve against an auto row and
+     collapse the tile to the height of its caption. */
+  .experience-grid > .experience {
+    grid-column: span 12 !important;
+    aspect-ratio: 16/10 !important;
+    height: auto !important;
+  }
+  .facts__row { grid-template-columns: 1fr; gap: var(--s-2); }
+}
+
+@media (max-width: 767.98px) {
+  .discover-bar { grid-template-columns: 1fr; }
+  .discover-bar__field { border-right: 0; border-bottom: 1px solid var(--border); }
+  .stat-row { grid-template-columns: repeat(2, 1fr); }
+  .stat-row__item:nth-child(2n) { border-right: 0; }
+  .hero__title { max-width: none; }
+}
+
+/* --- Contact enquiry form ------------------------------------------ */
+.enquiry-form .form-row-2 {
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-4);
+  margin-bottom: var(--s-4);
+}
+@media (max-width: 767.98px) { .enquiry-form .form-row-2 { grid-template-columns: 1fr; } }
+
+/* The brand lockup at the top of each auth page. */
+.auth-brand {
+  display: inline-flex; align-items: center; gap: 0.7rem;
+  margin-bottom: clamp(2rem, 1.5rem + 2vw, 3.5rem);
+  color: var(--heading);
+  transition: opacity var(--speed) var(--ease);
+}
+.auth-brand:hover { opacity: 0.72; }
+.auth-brand:focus-visible { outline: 2px solid var(--gold); outline-offset: 6px; }

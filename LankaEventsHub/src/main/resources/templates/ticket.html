@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('My Digital Ticket')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('registrations')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header no-print">
+      <div>
+        <h1 class="page-header__title"
+            th:text="${payment.owedAtTheDoor} ? 'Your reservation' : 'Your ticket'">Your ticket</h1>
+        <p class="page-header__sub"
+           th:text="${payment.owedAtTheDoor}
+                    ? 'Show this code at the door and settle there.'
+                    : 'Show the code at the door.'">Show the code at the door.</p>
+      </div>
+      <div class="page-header__actions">
+        <a th:href="@{/my-registrations}" class="btn btn-light-custom">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back
+        </a>
+        <button type="button" class="btn btn-light-custom" onclick="window.print()">
+          <i class="fa-solid fa-print" aria-hidden="true"></i> Print
+        </button>
+        <!-- Built in the browser from the values already on this page, so
+             it is a real download rather than a link to a feature that
+             does not exist. Hidden if the browser cannot make one. -->
+        <button type="button" class="btn btn-light-custom" id="add-to-calendar" hidden>
+          <i class="fa-regular fa-calendar-plus" aria-hidden="true"></i> Add to calendar
+        </button>
+      </div>
+    </div>
+
+    <div class="row justify-content-center">
+      <div class="col-xl-7 col-lg-9">
+
+        <!--
+          A ticket for a cancelled event is kept visible - the attendee
+          still needs the record of what they paid and that a refund is
+          coming - but it must never read as a valid pass. This says so
+          before anything else on the page does.
+        -->
+        <!--
+          A booking that will be settled at the door has a code but has
+          not been paid for. Saying so here, before anything else, is the
+          difference between a reservation and a ticket - and the number
+          is the one the organizer will ask for.
+        -->
+        <div class="ticket__void-note" style="background:var(--warning-soft);color:var(--warning-ink);"
+             th:if="${payment.owedAtTheDoor and !registration.eventCancelled}" role="alert">
+          <i class="fa-solid fa-hand-holding-dollar" aria-hidden="true"></i>
+          <div>
+            <strong>Not paid yet — this is a reservation, not a ticket.</strong>
+            <div class="text-micro mt-1">
+              <span th:text="|LKR ${#numbers.formatDecimal(payment.finalAmount, 1, 'COMMA', 2, 'POINT')} is due when you arrive.|">
+                Amount due on arrival.</span>
+              Your seat is held until the event starts; the booking is confirmed once
+              the organizer records the payment.
+            </div>
+          </div>
+        </div>
+
+        <div class="ticket__void-note" th:if="${registration.eventCancelled}" role="alert">
+          <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
+          <div>
+            <strong>This event was cancelled. This ticket is not valid for entry.</strong>
+            <div class="text-micro mt-1">
+              Your registration has been cancelled. If you paid, a full refund has been
+              queued and you will be notified once it completes.
+            </div>
+          </div>
+        </div>
+
+        <article class="ticket" th:classappend="${registration.eventCancelled} ? 'is-void'">
+
+          <div class="ticket__stripe">
+            <span>Verdant Events pass</span>
+            <span th:if="${!registration.eventCancelled and payment.owedAtTheDoor}">Unpaid reservation</span>
+            <span th:if="${!registration.eventCancelled and !payment.owedAtTheDoor}"
+                  th:text="${registration.seats > 1 ? 'Admits ' + registration.seats : 'Admit one'}">Admit one</span>
+            <span th:if="${registration.eventCancelled}">Cancelled</span>
+          </div>
+
+          <div class="ticket__main">
+            <p class="ticket__when"
+               th:text="${registration.eventStartDatetime != null
+                         ? #temporals.format(registration.eventStartDatetime, 'EEEE d MMMM yyyy · HH:mm')
+                         : 'Date to be confirmed'}">Date</p>
+
+            <h1 class="ticket__event" th:text="${registration.eventName}">Event name</h1>
+
+            <div class="ticket__grid">
+              <div class="ticket__qr">
+                <!-- Generated in the browser from the ticket code below. If
+                     the library fails to load, or there is no code, the code
+                     itself is still readable underneath - the ticket never
+                     becomes a blank white box. -->
+                <div id="qrcode"></div>
+                <div id="qr-fallback" class="text-micro text-center" style="display:none;color:#0F172A;">
+                  QR unavailable —<br>use the ticket code
+                </div>
+              </div>
+
+              <div class="ticket__details">
+                <div>
+                  <div class="ticket__label">Attendee</div>
+                  <div class="ticket__value" th:text="${registration.userName}">Name</div>
+                </div>
+                <div>
+                  <div class="ticket__label">Venue</div>
+                  <div class="ticket__value" th:text="${registration.eventVenue ?: 'To be confirmed'}">Venue</div>
+                </div>
+                <div th:if="${registration.seats > 1}">
+                  <div class="ticket__label">Seats</div>
+                  <div class="ticket__value tnum" th:text="${registration.seats}">4</div>
+                </div>
+                <div>
+                  <!-- "Paid" would be false on a reservation, and a ticket
+                       that misstates whether money changed hands is worse
+                       than one that shows no figure at all. -->
+                  <div class="ticket__label"
+                       th:text="${payment.owedAtTheDoor} ? 'Due at the door' : 'Amount paid'">Amount paid</div>
+                  <div class="ticket__value tnum"
+                       th:text="'LKR ' + ${#numbers.formatDecimal(payment.finalAmount, 1, 'COMMA', 2, 'POINT')}">LKR 0.00</div>
+                </div>
+                <div th:if="${payment.discountAmount != null
+                             and payment.discountAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+                  <div class="ticket__label">Discount applied</div>
+                  <div class="ticket__value tnum"
+                       th:text="'− LKR ' + ${#numbers.formatDecimal(payment.discountAmount, 1, 'COMMA', 2, 'POINT')}">− LKR 0.00</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ticket__perf"><span class="ticket__perf-right"></span></div>
+          </div>
+
+          <div class="ticket__stub">
+            <div class="flex-grow-1" style="min-width:200px;">
+              <div class="ticket__label">Ticket code</div>
+              <div class="ticket__code" th:text="${payment.ticketCode ?: 'Not issued'}">TICKET-CODE</div>
+            </div>
+            <div class="d-flex flex-column gap-2 align-items-end">
+              <span class="ticket__status" style="background:var(--danger);"
+                    th:if="${registration.eventCancelled}">
+                <i class="fa-solid fa-ban" aria-hidden="true"></i> Not valid for entry
+              </span>
+              <span class="ticket__status" style="background:var(--success);"
+                    th:if="${payment.status.name() == 'COMPLETED' and !registration.eventCancelled}">
+                <i class="fa-solid fa-circle-check" aria-hidden="true"></i> Paid
+              </span>
+              <span class="ticket__status" style="background:var(--warning);"
+                    th:if="${payment.owedAtTheDoor and !registration.eventCancelled}">
+                <i class="fa-solid fa-hand-holding-dollar" aria-hidden="true"></i> Pay at the door
+              </span>
+              <span class="ticket__status" style="background:var(--warning);"
+                    th:if="${payment.status.name() == 'PENDING' and !payment.owedAtTheDoor}">
+                <i class="fa-solid fa-clock" aria-hidden="true"></i> Payment pending
+              </span>
+              <span class="ticket__status" style="background:var(--danger);"
+                    th:if="${payment.status.name() == 'FAILED'}">
+                <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i> Payment failed
+              </span>
+            </div>
+          </div>
+        </article>
+
+        <p class="text-micro text-center mt-4 no-print" style="color:var(--muted);">
+          This ticket is tied to your account. The code identifies the event and the
+          booking — nothing about you personally.
+        </p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script th:inline="javascript">
+(function () {
+  const ticketCode = /*[[${payment.ticketCode}]]*/ '';
+  const eventCancelled = /*[[${registration.eventCancelled}]]*/ false;
+  const eventName = /*[[${registration.eventName}]]*/ '';
+  const eventVenue = /*[[${registration.eventVenue}]]*/ '';
+  const startsAt = /*[[${registration.eventStartDatetime != null
+                          ? #temporals.format(registration.eventStartDatetime, "yyyyMMdd'T'HHmmss")
+                          : null}]]*/ null;
+
+  /* ------------------------------------------------------------------
+     QR code
+     ------------------------------------------------------------------ */
+  const target = document.getElementById('qrcode');
+  const fallback = document.getElementById('qr-fallback');
+
+  // No QR for a cancelled event: a scannable code on a void ticket is
+  // exactly the thing that gets someone turned away at a door.
+  if (eventCancelled) {
+    if (fallback) {
+      fallback.textContent = 'Cancelled — no entry code';
+      fallback.style.display = 'block';
+    }
+  } else if (!ticketCode || typeof QRCode === 'undefined') {
+    if (fallback) { fallback.style.display = 'block'; }
+  } else {
+    try {
+      new QRCode(target, {
+        text: ticketCode, width: 168, height: 168,
+        colorDark: '#0F172A', colorLight: '#ffffff'
+      });
+    } catch (e) {
+      if (fallback) { fallback.style.display = 'block'; }
+    }
+  }
+
+  /* ------------------------------------------------------------------
+     Add to calendar
+
+     A real .ics file built from the values already rendered above -
+     no server call, no stored calendar integration. The button stays
+     hidden unless the browser can actually produce the download and
+     the event has a start time to put in it, so it is never a control
+     that does nothing.
+     ------------------------------------------------------------------ */
+  const calendarButton = document.getElementById('add-to-calendar');
+  const canDownload = typeof Blob !== 'undefined' && typeof URL !== 'undefined'
+      && typeof URL.createObjectURL === 'function';
+
+  if (calendarButton && canDownload && startsAt && !eventCancelled) {
+    calendarButton.hidden = false;
+    calendarButton.addEventListener('click', function () {
+      // Folded per RFC 5545: escape the characters that would otherwise
+      // end a line or a field.
+      const esc = function (value) {
+        return String(value || '').replace(/([,;\\])/g, '\\$1').replace(/\n/g, '\\n');
+      };
+      const ics = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Verdant Events//EN',
+        'BEGIN:VEVENT',
+        'UID:' + esc(ticketCode || eventName),
+        'DTSTART:' + startsAt,
+        'SUMMARY:' + esc(eventName),
+        'LOCATION:' + esc(eventVenue),
+        'DESCRIPTION:' + esc('Verdant Events booking. Ticket code: ' + (ticketCode || 'not issued')),
+        'END:VEVENT',
+        'END:VCALENDAR'
+      ].join('\r\n');
+
+      const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'verdant-events.ics';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    });
+  }
+})();
+</script>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

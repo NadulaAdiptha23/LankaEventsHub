@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Edit Event')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('myevents')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">Edit event</h1>
+        <p class="page-header__sub" th:text="${event.name}">Event</p>
+      </div>
+      <div class="page-header__actions">
+        <a th:href="@{/events/{id}(id=${event.id})}" class="btn btn-light-custom">
+          <i class="fa-solid fa-eye" aria-hidden="true"></i> View event
+        </a>
+      </div>
+    </div>
+
+    <div th:replace="~{fragments/alerts :: flash}"></div>
+
+    <div class="row">
+      <div class="col-xl-9">
+
+        <!--
+          The two-tier edit rule, stated up front rather than discovered by
+          hitting an error: once anybody holds a place, the terms they
+          signed up to are fixed. The backend enforces it either way.
+        -->
+        <div class="alert-custom alert-info" th:if="${event.seatsTaken > 0}">
+          <i class="fa-solid fa-lock" aria-hidden="true"></i>
+          <span>
+            <strong th:text="${event.seatsTaken}">0</strong> people have already registered,
+            so the date, time, venue, price, event type, capacity and registration window
+            are locked. Description, banner, contact details and instructions can still be
+            edited. To change anything locked, cancel this event and create a new one.
+          </span>
+        </div>
+
+        <form method="post" data-busy th:action="@{/events/{id}/edit(id=${event.id})}">
+
+          <section class="card-custom card-pad mb-4">
+            <div class="form-section">
+              <div class="form-section__head">
+                <span class="form-section__num"><i class="fa-solid fa-pen" aria-hidden="true"></i></span>
+                <div>
+                  <h2 class="form-section__title">Always editable</h2>
+                  <p class="form-section__sub">
+                    These do not change what anybody signed up for.
+                  </p>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label" for="name">Event name</label>
+                <input type="text" id="name" name="name" class="form-control"
+                       minlength="3" maxlength="150" th:value="${event.name}">
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label" for="description">Description</label>
+                <textarea id="description" name="description" class="form-control" rows="4"
+                          maxlength="5000" th:text="${event.description}"></textarea>
+                <p class="form-text">Up to 5000 characters.</p>
+              </div>
+
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <label class="form-label" for="category">Category</label>
+                  <input type="text" id="category" name="category" class="form-control"
+                         maxlength="60" th:value="${event.category}">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="bannerUrl">Banner image URL</label>
+                  <input type="url" id="bannerUrl" name="bannerUrl" class="form-control"
+                         maxlength="255" th:value="${event.bannerUrl}">
+                </div>
+              </div>
+
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <label class="form-label" for="contactPerson">Contact person</label>
+                  <input type="text" id="contactPerson" name="contactPerson" class="form-control"
+                         maxlength="150" th:value="${event.contactPerson}">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="contactDetails">Contact details</label>
+                  <input type="text" id="contactDetails" name="contactDetails" class="form-control"
+                         maxlength="150" th:value="${event.contactDetails}">
+                </div>
+              </div>
+
+              <div class="mb-0">
+                <label class="form-label" for="specialInstructions">Special instructions</label>
+                <textarea id="specialInstructions" name="specialInstructions" class="form-control"
+                          rows="3" maxlength="2000" th:text="${event.specialInstructions}"></textarea>
+                <p class="form-text">Up to 2000 characters.</p>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="form-section__head">
+                <span class="form-section__num"
+                      th:style="${event.seatsTaken > 0}
+                                ? 'background:var(--neutral-soft);color:var(--muted);' : ''">
+                  <i class="fa-solid" aria-hidden="true"
+                     th:classappend="${event.seatsTaken > 0} ? 'fa-lock' : 'fa-calendar-days'"></i>
+                </span>
+                <div>
+                  <h2 class="form-section__title">Date, venue and pricing</h2>
+                  <p class="form-section__sub"
+                     th:text="${event.seatsTaken > 0}
+                              ? 'Locked — this event already has registrations.'
+                              : 'Editable until the first person registers.'">Status</p>
+                </div>
+              </div>
+
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <label class="form-label" for="venue">Venue</label>
+                  <input type="text" id="venue" name="venue" class="form-control" maxlength="150"
+                         th:value="${event.venue}" th:disabled="${event.seatsTaken > 0}">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label" for="capacity">Capacity</label>
+                  <input type="number" id="capacity" name="capacity" class="form-control" min="1"
+                         th:value="${event.capacity}" th:disabled="${event.seatsTaken > 0}">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label" for="fee">Fee (LKR)</label>
+                  <input type="number" id="fee" name="fee" class="form-control" min="0" step="0.01"
+                         th:value="${event.fee}" th:disabled="${event.seatsTaken > 0}">
+                </div>
+              </div>
+
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <label class="form-label" for="startDatetime">Starts</label>
+                  <input type="datetime-local" id="startDatetime" name="startDatetime" class="form-control"
+                         th:value="${event.startDatetime != null}
+                                   ? ${#temporals.format(event.startDatetime,'yyyy-MM-dd''T''HH:mm')} : ''"
+                         th:disabled="${event.seatsTaken > 0}">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="endDatetime">Ends</label>
+                  <input type="datetime-local" id="endDatetime" name="endDatetime" class="form-control"
+                         th:value="${event.endDatetime != null}
+                                   ? ${#temporals.format(event.endDatetime,'yyyy-MM-dd''T''HH:mm')} : ''"
+                         th:disabled="${event.seatsTaken > 0}">
+                </div>
+              </div>
+
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <label class="form-label" for="registrationOpenDate">Registration opens</label>
+                  <input type="datetime-local" id="registrationOpenDate" name="registrationOpenDate"
+                         class="form-control"
+                         th:value="${event.registrationOpenDate != null}
+                                   ? ${#temporals.format(event.registrationOpenDate,'yyyy-MM-dd''T''HH:mm')} : ''"
+                         th:disabled="${event.seatsTaken > 0}">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="registrationDeadline">Registration closes</label>
+                  <input type="datetime-local" id="registrationDeadline" name="registrationDeadline"
+                         class="form-control"
+                         th:value="${event.registrationDeadline != null}
+                                   ? ${#temporals.format(event.registrationDeadline,'yyyy-MM-dd''T''HH:mm')} : ''"
+                         th:disabled="${event.seatsTaken > 0}">
+                </div>
+              </div>
+
+              <div class="mb-0">
+                <span class="form-label">Event type</span>
+                <div class="d-flex gap-4 mt-1">
+                  <label class="check-row" for="edit-type-public">
+                    <input type="radio" id="edit-type-public" name="eventType" value="PUBLIC"
+                           th:checked="${event.eventType.name() == 'PUBLIC'}"
+                           th:disabled="${event.seatsTaken > 0}">
+                    Open to everyone
+                  </label>
+                  <label class="check-row" for="edit-type-restricted">
+                    <input type="radio" id="edit-type-restricted" name="eventType" value="RESTRICTED"
+                           th:checked="${event.eventType.name() == 'RESTRICTED'}"
+                           th:disabled="${event.seatsTaken > 0}">
+                    Invite only
+                  </label>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="d-flex gap-2 justify-content-end mb-5">
+            <a th:href="@{/my-events}" class="btn btn-light-custom">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+          </div>
+        </form>
+
+        <!--
+          ================================================================
+          The agenda.
+
+          Outside the event form on purpose: each session saves on its own,
+          so adding one does not require re-submitting the whole event, and
+          a validation failure on a session cannot discard unsaved edits to
+          the event above it.
+
+          Sessions stay editable after people have registered, unlike the
+          date and price. The two-tier rule protects the terms somebody
+          signed up to; a corrected speaker name or a clearer session title
+          is information they want, not a change to the deal.
+          ================================================================
+        -->
+        <section class="card-custom mb-5">
+          <div class="card-head">
+            <div>
+              <h2>Agenda</h2>
+              <p class="text-micro mb-0" style="color:var(--muted);">
+                Break the event into sessions with their own time and speaker.
+                These appear on the public event page.
+              </p>
+            </div>
+          </div>
+
+          <div th:if="${#lists.isEmpty(sessions)}">
+              <div
+                   th:replace="~{fragments/components :: emptyState(
+                      'fa-list-check',
+                      'No sessions yet',
+                      'Add one below. An event with no sessions simply shows its own time and venue.',
+                      null, null)}"></div>
+          </div>
+
+          <div class="card-pad" th:each="s : ${sessions}"
+               style="border-top:1px solid var(--border);">
+            <form method="post" data-busy
+                  th:action="@{/events/{eid}/sessions/{sid}/update(eid=${event.id}, sid=${s.id})}">
+              <div class="row g-3 align-items-end">
+                <div class="col-12 col-lg-5">
+                  <label class="form-label" th:for="'t-' + ${s.id}">Title</label>
+                  <input class="form-control" type="text" name="title" maxlength="150" required
+                         th:id="'t-' + ${s.id}" th:value="${s.title}">
+                </div>
+                <div class="col-12 col-lg-4">
+                  <label class="form-label" th:for="'sp-' + ${s.id}">Speaker</label>
+                  <input class="form-control" type="text" name="speaker" maxlength="150"
+                         th:id="'sp-' + ${s.id}" th:value="${s.speaker}">
+                </div>
+                <div class="col-6 col-lg-3">
+                  <label class="form-label" th:for="'st-' + ${s.id}">Starts</label>
+                  <input class="form-control" type="datetime-local" name="startTime"
+                         th:id="'st-' + ${s.id}"
+                         th:value="${s.startTime != null
+                                   ? #temporals.format(s.startTime, 'yyyy-MM-dd''T''HH:mm') : ''}">
+                </div>
+                <div class="col-6 col-lg-3">
+                  <label class="form-label" th:for="'en-' + ${s.id}">Ends</label>
+                  <input class="form-control" type="datetime-local" name="endTime"
+                         th:id="'en-' + ${s.id}"
+                         th:value="${s.endTime != null
+                                   ? #temporals.format(s.endTime, 'yyyy-MM-dd''T''HH:mm') : ''}">
+                </div>
+                <div class="col-12 col-lg-6">
+                  <label class="form-label" th:for="'d-' + ${s.id}">Description</label>
+                  <input class="form-control" type="text" name="description"
+                         th:id="'d-' + ${s.id}" th:value="${s.description}">
+                </div>
+                <div class="col-12 col-lg-3 d-flex gap-2">
+                  <button type="submit" class="btn btn-light-custom w-100">Save</button>
+                </div>
+              </div>
+            </form>
+            <form method="post" data-busy class="mt-2"
+                  th:action="@{/events/{eid}/sessions/{sid}/delete(eid=${event.id}, sid=${s.id})}">
+              <button type="submit" class="btn btn-light-custom btn-sm">Remove session</button>
+            </form>
+          </div>
+
+          <form method="post" data-busy class="card-pad"
+                style="border-top:1px solid var(--border);"
+                th:action="@{/events/{id}/sessions(id=${event.id})}">
+            <h3 class="form-section__title mb-3">Add a session</h3>
+            <div class="row g-3 align-items-end">
+              <div class="col-12 col-lg-5">
+                <label class="form-label" for="new-title">Title</label>
+                <input class="form-control" id="new-title" type="text" name="title"
+                       maxlength="150" required placeholder="Opening keynote">
+              </div>
+              <div class="col-12 col-lg-4">
+                <label class="form-label" for="new-speaker">Speaker</label>
+                <input class="form-control" id="new-speaker" type="text" name="speaker"
+                       maxlength="150" placeholder="Who is presenting">
+              </div>
+              <div class="col-6 col-lg-3">
+                <label class="form-label" for="new-start">Starts</label>
+                <input class="form-control" id="new-start" type="datetime-local" name="startTime">
+              </div>
+              <div class="col-6 col-lg-3">
+                <label class="form-label" for="new-end">Ends</label>
+                <input class="form-control" id="new-end" type="datetime-local" name="endTime">
+              </div>
+              <div class="col-12 col-lg-6">
+                <label class="form-label" for="new-desc">Description</label>
+                <input class="form-control" id="new-desc" type="text" name="description"
+                       placeholder="What this session covers">
+              </div>
+              <div class="col-12 col-lg-3">
+                <button type="submit" class="btn btn-primary w-100">
+                  <i class="fa-solid fa-plus" aria-hidden="true"></i> Add session
+                </button>
+              </div>
+            </div>
+            <p class="text-micro mt-3 mb-0" style="color:var(--muted);">
+              A session must sit inside the event's own start and end times.
+            </p>
+          </form>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

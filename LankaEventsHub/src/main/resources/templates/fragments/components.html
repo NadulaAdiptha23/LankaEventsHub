@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--
+  ====================================================================
+  Shared UI components.
+
+  Everything here exists because it appears on more than one page and
+  must look and behave identically on all of them. A status badge
+  defined once cannot drift into four slightly different pills; an event
+  card defined once cannot be laid out one way on the home page and
+  another way on the listing.
+
+  These fragments render model data only. None of them decides anything
+  - whether a control is shown is the page's business, and whether an
+  action is allowed is the server's.
+  ====================================================================
+-->
+
+<!-- ==================================================================
+     STATUS BADGES
+
+     One pill design, one colour language, five domains. The enum value
+     is displayed as written but humanised: PENDING_APPROVAL reads as
+     "Pending approval", not as a constant name.
+
+     Colour meaning, kept consistent everywhere:
+       green  - live, confirmed, settled
+       amber  - waiting on somebody
+       red    - cancelled, rejected, failed
+       grey   - finished, nothing left to do
+       ivory  - informational
+     ================================================================== -->
+
+<span th:fragment="statusPill(label, tone)"
+      class="badge-custom" th:classappend="${tone}"
+      th:text="${#strings.capitalizeWords(#strings.replace(#strings.toLowerCase(label), '_', ' '))}">Status</span>
+
+<!-- Event: DRAFT, PENDING_APPROVAL, PUBLISHED, COMPLETED, CANCELLED.
+     COMPLETED is grey rather than green - the event is over, which is
+     not the same thing as a success the organizer should celebrate.
+     DRAFT is grey for the mirror-image reason: nothing is happening and
+     nobody is waiting. Amber is kept for states where somebody else owes
+     an answer, which is precisely what separates a draft from one that
+     is pending approval. -->
+<th:block th:fragment="eventStatus(status)" th:if="${status != null}">
+    <th:block th:with="s=${status.toString()}">
+        <span th:replace="~{fragments/components :: statusPill(${s},
+              ${s == 'PUBLISHED' ? 'badge-success-soft'
+              : (s == 'PENDING_APPROVAL' ? 'badge-warning-soft'
+              : (s == 'CANCELLED' ? 'badge-danger-soft' : 'badge-gray-soft'))})}"></span>
+    </th:block>
+</th:block>
+
+<!-- Registration: PENDING_PAYMENT, CONFIRMED, WAITLISTED, CANCELLED.
+     PENDING_PAYMENT is amber for the same reason PENDING_APPROVAL is:
+     somebody owes an answer. Here it is the attendee, and the clock is
+     running - so it must never be mistaken for a confirmed seat. -->
+<th:block th:fragment="registrationStatus(status)" th:if="${status != null}">
+    <th:block th:with="s=${status.toString()}">
+        <span th:replace="~{fragments/components :: statusPill(${s},
+              ${s == 'CONFIRMED' ? 'badge-success-soft'
+              : (s == 'WAITLISTED' or s == 'PENDING_PAYMENT' ? 'badge-warning-soft'
+              : 'badge-danger-soft')})}"></span>
+    </th:block>
+</th:block>
+
+<!-- Payment: PENDING, COMPLETED, FAILED, REFUNDED. Here COMPLETED IS
+     the good outcome, which is why payment gets its own mapping rather
+     than sharing the event one. -->
+<th:block th:fragment="paymentStatus(status)" th:if="${status != null}">
+    <th:block th:with="s=${status.toString()}">
+        <span th:replace="~{fragments/components :: statusPill(${s},
+              ${s == 'COMPLETED' ? 'badge-success-soft'
+              : (s == 'PENDING' ? 'badge-warning-soft'
+              : (s == 'FAILED' ? 'badge-danger-soft' : 'badge-gray-soft'))})}"></span>
+    </th:block>
+</th:block>
+
+<!-- Invitation: PENDING, APPROVED, REJECTED. -->
+<th:block th:fragment="invitationStatus(status)" th:if="${status != null}">
+    <th:block th:with="s=${status.toString()}">
+        <span th:replace="~{fragments/components :: statusPill(${s},
+              ${s == 'APPROVED' ? 'badge-success-soft'
+              : (s == 'PENDING' ? 'badge-warning-soft' : 'badge-danger-soft')})}"></span>
+    </th:block>
+</th:block>
+
+<!-- Announcement: DRAFT, PENDING_APPROVAL, PUBLISHED, REJECTED.
+     The same four tones as an event, for the same reasons - a draft is
+     grey because nobody is waiting on it, PENDING_APPROVAL is amber
+     because an administrator owes an answer, and PUBLISHED is green
+     because the message actually reached people's inboxes. -->
+<th:block th:fragment="announcementStatus(status)" th:if="${status != null}">
+    <th:block th:with="s=${status.toString()}">
+        <span th:replace="~{fragments/components :: statusPill(${s},
+              ${s == 'PUBLISHED' ? 'badge-success-soft'
+              : (s == 'PENDING_APPROVAL' ? 'badge-warning-soft'
+              : (s == 'REJECTED' ? 'badge-danger-soft' : 'badge-gray-soft'))})}"></span>
+    </th:block>
+</th:block>
+
+<!-- Refund: PENDING, PROCESSED, COMPLETED. A three-step queue, so
+     PROCESSED is "in flight" (green) rather than "waiting" (amber). -->
+<th:block th:fragment="refundStatus(status)" th:if="${status != null}">
+    <th:block th:with="s=${status.toString()}">
+        <span th:replace="~{fragments/components :: statusPill(${s},
+              ${s == 'COMPLETED' ? 'badge-success-soft'
+              : (s == 'PROCESSED' ? 'badge-primary-soft' : 'badge-warning-soft')})}"></span>
+    </th:block>
+</th:block>
+
+
+<!-- ==================================================================
+     CATEGORY ICON
+
+     Every category gets its own glyph and tint. The same star on all
+     six categories was the single clearest "unfinished" signal on the
+     home page. Anything not in the list falls back to a calendar rather
+     than to nothing.
+     ================================================================== -->
+<th:block th:fragment="categoryIcon(category)"
+          th:with="key=${category != null ? #strings.toLowerCase(category) : ''},
+                   icons=${ {'workshop':'fa-screwdriver-wrench',
+                             'conference':'fa-people-group',
+                             'seminar':'fa-chalkboard-user',
+                             'networking':'fa-handshake',
+                             'concert':'fa-music',
+                             'sports':'fa-futbol',
+                             'exhibition':'fa-palette',
+                             'hackathon':'fa-code'} }">
+    <!--
+      One treatment for every category, not eight tints.
+
+      The old version gave each category its own pastel - blue, indigo,
+      cyan, pink, violet - which is eight accent colours competing on a
+      page that is meant to have one. The glyph already says which
+      category this is; colour was saying it a second time, louder, and
+      in colours that belong to no brand.
+    -->
+    <span class="category-tile__icon">
+        <i class="fa-solid" th:classappend="${icons[key] ?: 'fa-calendar-days'}" aria-hidden="true"></i>
+    </span>
+</th:block>
+
+
+<!-- ==================================================================
+     EMPTY STATE
+
+     A page with nothing on it should say so and offer the one thing
+     worth doing next, rather than rendering an empty table with a
+     header row and leaving the visitor to guess.
+     ================================================================== -->
+<div th:fragment="emptyState(icon, title, text, actionUrl, actionLabel)" class="empty-state">
+    <div class="empty-state__icon">
+        <i class="fa-solid" th:classappend="${icon}" aria-hidden="true"></i>
+    </div>
+    <h3 class="empty-state__title" th:text="${title}">Nothing here yet</h3>
+    <p class="empty-state__text" th:text="${text}">There is nothing to show.</p>
+    <a th:if="${actionUrl != null}" th:href="${actionUrl}" class="btn btn-primary">
+        <span th:text="${actionLabel}">Do the thing</span>
+    </a>
+</div>
+
+
+<!-- ==================================================================
+     EVENT CARD
+
+     Used by the home page and the listing, so an event looks the same
+     wherever it is shown. The layout is fixed-height by design: the
+     image has a set aspect ratio and the title clamps to two lines, so
+     one long name cannot make its card taller than the rest of the row.
+
+     Seats-left is a real number from the model (capacity minus taken),
+     and it changes colour only because the number is genuinely low.
+     ================================================================== -->
+<div th:fragment="eventCard(event)" class="card-custom card-hover event-card">
+    <a th:href="@{/events/{id}(id=${event.id})}" class="event-card__media"
+       th:aria-label="'View ' + ${event.name}">
+        <!--
+          The fallback is a LOCAL asset, not a remote photo URL.
+
+          It used to be an Unsplash link, in three places on this one
+          element - src, th:src and an onerror handler. That is a site
+          whose images break the moment a visitor is offline, behind a
+          strict network, or the moment that photo is taken down; and the
+          onerror pointed at the same host that had just failed, so the
+          fallback could not work either. This file is served by the same
+          application as the page.
+        -->
+        <!-- @{} cannot be nested inside ${}, so the conditional is at
+             the top level with the link expression as one branch, and
+             the fallback path is bound once into a variable, handed to
+             the page as a data attribute, and applied by the one image
+             handler in app.js. Thymeleaf refuses variables inside
+             onerror - rightly, it is an injection vector - and one
+             delegated handler beats an inline one per image regardless. -->
+        <!--
+          The fallback rotates across the image set by event id rather
+          than being one picture repeated.
+
+          With a single fallback, any listing whose banners are missing
+          renders as six identical tiles, which reads as a broken page
+          rather than as a set of different events. Keyed on the id so a
+          given event always gets the same picture - a random one would
+          change on every reload.
+        -->
+        <img th:with="pool=${ {'exp-corporate.svg','exp-wedding.svg','exp-music.svg',
+                               'exp-exhibition.svg','exp-workshop.svg','exp-private.svg'} },
+                      fallback=@{'/img/' + ${ {'exp-corporate.svg','exp-wedding.svg','exp-music.svg',
+                               'exp-exhibition.svg','exp-workshop.svg','exp-private.svg'}[
+                               (event.id != null ? event.id : 0) % 6] }}"
+             th:src="${event.bannerUrl != null and !event.bannerUrl.isEmpty()}
+                     ? ${event.bannerUrl} : ${fallback}"
+             th:alt="${'Cover image for ' + event.name}" loading="lazy"
+             th:data-fallback="${fallback}">
+        <span class="event-card__badges">
+            <span class="badge-custom badge-plain" th:text="${event.category ?: 'General'}">Category</span>
+            <span th:if="${event.seatsAvailable != null and event.seatsAvailable <= 0}"
+                  class="badge-custom badge-plain" style="color:var(--danger-ink);">Sold out</span>
+        </span>
+    </a>
+    <div class="event-card__body">
+        <p class="event-card__date">
+            <i class="fa-solid fa-calendar-day" aria-hidden="true"></i>
+            <span th:text="${event.startDatetime != null
+                            ? #temporals.format(event.startDatetime, 'EEE, dd MMM · HH:mm')
+                            : 'Date to be confirmed'}">Date</span>
+        </p>
+        <h3 class="event-card__title">
+            <a th:href="@{/events/{id}(id=${event.id})}" class="text-heading"
+               th:text="${event.name}">Event name</a>
+        </h3>
+        <p class="event-card__meta">
+            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+            <span th:text="${event.venue ?: 'Venue to be announced'}">Venue</span>
+        </p>
+        <p class="event-card__meta" th:if="${event.seatsAvailable != null and event.capacity != null}">
+            <i class="fa-solid fa-user-group" aria-hidden="true"></i>
+            <span class="seats-left"
+                  th:classappend="${event.seatsAvailable <= 0 ? 'is-full'
+                                   : (event.seatsAvailable <= 10 ? 'is-low' : '')}"
+                  th:text="${event.seatsAvailable > 0
+                            ? event.seatsAvailable + ' of ' + event.capacity + ' seats left'
+                            : 'No seats left'}">Seats</span>
+        </p>
+        <div class="event-card__foot">
+            <span class="event-card__price">
+                <span th:if="${event.fee == null or event.fee.compareTo(T(java.math.BigDecimal).ZERO) <= 0}"
+                      class="free">Free</span>
+                <span th:unless="${event.fee == null or event.fee.compareTo(T(java.math.BigDecimal).ZERO) <= 0}"
+                      th:text="'LKR ' + ${#numbers.formatDecimal(event.fee, 1, 'COMMA', 2, 'POINT')}">LKR 0.00</span>
+            </span>
+            <a class="btn btn-outline-primary btn-sm" th:href="@{/events/{id}(id=${event.id})}">
+                View event <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+
+<!-- ==================================================================
+     CAPACITY METER
+
+     Seats taken against capacity, as one bar plus the numbers. Amber
+     past 80%, red when full - thresholds on real values, so the colour
+     is information rather than decoration.
+     ================================================================== -->
+<div th:fragment="capacityMeter(taken, capacity)"
+     th:with="t=${taken != null ? taken : 0}, c=${capacity != null and capacity > 0 ? capacity : 0},
+              pct=${capacity != null and capacity > 0
+                    ? (T(java.lang.Math).min(100, (taken != null ? taken : 0) * 100 / capacity)) : 0}">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+        <span class="text-micro text-muted-custom tnum"
+              th:text="${t} + ' / ' + ${c == 0 ? '—' : c}">0 / 0</span>
+        <span class="text-micro text-muted-custom tnum" th:text="${pct} + '%'">0%</span>
+    </div>
+    <div class="meter" role="progressbar" th:aria-valuenow="${pct}"
+         aria-valuemin="0" aria-valuemax="100"
+         th:aria-label="'Capacity: ' + ${t} + ' of ' + ${c} + ' seats taken'">
+        <div class="meter__fill"
+             th:classappend="${pct >= 100 ? 'is-full' : (pct >= 80 ? 'is-warning' : '')}"
+             th:style="'width:' + ${pct} + '%'"></div>
+    </div>
+</div>
+
+<!-- ==================================================================
+     A permanent delete, behind a confirmation the person has to type.
+     ==================================================================
+
+     One fragment, used by every purge control in the product, so a
+     permanent delete looks and behaves the same wherever it appears
+     rather than each screen inventing its own.
+
+     Two deliberate choices.
+
+     It is a <details> rather than a JavaScript dialog: the panel is part
+     of the page, so it works with the keyboard, works with a screen
+     reader, and works with JavaScript off - in which case the person
+     simply gets a form with a submit button, which is the same guarantee
+     every other form on this site makes.
+
+     The typed confirmation is a GUARD AGAINST A SLIP, not a security
+     control. Nothing on the server asks for it. What actually protects
+     these endpoints is that they are administrator-only and audited, in
+     PurgeService, where a control that cannot be bypassed by editing the
+     page belongs.
+
+     @param action  the form action
+     @param name    what the person must type back, and what is being deleted
+     @param what    the noun for the sentence: "event", "account", "booking"
+     @param detail  one line saying what else goes with it
+-->
+<details th:fragment="confirmDelete(action, name, what, detail)" class="purge">
+    <summary class="purge__open">
+        <i class="fa-solid fa-trash" aria-hidden="true"></i>
+        <span th:text="|Delete this ${what} permanently|">Delete permanently</span>
+    </summary>
+    <div class="purge__panel">
+        <p class="purge__warn">
+            <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+            <span th:text="|This cannot be undone. ${detail}|">This cannot be undone.</span>
+        </p>
+        <form method="post" data-busy data-purge th:action="${action}">
+            <label class="form-label text-micro" th:for="|why-${name}|">
+                Why? (recorded in the audit log)
+            </label>
+            <input type="text" name="reason" class="form-control form-control-sm mb-3"
+                   maxlength="200" th:id="|why-${name}|"
+                   placeholder="A duplicate, a test record, a mistake…">
+
+            <label class="form-label text-micro" th:for="|confirm-${name}|">
+                Type <strong th:text="${name}">the name</strong> to confirm
+            </label>
+            <input type="text" class="form-control form-control-sm mb-3" data-purge-name
+                   th:id="|confirm-${name}|" th:attr="data-expected=${name}"
+                   autocomplete="off" spellcheck="false">
+
+            <button type="submit" class="btn btn-danger btn-sm" data-purge-submit>
+                <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                <span th:text="|Delete this ${what}|">Delete</span>
+            </button>
+        </form>
+    </div>
+</details>
+</body>
+</html>

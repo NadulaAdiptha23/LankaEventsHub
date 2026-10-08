@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Edit Discount')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('discounts')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">Edit discount</h1>
+        <p class="page-header__sub" th:text="${discount.eventName}">Event</p>
+      </div>
+      <div class="page-header__actions">
+        <a th:href="@{/discounts}" class="btn btn-light-custom">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Discounts
+        </a>
+      </div>
+    </div>
+
+    <div th:replace="~{fragments/alerts :: flash}"></div>
+
+    <div class="row">
+      <div class="col-xl-8">
+        <section class="card-custom card-pad mb-4">
+          <form method="post" data-busy
+                th:action="@{/discounts/{id}/update(id=${discount.id})}">
+            <div class="row g-3 align-items-end">
+              <div class="col-6 col-lg-4">
+                <label class="form-label" for="d-type">Type</label>
+                <select class="form-select" id="d-type" name="type" required>
+                  <option th:each="t : ${types}" th:value="${t}"
+                          th:text="${#strings.capitalizeWords(#strings.replace(#strings.toLowerCase(t), '_', ' '))}"
+                          th:selected="${t == discount.type}">Type</option>
+                </select>
+              </div>
+              <div class="col-6 col-lg-2">
+                <label class="form-label" for="d-percent">Percent off</label>
+                <input class="form-control" id="d-percent" name="percentOff" type="number"
+                       min="0.01" max="100" step="0.01" required th:value="${discount.percentOff}">
+              </div>
+              <div class="col-12 col-lg-6">
+                <label class="form-label" for="d-code">Promo code</label>
+                <input class="form-control" id="d-code" name="code" type="text" maxlength="40"
+                       placeholder="Only for promo-code discounts" th:value="${discount.code}">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="d-from">Valid from</label>
+                <input class="form-control" id="d-from" name="validFrom" type="datetime-local"
+                       th:value="${discount.validFrom != null}
+                                 ? ${#temporals.format(discount.validFrom,'yyyy-MM-dd''T''HH:mm')} : ''">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="d-to">Valid until</label>
+                <input class="form-control" id="d-to" name="validTo" type="datetime-local"
+                       th:value="${discount.validTo != null}
+                                 ? ${#temporals.format(discount.validTo,'yyyy-MM-dd''T''HH:mm')} : ''">
+              </div>
+              <div class="col-12">
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" id="d-active" name="active"
+                         value="true" th:checked="${discount.active}">
+                  <label class="form-check-label" for="d-active">Active</label>
+                  <p class="form-text">
+                    Unchecking this is the same as "Switch off" on the list -
+                    it stops being offered immediately without losing the
+                    history of payments that already used it.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex gap-3 mt-4">
+              <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Save changes
+              </button>
+              <a th:href="@{/discounts}" class="btn btn-light-custom">Cancel</a>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

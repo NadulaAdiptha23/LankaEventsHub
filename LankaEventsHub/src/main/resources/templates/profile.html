@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('My Profile')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('profile')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">Your profile</h1>
+        <p class="page-header__sub">Your details and password.</p>
+      </div>
+    </div>
+
+    <div th:replace="~{fragments/alerts :: flash}"></div>
+
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <section class="card-custom">
+          <div class="card-head"><h2>Account details</h2></div>
+          <div class="card-pad">
+            <div class="d-flex align-items-center gap-3 mb-4">
+              <span class="avatar avatar-xl"
+                    th:text="${profile.fullName != null
+                              ? #strings.toUpperCase(#strings.substring(profile.fullName,0,1)) : 'U'}">U</span>
+              <div style="min-width:0;">
+                <div class="fw-bold text-heading truncate" th:text="${profile.fullName}">Name</div>
+                <div class="text-micro truncate" style="color:var(--muted);"
+                     th:text="${profile.email}">email</div>
+              </div>
+            </div>
+
+            <form method="post" data-busy th:action="@{/profile}">
+              <div class="mb-4">
+                <label class="form-label" for="fullName">Full name <span class="req">*</span></label>
+                <input type="text" id="fullName" name="fullName" class="form-control" required
+                       maxlength="150" th:value="${profile.fullName}" autocomplete="name">
+              </div>
+              <div class="mb-4">
+                <label class="form-label" for="contactNumber">Contact number</label>
+                <input type="text" id="contactNumber" name="contactNumber" class="form-control"
+                       maxlength="30" placeholder="0771234567" th:value="${profile.contactNumber}"
+                       autocomplete="tel">
+              </div>
+              <div class="mb-4">
+                <label class="form-label" for="profile-email">Email address</label>
+                <input type="email" id="profile-email" class="form-control"
+                       th:value="${profile.email}" disabled>
+                <p class="form-text">
+                  Your email is your sign-in name and cannot be changed here.
+                </p>
+              </div>
+              <div class="mb-4">
+                <span class="form-label">Role</span>
+                <div class="d-flex gap-2 align-items-center flex-wrap">
+                  <span class="badge-custom badge-primary-soft" th:text="${profile.role}">ATTENDEE</span>
+                  <span class="badge-custom badge-success-soft"
+                        th:if="${profile.verifiedStudent}">Verified student</span>
+                </div>
+                <p class="form-text">
+                  Roles and student verification are set by an administrator — there is
+                  no self-service way to change either.
+                </p>
+              </div>
+              <button type="submit" class="btn btn-primary">Save changes</button>
+            </form>
+          </div>
+        </section>
+      </div>
+
+      <div class="col-lg-6">
+        <section class="card-custom">
+          <div class="card-head"><h2>Change password</h2></div>
+          <div class="card-pad">
+            <form method="post" data-busy th:action="@{/profile/password}">
+              <div class="mb-4">
+                <label class="form-label" for="currentPassword">Current password <span class="req">*</span></label>
+                <input type="password" id="currentPassword" name="currentPassword"
+                       class="form-control" required autocomplete="current-password">
+              </div>
+              <div class="mb-4">
+                <label class="form-label" for="newPassword">New password <span class="req">*</span></label>
+                <input type="password" id="newPassword" name="newPassword" class="form-control"
+                       minlength="8" required autocomplete="new-password">
+                <p class="form-text">At least 8 characters, including a letter and a number.</p>
+              </div>
+              <div class="mb-4">
+                <label class="form-label" for="confirmPassword">Confirm new password <span class="req">*</span></label>
+                <input type="password" id="confirmPassword" name="confirmPassword"
+                       class="form-control" minlength="8" required autocomplete="new-password">
+              </div>
+              <button type="submit" class="btn btn-primary">Change password</button>
+            </form>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

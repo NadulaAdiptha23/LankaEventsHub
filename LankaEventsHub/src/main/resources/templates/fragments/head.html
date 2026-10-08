@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#14432C">
+    <!--
+      CSRF token, exposed so the small amount of fetch() on this site can
+      send it. Every state-changing request is CSRF-protected, including
+      the checkout page's price preview - see SecurityConfig.
+    -->
+    <meta name="_csrf" th:content="${_csrf != null} ? ${_csrf.token} : ''">
+    <meta name="_csrf_header" th:content="${_csrf != null} ? ${_csrf.headerName} : ''">
+    <title th:text="${title} + ' — Verdant Events'">Verdant Events</title>
+    <meta name="description"
+          th:content="${metaDescription} ?: 'Verdant Events — event management and event discovery. We plan, manage and deliver exceptional events designed around people, experiences and moments.'">
+    <link rel="icon" type="image/png" th:href="@{/img/verdant-logo.png}">
+    <!--
+      Everything this page needs is served by this application.
+
+      Bootstrap, Font Awesome and the two brand faces used to come from
+      three separate CDNs, so a page load depended on three third-party
+      hosts being reachable - and on a network that blocks any of them
+      the layout, the icons or the entire typographic identity silently
+      collapse. Vendored, they are six fewer DNS lookups and TLS
+      handshakes in the critical path, and the site renders offline.
+
+      Two families, each with one job. Playfair Display is the editorial
+      voice: hero, section headings, the figures on the statistics row.
+      DM Sans is everything a person has to operate - navigation, forms,
+      tables, dashboards.
+    -->
+    <link rel="stylesheet" th:href="@{/vendor/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/vendor/fonts.css}">
+    <link rel="stylesheet" th:href="@{/vendor/fa/all.min.css}">
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+    <!--
+      Shared behaviour: toasts, action menus, the mobile drawer, busy
+      buttons. Deferred, and every control it touches works without it.
+    -->
+    <script th:src="@{/js/app.js}" defer></script>
+</head>
+</html>

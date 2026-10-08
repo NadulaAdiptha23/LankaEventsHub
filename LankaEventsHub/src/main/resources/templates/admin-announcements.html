@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Announcement Approvals')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('announcements')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">Announcement approvals</h1>
+        <p class="page-header__sub">Messages organizers want to send to their attendees</p>
+      </div>
+    </div>
+
+    <div th:replace="~{fragments/alerts :: flash}"></div>
+
+    <div class="alert-custom alert-warning">
+      <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+      <span>
+        Approving sends the message immediately to everyone holding a place on that event,
+        and it cannot be recalled. Read the wording, not just the title.
+      </span>
+    </div>
+
+    <section class="card-custom">
+      <div class="card-head" th:unless="${#lists.isEmpty(pending)}">
+        <h2>Waiting for you</h2>
+        <span class="text-micro" style="color:var(--muted);"
+              th:text="${#lists.size(pending)} + ' to review'">0 to review</span>
+      </div>
+
+      <div th:if="${#lists.isEmpty(pending)}">
+          <div
+               th:replace="~{fragments/components :: emptyState(
+                 'fa-circle-check',
+                 'Nothing waiting',
+                 'When an organizer submits an announcement it appears here, oldest first.',
+                 null, null)}"></div>
+      </div>
+
+      <div class="table-responsive" th:unless="${#lists.isEmpty(pending)}">
+        <table class="table-modern">
+          <caption class="visually-hidden">Announcements awaiting approval</caption>
+          <thead>
+            <tr>
+              <th scope="col">Message</th>
+              <th scope="col">Event</th>
+              <th scope="col">Submitted</th>
+              <th scope="col" class="col-actions">Decision</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="a : ${pending}">
+              <td>
+                <div class="cell-title" th:text="${a.title}">Title</div>
+                <div class="text-micro" style="color:var(--muted);" th:text="${a.message}">Message</div>
+                <div class="text-micro mt-1" style="color:var(--muted);"
+                     th:text="'Written by ' + ${a.authorName}">Written by</div>
+              </td>
+
+              <td th:text="${a.eventName}">Event</td>
+
+              <td class="text-micro"
+                  th:text="${a.submittedAt != null
+                            ? #temporals.format(a.submittedAt, 'd MMM yyyy, HH:mm') : ''}">Date</td>
+
+              <td class="col-actions">
+                <form th:action="@{/admin/announcements/{id}/approve(id=${a.id})}" method="post"
+                      class="mb-2">
+                  <button class="btn btn-success btn-sm" type="submit">
+                    <i class="fa-solid fa-check" aria-hidden="true"></i> Approve and send
+                  </button>
+                </form>
+
+                <!-- The reason is required, and asked for here rather than
+                     in a prompt() dialog, so it can be typed properly and
+                     so the page keeps working without JavaScript. -->
+                <form th:action="@{/admin/announcements/{id}/reject(id=${a.id})}" method="post"
+                      class="d-flex gap-2 flex-wrap">
+                  <label class="visually-hidden" th:for="'reason-' + ${a.id}">
+                    Why this announcement is being rejected
+                  </label>
+                  <input class="form-control form-control-sm" th:id="'reason-' + ${a.id}"
+                         name="reason" maxlength="500" required
+                         placeholder="Why not? The author will see this.">
+                  <button class="btn btn-outline-danger btn-sm" type="submit">Reject</button>
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div th:replace="~{fragments/footer :: foot}"></div>
+</body>
+</html>

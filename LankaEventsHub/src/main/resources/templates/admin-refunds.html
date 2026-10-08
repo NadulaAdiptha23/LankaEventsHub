@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Refunds')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('refunds')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">Refund queue</h1>
+        <p class="page-header__sub">Created automatically when a paid event is cancelled.</p>
+      </div>
+      <div class="page-header__actions">
+        <a th:href="@{/admin/reports}" class="btn btn-light-custom">
+          <i class="fa-solid fa-chart-line" aria-hidden="true"></i> Reports
+        </a>
+      </div>
+    </div>
+
+    <div th:replace="~{fragments/alerts :: flash}"></div>
+
+    <div class="row g-4 mb-5" th:if="${!#lists.isEmpty(refunds)}">
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-icon is-warning"><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i></span>
+          <div class="stat-value" th:text="${#lists.size(refunds.?[status.name() == 'PENDING'])}">0</div>
+          <div class="stat-label">Pending</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-icon"><i class="fa-solid fa-spinner" aria-hidden="true"></i></span>
+          <div class="stat-value" th:text="${#lists.size(refunds.?[status.name() == 'PROCESSED'])}">0</div>
+          <div class="stat-label">Processed</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-icon is-success"><i class="fa-solid fa-circle-check" aria-hidden="true"></i></span>
+          <div class="stat-value" th:text="${#lists.size(refunds.?[status.name() == 'COMPLETED'])}">0</div>
+          <div class="stat-label">Completed</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-icon is-neutral"><i class="fa-solid fa-money-bill-wave" aria-hidden="true"></i></span>
+          <!-- Guarded: #aggregates.sum has nothing to add up when every
+               refund is already settled. -->
+          <div class="stat-value tnum"
+               th:with="outstanding=${refunds.?[status.name() != 'COMPLETED']}"
+               th:text="${#lists.isEmpty(outstanding)
+                         ? 'LKR 0'
+                         : 'LKR ' + #numbers.formatDecimal(
+                             #aggregates.sum(outstanding.![amount]), 1, 'COMMA', 0, 'POINT')}">0</div>
+          <div class="stat-label">Still owed</div>
+        </div>
+      </div>
+    </div>
+
+    <section class="card-custom">
+      <div class="card-head" th:if="${!#lists.isEmpty(refunds)}">
+        <div>
+          <h2>All refunds</h2>
+          <p class="text-micro mb-0" style="color:var(--muted);">
+            One step at a time: pending → processed → completed.
+          </p>
+        </div>
+      </div>
+
+      <div th:if="${#lists.isEmpty(refunds)}">
+          <div
+               th:replace="~{fragments/components :: emptyState(
+                  'fa-rotate-left',
+                  'No refunds',
+                  'Refunds appear here when an organizer cancels an event people paid for.',
+                  null, null)}"></div>
+      </div>
+
+      <div class="table-responsive" th:unless="${#lists.isEmpty(refunds)}">
+        <table class="table-modern">
+          <caption class="visually-hidden-focusable">The refund queue</caption>
+          <thead>
+            <tr>
+              <th scope="col">Event</th>
+              <th scope="col">Attendee</th>
+              <th scope="col">Amount</th>
+              <th scope="col">Requested</th>
+              <th scope="col">Status</th>
+              <th scope="col" class="col-actions"><span class="visually-hidden-focusable">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="r : ${refunds}">
+              <td class="cell-title" th:text="${r.eventName}">Event</td>
+              <td th:text="${r.attendeeName}">Attendee</td>
+              <td class="tnum"
+                  th:text="'LKR ' + ${#numbers.formatDecimal(r.amount, 1, 'COMMA', 2, 'POINT')}">LKR 0.00</td>
+              <td th:text="${r.requestedAt != null
+                            ? #temporals.format(r.requestedAt, 'd MMM yyyy') : ''}">When</td>
+              <td>
+                <th:block th:replace="~{fragments/components :: refundStatus(${r.status})}"></th:block>
+              </td>
+              <td class="col-actions">
+                <!-- One step per click, and the button is not offered once
+                     the refund is COMPLETED - the server refuses to advance
+                     past it anyway. -->
+                <form method="post" data-busy
+                      th:action="@{/admin/refunds/{id}/advance(id=${r.id})}"
+                      th:unless="${r.status.name() == 'COMPLETED'}">
+                  <button type="submit" class="btn btn-light-custom btn-sm"
+                          th:text="${r.status.name() == 'PENDING'} ? 'Mark processed' : 'Mark completed'">Advance</button>
+                </form>
+                <span class="text-micro" style="color:var(--muted);"
+                      th:if="${r.status.name() == 'COMPLETED'}">Done</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card-pad text-micro" style="color:var(--muted);border-top:1px solid var(--border);"
+           th:unless="${#lists.isEmpty(refunds)}">
+        Money movement happens outside this system — marking a refund completed
+        records that it was paid out and notifies the attendee.
+      </div>
+    </section>
+  </main>
+</div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Event Details')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/navbar :: nav('events', true)}"></div>
+
+<!-- ==================================================================
+     HERO
+     ================================================================== -->
+<header class="event-hero">
+    <img th:src="${event.bannerUrl != null and !event.bannerUrl.isEmpty()
+                  ? event.bannerUrl
+                  : 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1600'}"
+         src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1600" alt=""
+         onerror="this.src='https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1600'">
+    <div class="event-hero__scrim"></div>
+    <div class="container event-hero__body">
+        <nav aria-label="Breadcrumb">
+            <ol class="breadcrumb mb-2 text-micro" style="--bs-breadcrumb-divider-color:#94A3B8;">
+                <li class="breadcrumb-item"><a th:href="@{/events}" style="color:#CBD5E1;">Events</a></li>
+                <li class="breadcrumb-item active" style="color:#94A3B8;"
+                    aria-current="page" th:text="${event.name}">Event</li>
+            </ol>
+        </nav>
+
+        <div class="d-flex flex-wrap gap-2">
+            <span class="badge-custom badge-plain" style="background:rgba(255,255,255,0.16);color:#fff;"
+                  th:text="${event.category ?: 'General'}">Category</span>
+            <span class="badge-custom badge-warning-soft"
+                  th:if="${event.eventType != null and event.eventType.name() == 'RESTRICTED'}">Invite only</span>
+            <div th:if="${event.status != null and event.status.name() != 'PUBLISHED'}">
+                <th:block
+                          th:replace="~{fragments/components :: eventStatus(${event.status})}"></th:block>
+            </div>
+        </div>
+
+        <h1 class="event-hero__title" th:text="${event.name}">Event name</h1>
+
+        <div class="event-hero__meta">
+            <span>
+                <i class="fa-solid fa-calendar-day" aria-hidden="true"></i>
+                <span th:text="${event.startDatetime != null
+                                ? #temporals.format(event.startDatetime, 'EEEE, d MMMM yyyy')
+                                : 'Date to be confirmed'}">Date</span>
+            </span>
+            <span>
+                <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                <span th:text="${event.venue ?: 'Venue to be confirmed'}">Venue</span>
+            </span>
+            <span>
+                <i class="fa-solid fa-user" aria-hidden="true"></i>
+                <span th:text="'By ' + ${event.organizerName ?: 'the organizer'}">Organizer</span>
+            </span>
+        </div>
+    </div>
+</header>
+
+<main id="main" class="container py-5">
+    <div th:replace="~{fragments/alerts :: flash}"></div>
+
+    <!-- ==============================================================
+         KEY FACTS
+         The five things somebody needs before they decide, on one row.
+         ============================================================== -->
+    <div class="card-custom fact-row">
+        <div class="fact">
+            <span class="fact__icon"><i class="fa-solid fa-calendar-days" aria-hidden="true"></i></span>
+            <div>
+                <div class="fact__label">Date</div>
+                <div class="fact__value" th:text="${event.startDatetime != null
+                     ? #temporals.format(event.startDatetime, 'd MMM yyyy') : 'To be confirmed'}">Date</div>
+            </div>
+        </div>
+        <div class="fact">
+            <span class="fact__icon"><i class="fa-solid fa-clock" aria-hidden="true"></i></span>
+            <div>
+                <div class="fact__label">Time</div>
+                <div class="fact__value" th:text="${event.startDatetime == null ? 'To be confirmed'
+                     : (event.endDatetime == null
+                        ? #temporals.format(event.startDatetime, 'HH:mm')
+                        : #temporals.format(event.startDatetime, 'HH:mm') + ' – ' + #temporals.format(event.endDatetime, 'HH:mm'))}">Time</div>
+            </div>
+        </div>
+        <div class="fact">
+            <span class="fact__icon"><i class="fa-solid fa-location-dot" aria-hidden="true"></i></span>
+            <div>
+                <div class="fact__label">Venue</div>
+                <div class="fact__value" th:text="${event.venue ?: 'To be confirmed'}">Venue</div>
+            </div>
+        </div>
+        <div class="fact">
+            <span class="fact__icon"><i class="fa-solid fa-user-group" aria-hidden="true"></i></span>
+            <div>
+                <div class="fact__label">Capacity</div>
+                <div class="fact__value tnum" th:text="${event.capacity != null ? event.capacity + ' seats' : '—'}">0</div>
+            </div>
+        </div>
+        <div class="fact">
+            <span class="fact__icon"><i class="fa-solid fa-credit-card" aria-hidden="true"></i></span>
+            <div>
+                <div class="fact__label">Price</div>
+                <div class="fact__value"
+                     th:text="${event.fee != null and event.fee.compareTo(T(java.math.BigDecimal).ZERO) > 0
+                               ? 'LKR ' + #numbers.formatDecimal(event.fee, 1, 'COMMA', 2, 'POINT') : 'Free'}">Free</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-5">
+
+        <!-- ==========================================================
+             MAIN COLUMN
+             ========================================================== -->
+        <div class="col-lg-7">
+
+            <section class="card-custom card-pad mb-4">
+                <h2 class="mb-3">About this event</h2>
+                <p class="mb-0" style="white-space:pre-line;"
+                   th:text="${event.description != null and !event.description.isEmpty()
+                             ? event.description : 'The organizer has not added a description yet.'}">Description</p>
+            </section>
+
+            <!-- Agenda -->
+            <section class="card-custom card-pad mb-4"
+                     th:if="${!#lists.isEmpty(event.sessions)}">
+
+                <h2 class="mb-3">Schedule</h2>
+
+                <div class="session-row"
+                     th:each="eventSession : ${event.sessions}">
+
+                    <div class="session-row__time"
+                         th:text="${eventSession.startTime != null
+                       ? #temporals.format(eventSession.startTime, 'HH:mm')
+                       : 'TBC'}">
+                        09:00
+                    </div>
+
+                    <div>
+                        <h3 class="session-row__title"
+                            th:text="${eventSession.title}">
+                            Session title
+                        </h3>
+
+                        <p class="session-row__meta"
+                           th:if="${eventSession.speaker != null
+                       and !eventSession.speaker.isEmpty()}"
+                           th:text="'Speaker: ' + eventSession.speaker">
+                            Speaker
+                        </p>
+
+                        <p class="session-row__meta"
+                           th:if="${eventSession.description != null
+                       and !eventSession.description.isEmpty()}"
+                           th:text="${eventSession.description}">
+                            Description
+                        </p>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- Registration window. Real dates from the model - this is
+                 what decides whether the button on the right appears. -->
+            <section class="card-custom card-pad mb-4"
+                     th:if="${event.registrationOpenDate != null or event.registrationDeadline != null}">
+                <h2 class="mb-3">Registration window</h2>
+                <div class="row g-4">
+                    <div class="col-sm-6" th:if="${event.registrationOpenDate != null}">
+                        <div class="fact__label">Opens</div>
+                        <div class="fact__value"
+                             th:text="${#temporals.format(event.registrationOpenDate, 'd MMM yyyy, HH:mm')}">Opens</div>
+                    </div>
+                    <div class="col-sm-6" th:if="${event.registrationDeadline != null}">
+                        <div class="fact__label">Closes</div>
+                        <div class="fact__value"
+                             th:text="${#temporals.format(event.registrationDeadline, 'd MMM yyyy, HH:mm')}">Closes</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Invite-only explainer -->
+            <section class="card-custom card-pad mb-4"
+                     th:if="${event.status != null and event.status.name() == 'PUBLISHED'
+                             and event.eventType != null and event.eventType.name() == 'RESTRICTED'}">
+                <h2 class="mb-2">
+                    <i class="fa-solid fa-lock me-2" style="color:var(--warning);" aria-hidden="true"></i>Invite-only event
+                </h2>
+                <p class="text-meta mb-0" style="color:var(--muted);">
+                    Registration opens to you only once the organizer approves your invitation
+                    request. Requesting access does not reserve a seat, and a decision that has
+                    already been made cannot be appealed by requesting again.
+                </p>
+            </section>
+
+            <!-- What to know before you go -->
+            <section class="card-custom card-pad mb-4"
+                     th:if="${event.specialInstructions != null and !event.specialInstructions.isEmpty()}">
+                <h2 class="mb-3">Before you go</h2>
+                <p class="mb-0" style="white-space:pre-line;"
+                   th:text="${event.specialInstructions}">Instructions</p>
+            </section>
+
+            <!-- Organizer -->
+            <section class="card-custom card-pad">
+                <h2 class="mb-3">Organized by</h2>
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <span class="avatar avatar-lg"
+                          th:text="${event.organizerName != null
+                                    ? #strings.toUpperCase(#strings.substring(event.organizerName,0,1)) : 'O'}">O</span>
+                    <div class="flex-grow-1">
+                        <div class="fw-bold text-heading" th:text="${event.organizerName ?: 'Organizer'}">Organizer</div>
+                        <div class="text-meta" style="color:var(--muted);">Event organizer · Verdant Events</div>
+                    </div>
+                </div>
+                <div class="row g-3 mt-2"
+                     th:if="${event.contactPerson != null or event.contactDetails != null}">
+                    <div class="col-sm-6" th:if="${event.contactPerson != null and !event.contactPerson.isEmpty()}">
+                        <div class="fact__label">Contact</div>
+                        <div class="fact__value" th:text="${event.contactPerson}">Name</div>
+                    </div>
+                    <div class="col-sm-6" th:if="${event.contactDetails != null and !event.contactDetails.isEmpty()}">
+                        <div class="fact__label">Get in touch</div>
+                        <div class="fact__value" th:text="${event.contactDetails}">Email or phone</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ==========================================================
+             BOOKING PANEL
+             Sticky on desktop, static on a phone (a sticky panel on a
+             small screen can pin the content off-screen).
+
+             Everything below is driven by `availability`, which the
+             server computed with the same rules registration itself
+             enforces. No button is shown for an action the backend
+             would refuse - and the backend re-checks anyway.
+             ========================================================== -->
+        <div class="col-lg-5">
+            <div class="card-custom sticky-panel">
+                <div class="card-pad">
+                    <div class="d-flex justify-content-between align-items-end mb-4">
+                        <div>
+                            <div class="fact__label">General admission</div>
+                            <div class="booking-price">
+                                <span th:if="${event.fee == null or event.fee.compareTo(T(java.math.BigDecimal).ZERO) <= 0}">Free</span>
+                                <span th:unless="${event.fee == null or event.fee.compareTo(T(java.math.BigDecimal).ZERO) <= 0}">
+                                    <span class="unit">LKR</span>
+                                    <span th:text="${#numbers.formatDecimal(event.fee, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                                </span>
+                            </div>
+                        </div>
+                        <span class="badge-custom"
+                              th:classappend="${event.seatsAvailable != null and event.seatsAvailable > 0
+                                               ? 'badge-success-soft' : 'badge-danger-soft'}"
+                              th:text="${event.seatsAvailable != null and event.seatsAvailable > 0
+                                        ? 'Available' : 'Full'}">Available</span>
+                    </div>
+
+                    <!-- Seats -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between text-meta mb-2">
+                            <span th:text="${event.seatsAvailable != null and event.seatsAvailable > 0
+                                             ? event.seatsAvailable + ' seats remaining' : 'Fully booked'}">Seats</span>
+                            <span class="text-muted-custom tnum"
+                                  th:text="'of ' + ${event.capacity ?: 0}">of 100</span>
+                        </div>
+                        <div th:replace="~{fragments/components :: capacityMeter(${event.seatsTaken}, ${event.capacity})}"></div>
+                    </div>
+
+                    <div sec:authorize="isAuthenticated()">
+
+                        <!-- Where you currently stand -->
+                        <div class="alert-custom alert-success"
+                             th:if="${availability.myStatus != null and availability.myStatus.name() == 'CONFIRMED'}">
+                            <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                            <span th:if="${availability.mySeats == null or availability.mySeats == 1}">
+                                You have a confirmed place.</span>
+                            <span th:if="${availability.mySeats != null and availability.mySeats > 1}"
+                                  th:text="|You have a confirmed booking for ${availability.mySeats} people.|">
+                                You have a confirmed booking.</span>
+                        </div>
+                        <!-- A held seat is not a place, and the page must
+                             not let anyone read it as one. The deadline
+                             and the pay button are both here because a
+                             hold with neither is just a confusing
+                             status. -->
+                        <div class="alert-custom alert-warning"
+                             th:if="${availability.awaitingPayment}">
+                            <i class="fa-solid fa-clock" aria-hidden="true"></i>
+                            <span>
+                                A seat is held for you. It becomes a confirmed place once
+                                you have paid<span th:if="${availability.paymentDueAt != null}">,
+                                and is released at
+                                <strong th:text="${#temporals.format(availability.paymentDueAt, 'd MMM, HH:mm')}">time</strong>
+                                if it is not</span>.
+                            </span>
+                        </div>
+                        <a class="btn btn-primary btn-lg btn-block mb-2"
+                           th:if="${availability.awaitingPayment and availability.myRegistrationId != null}"
+                           th:href="@{/registrations/{id}/pay(id=${availability.myRegistrationId})}">
+                            <i class="fa-solid fa-credit-card" aria-hidden="true"></i>
+                            Pay now to confirm
+                        </a>
+                        <div class="alert-custom alert-warning"
+                             th:if="${availability.myStatus != null and availability.myStatus.name() == 'WAITLISTED'}">
+                            <i class="fa-solid fa-hourglass-half" aria-hidden="true"></i>
+                            <span>You are on the waitlist. If a seat is freed you move up automatically.</span>
+                        </div>
+                        <div class="alert-custom alert-info" th:if="${availability.awaitingInvitationDecision}">
+                            <i class="fa-solid fa-envelope" aria-hidden="true"></i>
+                            <span>Your invitation request is waiting for the organizer's decision.</span>
+                        </div>
+                        <div class="alert-custom alert-error" th:if="${availability.invitationRejected}">
+                            <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
+                            <span>Your invitation request for this event was not approved.</span>
+                        </div>
+
+                        <!-- Register / join waitlist.
+                             The seat selector offers only what the event
+                             can actually seat, so the page does not invite
+                             a booking the server will refuse. The number
+                             is still re-checked under a lock on the way
+                             in - this control is a convenience, never the
+                             rule. -->
+                        <form method="get" data-busy
+                              th:action="@{/events/{id}/register/review(id=${event.id})}"
+                              th:if="${availability.canRegister}">
+                            <div class="mb-2">
+                                <label for="seats" class="form-label text-micro">
+                                    How many seats?
+                                </label>
+                                <select id="seats" name="seats" class="form-select">
+                                    <option th:each="n : ${#numbers.sequence(1, availability.maxSeatsBookable)}"
+                                            th:value="${n}"
+                                            th:text="${n == 1 ? '1 seat' : n + ' seats'}">1 seat</option>
+                                </select>
+                                <p class="text-micro mb-0 mt-1" style="color:var(--muted);"
+                                   th:if="${event.fee != null and event.fee.signum() > 0}">
+                                    <span th:text="${#numbers.formatDecimal(event.fee, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                                    per seat.
+                                </p>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg btn-block mb-2">
+                                <i class="fa-solid fa-ticket" aria-hidden="true"></i>
+                                <span th:if="${!availability.wouldWaitlist}">Register now</span>
+                                <span th:if="${availability.wouldWaitlist}">Join the waitlist</span>
+                            </button>
+                        </form>
+                        <p class="text-micro text-center mb-3" style="color:var(--muted);"
+                           th:if="${availability.canRegister and availability.wouldWaitlist}">
+                            This event is full — you will be added to the waitlist.
+                        </p>
+
+                        <!-- Request invitation -->
+                        <form method="post" data-busy
+                              th:action="@{/events/{id}/request-invitation(id=${event.id})}"
+                              th:if="${availability.canRequestInvitation}">
+                            <button type="submit" class="btn btn-outline-primary btn-lg btn-block mb-2">
+                                <i class="fa-solid fa-envelope" aria-hidden="true"></i>Request an invitation
+                            </button>
+                        </form>
+
+                        <!-- Why you cannot register -->
+                        <div class="alert-custom alert-info"
+                             th:if="${!availability.canRegister and !availability.registered
+                                      and !availability.canRequestInvitation and availability.blockedReason != null}">
+                            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                            <span th:text="${availability.blockedReason}">Registration is closed</span>
+                        </div>
+
+                        <!-- Cancel.
+
+                             Said before the button, not after it. If this
+                             place was paid for and the policy does not
+                             refund self-cancellation, the attendee is
+                             about to give up both the seat and the money,
+                             and finding that out afterwards is how a
+                             support ticket starts. The same fact drives
+                             the confirm dialog, so the warning and the
+                             outcome cannot drift apart. -->
+                        <div class="alert-custom alert-warning"
+                             th:if="${availability.registered and availability.canCancel
+                                      and availability.cancelForfeitsPayment}">
+                            <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+                            <span>
+                                You have paid for this place. Cancelling it yourself
+                                releases the seat but does <strong>not</strong> refund what
+                                you paid &mdash; refunds are only issued if the organizer
+                                cancels the event.
+                            </span>
+                        </div>
+                        <form method="post" data-busy
+                              th:action="@{/events/{id}/cancel(id=${event.id})}"
+                              th:if="${availability.registered and availability.canCancel
+                                       and availability.cancelForfeitsPayment}"
+                              onsubmit="return confirm('Cancel your registration? You will not be refunded what you paid for this place.');">
+                            <button type="submit" class="btn btn-light-custom btn-block">
+                                Cancel my registration
+                            </button>
+                        </form>
+                        <form method="post" data-busy
+                              th:action="@{/events/{id}/cancel(id=${event.id})}"
+                              th:if="${availability.registered and availability.canCancel
+                                       and !availability.cancelForfeitsPayment}">
+                            <button type="submit" class="btn btn-light-custom btn-block">
+                                Cancel my registration
+                            </button>
+                        </form>
+                        <p class="text-micro text-center mb-0" style="color:var(--muted);"
+                           th:if="${availability.registered and !availability.canCancel and availability.cancelBlockedReason != null}"
+                           th:text="${availability.cancelBlockedReason}">Cancellations are closed</p>
+                    </div>
+
+                    <!-- Guest -->
+                    <div sec:authorize="!isAuthenticated()">
+                        <div class="alert-custom alert-info" th:if="${availability.blockedReason != null}">
+                            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                            <span th:text="${availability.blockedReason}">Registration is closed</span>
+                        </div>
+                        <a th:href="@{/login}" class="btn btn-primary btn-lg btn-block mb-2">
+                            <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>Sign in to register
+                        </a>
+                        <a th:href="@{/register}" class="btn btn-light-custom btn-block">Create an account</a>
+                    </div>
+                </div>
+
+                <!-- Organizer / admin controls, only for people who own this event -->
+                <div th:if="${canManage}" class="card-pad" style="border-top:1px solid var(--border);">
+                    <div class="fact__label mb-3">Organizer tools</div>
+                    <div class="d-grid gap-2">
+                        <a th:href="@{/events/{id}/edit(id=${event.id})}" class="btn btn-light-custom btn-sm">
+                            <i class="fa-solid fa-pen" aria-hidden="true"></i> Edit event
+                        </a>
+                        <a th:href="@{/events/{id}/attendees(id=${event.id})}" class="btn btn-light-custom btn-sm">
+                            <i class="fa-solid fa-users" aria-hidden="true"></i> View attendees
+                        </a>
+                        <a th:href="@{/events/{id}/invitations(id=${event.id})}" class="btn btn-light-custom btn-sm"
+                           th:if="${event.eventType != null and event.eventType.name() == 'RESTRICTED'}">
+                            <i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i> Invitation requests
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: foot}"></div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

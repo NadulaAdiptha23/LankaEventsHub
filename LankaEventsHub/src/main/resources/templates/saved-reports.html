@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('My Reports')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('savedreports')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">My reports</h1>
+        <p class="page-header__sub">Questions you have saved, answered fresh each time you open one</p>
+      </div>
+    </div>
+
+    <div th:replace="~{fragments/alerts :: flash}"></div>
+
+    <div class="alert-custom alert-info">
+      <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+      <span>
+        A saved report stores the question, never the answer - the figures are recalculated
+        from live data every time you open it, so nothing here can go stale.
+      </span>
+    </div>
+
+    <!-- ============================== new report ============================== -->
+    <section class="card-custom mb-4">
+      <div class="card-head">
+        <h2>Save a new report</h2>
+      </div>
+      <div class="card-pad">
+        <form th:action="@{/reports}" method="post" class="row g-3">
+          <div class="col-12 col-lg-4">
+            <label class="form-label" for="title">Name</label>
+            <input class="form-control" id="title" name="title" maxlength="120" required
+                   placeholder="Q1 attendance">
+          </div>
+
+          <div class="col-12 col-lg-4">
+            <label class="form-label" for="reportType">Measures</label>
+            <select class="form-select" id="reportType" name="reportType" required>
+              <option value="" selected disabled>Choose what to measure</option>
+              <!-- Only the types this role may actually run are rendered,
+                   and the service refuses any other regardless - a
+                   dropdown is a convenience, not a security control. -->
+              <option th:each="t : ${types}" th:value="${t.name()}" th:text="${t.label}">Type</option>
+            </select>
+          </div>
+
+          <div class="col-12 col-lg-4" th:if="${!#lists.isEmpty(manageableEvents)}">
+            <label class="form-label" for="eventId">Event</label>
+            <select class="form-select" id="eventId" name="eventId">
+              <option value="">Not about one event</option>
+              <option th:each="e : ${manageableEvents}" th:value="${e.id}" th:text="${e.name}">Event</option>
+            </select>
+            <div class="form-text">Required by the event reports, and rejected by the others.</div>
+          </div>
+
+          <div class="col-6 col-lg-3">
+            <label class="form-label" for="dateFrom">From</label>
+            <input class="form-control" type="date" id="dateFrom" name="dateFrom">
+          </div>
+          <div class="col-6 col-lg-3">
+            <label class="form-label" for="dateTo">To</label>
+            <input class="form-control" type="date" id="dateTo" name="dateTo">
+            <div class="form-text">Leave both blank for all time. Rejected by the platform-wide snapshot types (Platform overview, Category popularity), which have no date to filter on.</div>
+          </div>
+
+          <div class="col-12">
+            <button class="btn btn-primary" type="submit">
+              <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Save report
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ============================== saved list ============================== -->
+    <section class="card-custom">
+      <div class="card-head" th:unless="${#lists.isEmpty(reports)}">
+        <h2>Saved</h2>
+        <span class="text-micro" style="color:var(--muted);"
+              th:text="${#lists.size(reports)} + ' saved'">0 saved</span>
+      </div>
+
+      <div th:if="${#lists.isEmpty(reports)}">
+          <div
+               th:replace="~{fragments/components :: emptyState(
+                 'fa-chart-simple',
+                 'No saved reports yet',
+                 'Save a question above and it will be waiting here, answered with current data.',
+                 null, null)}"></div>
+      </div>
+
+      <div class="table-responsive" th:unless="${#lists.isEmpty(reports)}">
+        <table class="table-modern">
+          <caption class="visually-hidden">Your saved report definitions</caption>
+          <thead>
+            <tr>
+              <th scope="col">Report</th>
+              <th scope="col">Measures</th>
+              <th scope="col">Scope</th>
+              <th scope="col">Window</th>
+              <th scope="col" class="col-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="r : ${reports}">
+              <td>
+                <div class="cell-title" th:text="${r.title}">Title</div>
+                <div class="text-micro" style="color:var(--muted);"
+                     th:text="|Saved ${#temporals.format(r.createdAt, 'd MMM yyyy')}|">Saved</div>
+
+                <div class="collapse" th:id="'edit-' + ${r.id}">
+                  <form th:action="@{/reports/{id}/update(id=${r.id})}" method="post"
+                        class="row g-2 mt-2">
+                    <div class="col-12">
+                      <label class="form-label" th:for="'rt-' + ${r.id}">Name</label>
+                      <input class="form-control" th:id="'rt-' + ${r.id}" name="title"
+                             th:value="${r.title}" maxlength="120" required>
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label" th:for="'ry-' + ${r.id}">Measures</label>
+                      <select class="form-select" th:id="'ry-' + ${r.id}" name="reportType" required>
+                        <option th:each="t : ${types}" th:value="${t.name()}" th:text="${t.label}"
+                                th:selected="${t.name() == r.reportType.name()}">Type</option>
+                      </select>
+                    </div>
+                    <div class="col-12" th:if="${!#lists.isEmpty(manageableEvents)}">
+                      <label class="form-label" th:for="'re-' + ${r.id}">Event</label>
+                      <select class="form-select" th:id="'re-' + ${r.id}" name="eventId">
+                        <option value="">Not about one event</option>
+                        <option th:each="e : ${manageableEvents}" th:value="${e.id}"
+                                th:text="${e.name}"
+                                th:selected="${r.eventId != null and e.id == r.eventId}">Event</option>
+                      </select>
+                    </div>
+                    <div class="col-6">
+                      <label class="form-label" th:for="'rf-' + ${r.id}">From</label>
+                      <input class="form-control" type="date" th:id="'rf-' + ${r.id}"
+                             name="dateFrom" th:value="${r.dateFrom}">
+                    </div>
+                    <div class="col-6">
+                      <label class="form-label" th:for="'rto-' + ${r.id}">To</label>
+                      <input class="form-control" type="date" th:id="'rto-' + ${r.id}"
+                             name="dateTo" th:value="${r.dateTo}">
+                    </div>
+                    <div class="col-12">
+                      <button class="btn btn-primary btn-sm" type="submit">Save changes</button>
+                    </div>
+                  </form>
+                </div>
+              </td>
+
+              <td th:text="${r.reportTypeLabel}">Measures</td>
+
+              <td th:text="${r.eventName != null ? r.eventName : '—'}">Scope</td>
+
+              <td class="text-micro"
+                  th:text="${r.hasWindow}
+                           ? ((r.dateFrom != null ? r.dateFrom : 'start') + ' to '
+                              + (r.dateTo != null ? r.dateTo : 'now'))
+                           : 'All time'">All time</td>
+
+              <td class="col-actions">
+                <span class="d-inline-flex gap-2 flex-wrap">
+                  <a class="btn btn-primary btn-sm" th:href="@{/reports/{id}(id=${r.id})}">Open</a>
+
+                  <button class="btn btn-light-custom btn-sm" type="button"
+                          data-bs-toggle="collapse" th:attr="data-bs-target='#edit-' + ${r.id}">
+                    Edit
+                  </button>
+
+                  <form th:action="@{/reports/{id}/delete(id=${r.id})}" method="post">
+                    <button class="btn btn-outline-danger btn-sm" type="submit">Delete</button>
+                  </form>
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div th:replace="~{fragments/footer :: foot}"></div>
+</body>
+</html>

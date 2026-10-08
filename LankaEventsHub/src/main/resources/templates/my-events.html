@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('My Events')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('myevents')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title" sec:authorize="hasRole('ADMIN')">All events</h1>
+        <h1 class="page-header__title" sec:authorize="!hasRole('ADMIN')">Your events</h1>
+        <p class="page-header__sub">Everything you own, in every status.</p>
+      </div>
+      <div class="page-header__actions">
+        <a th:href="@{/events/new}" class="btn btn-primary">
+          <i class="fa-solid fa-plus" aria-hidden="true"></i> Create event
+        </a>
+      </div>
+    </div>
+
+    <div th:replace="~{fragments/alerts :: flash}"></div>
+    <div class="alert-custom alert-success" th:if="${param.submitted}" data-flash="success">
+      <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+      <span>Event submitted. An administrator has to approve it before attendees can see it.</span>
+    </div>
+    <div class="alert-custom alert-info" th:if="${param.saved}" data-flash="info">
+      <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+      <span>Saved as a draft. Nobody else can see it yet &mdash; submit it when it is ready.</span>
+    </div>
+
+    <!-- ============================================================
+         KPIs.
+
+         All four are counted from the event list already on this page:
+         how many events, how many are live, how many seats have been
+         taken across them, and how full they are on average.
+
+         There is deliberately no revenue figure here. The reporting
+         model exposes platform-wide revenue to administrators only,
+         not per-organizer takings, so a revenue card on this page
+         would be a number with nothing behind it.
+         ============================================================ -->
+    <div class="row g-4 mb-5" th:if="${!#lists.isEmpty(events)}">
+      <div class="col-sm-6 col-xl">
+        <div class="stat-card">
+          <span class="stat-icon"><i class="fa-solid fa-calendar-days" aria-hidden="true"></i></span>
+          <div class="stat-value" th:text="${#lists.size(events)}">0</div>
+          <div class="stat-label">Total events</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl">
+        <div class="stat-card">
+          <span class="stat-icon is-success"><i class="fa-solid fa-tower-broadcast" aria-hidden="true"></i></span>
+          <div class="stat-value"
+               th:text="${#lists.size(events.?[status.name() == 'PUBLISHED'])}">0</div>
+          <div class="stat-label">Published</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl">
+        <div class="stat-card">
+          <span class="stat-icon is-warning"><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i></span>
+          <div class="stat-value"
+               th:text="${#lists.size(events.?[status.name() == 'PENDING_APPROVAL'])}">0</div>
+          <div class="stat-label">Awaiting approval</div>
+        </div>
+      </div>
+      <!-- Drafts are counted separately from "awaiting approval" because
+           the two need opposite things from the organizer: one is waiting
+           on an administrator, the other is waiting on them. -->
+      <div class="col-sm-6 col-xl">
+        <div class="stat-card">
+          <span class="stat-icon is-neutral"><i class="fa-solid fa-file-pen" aria-hidden="true"></i></span>
+          <div class="stat-value"
+               th:text="${#lists.size(events.?[status.name() == 'DRAFT'])}">0</div>
+          <div class="stat-label">Drafts</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl">
+        <div class="stat-card">
+          <span class="stat-icon is-neutral"><i class="fa-solid fa-user-group" aria-hidden="true"></i></span>
+          <div class="stat-value"
+               th:text="${#aggregates.sum(events.![seatsTaken ?: 0])}">0</div>
+          <div class="stat-label">Seats taken</div>
+        </div>
+      </div>
+    </div>
+
+    <section class="card-custom">
+      <div class="card-head">
+        <div>
+          <h2>Your event list</h2>
+          <p class="text-micro mb-0" style="color:var(--muted);">
+            Edit, cancel and complete are only offered where the server would allow them.
+          </p>
+        </div>
+      </div>
+
+      <div th:if="${#lists.isEmpty(events)}">
+          <div
+               th:replace="~{fragments/components :: emptyState(
+                  'fa-calendar-plus',
+                  'No events yet',
+                  'Create your first event and submit it for approval — it takes about a minute.',
+                  @{/events/new}, 'Create event')}"></div>
+      </div>
+
+      <div class="table-responsive" th:unless="${#lists.isEmpty(events)}">
+        <table class="table-modern">
+          <caption class="visually-hidden-focusable">Events you manage</caption>
+          <thead>
+            <tr>
+              <th scope="col">Event</th>
+              <th scope="col">Date</th>
+              <th scope="col">Status</th>
+              <th scope="col" style="min-width:150px;">Registrations</th>
+              <th scope="col" class="col-actions"><span class="visually-hidden-focusable">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="event : ${events}">
+              <td>
+                <div class="cell-title" th:text="${event.name}">Event</div>
+                <div class="cell-sub" th:text="${event.venue ?: 'Venue to be confirmed'}">Venue</div>
+              </td>
+              <td th:text="${event.startDatetime != null
+                            ? #temporals.format(event.startDatetime, 'd MMM yyyy') : 'To be confirmed'}">Date</td>
+              <td>
+                <th:block th:replace="~{fragments/components :: eventStatus(${event.status})}"></th:block>
+              </td>
+              <td>
+                <div th:replace="~{fragments/components :: capacityMeter(${event.seatsTaken}, ${event.capacity})}"></div>
+              </td>
+              <td class="col-actions">
+                <!-- One trigger instead of six buttons per row. The rules
+                     for which items appear are unchanged. -->
+                <div class="action-menu">
+                  <button type="button" class="action-menu__trigger"
+                          aria-haspopup="true" aria-expanded="false"
+                          th:aria-label="'Actions for ' + ${event.name}">
+                    <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
+                  </button>
+                  <div class="action-menu__list">
+                    <a th:href="@{/events/{id}(id=${event.id})}">
+                      <i class="fa-solid fa-eye" aria-hidden="true"></i> View event
+                    </a>
+                    <a th:href="@{/events/{id}/attendees(id=${event.id})}">
+                      <i class="fa-solid fa-users" aria-hidden="true"></i> Attendees
+                    </a>
+                    <a th:if="${event.eventType != null and event.eventType.name() == 'RESTRICTED'}"
+                       th:href="@{/events/{id}/invitations(id=${event.id})}">
+                      <i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i> Invitations
+                    </a>
+                    <!-- Offered only once the event is public. A draft has
+                         no attendees to announce to, and the service
+                         refuses to send one - so the link would lead to a
+                         screen whose only outcome is an error. -->
+                    <a th:if="${event.status.name() == 'PUBLISHED' or event.status.name() == 'COMPLETED' or event.status.name() == 'CANCELLED'}"
+                       th:href="@{/events/{id}/announcements(id=${event.id})}">
+                      <i class="fa-solid fa-bullhorn" aria-hidden="true"></i> Announcements
+                    </a>
+                    <a th:if="${event.status.name() == 'DRAFT' or event.status.name() == 'PENDING_APPROVAL' or event.status.name() == 'PUBLISHED'}"
+                       th:href="@{/events/{id}/edit(id=${event.id})}">
+                      <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                      <span th:text="${event.status.name() == 'DRAFT'} ? 'Continue editing' : 'Edit'">Edit</span>
+                    </a>
+
+                    <div class="action-menu__sep"
+                         th:if="${event.status.name() == 'DRAFT' or event.status.name() == 'PENDING_APPROVAL' or event.status.name() == 'PUBLISHED'}"></div>
+
+                    <!-- Only offered on a draft. If the draft is still
+                         missing a venue, start time, capacity or deadline
+                         the server refuses and names every gap at once -
+                         this button does not pretend to know in advance. -->
+                    <form method="post" data-busy
+                          th:if="${event.status.name() == 'DRAFT'}"
+                          th:action="@{/events/{id}/submit(id=${event.id})}">
+                      <button type="submit">
+                        <i class="fa-solid fa-paper-plane" aria-hidden="true"></i> Submit for approval
+                      </button>
+                    </form>
+                    <form method="post" data-busy
+                          th:if="${event.status.name() == 'PUBLISHED'}"
+                          th:action="@{/events/{id}/complete(id=${event.id})}">
+                      <button type="submit">
+                        <i class="fa-solid fa-flag-checkered" aria-hidden="true"></i> Mark completed
+                      </button>
+                    </form>
+                    <!-- Two forms rather than one with a computed message.
+                         Discarding a draft and cancelling a live event go
+                         to the same endpoint, but they are not the same
+                         act: one affects nobody, the other cancels every
+                         booking on it. A warning that says "attendees will
+                         be notified" over a draft nobody has seen would
+                         teach the organizer to stop reading these. -->
+                    <form method="post" data-busy
+                          th:if="${event.status.name() == 'DRAFT'}"
+                          th:action="@{/events/{id}/cancel-event(id=${event.id})}"
+                          onsubmit="return confirm('Discard this draft? Nobody has seen it and nothing is booked on it, but it cannot be brought back.');">
+                      <button type="submit" class="is-danger">
+                        <i class="fa-solid fa-trash-can" aria-hidden="true"></i> Discard draft
+                      </button>
+                    </form>
+                    <form method="post" data-busy
+                          th:if="${event.status.name() == 'PENDING_APPROVAL' or event.status.name() == 'PUBLISHED'}"
+                          th:action="@{/events/{id}/cancel-event(id=${event.id})}"
+                          onsubmit="return confirm('Cancel this event? Every registration on it will be cancelled, attendees will be notified, and refunds will be created for anyone who paid. This cannot be undone.');">
+                      <button type="submit" class="is-danger">
+                        <i class="fa-solid fa-ban" aria-hidden="true"></i> Cancel event
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

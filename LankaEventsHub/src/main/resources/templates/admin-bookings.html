@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Bookings')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('bookings')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">Bookings</h1>
+        <p class="page-header__sub">
+          Every registration on the platform, with what was paid and what is owed back.
+        </p>
+      </div>
+      <div class="page-header__actions">
+        <!-- The export carries the filters currently applied, not the
+             whole table: what you are looking at is what you download. -->
+        <a class="btn btn-light-custom"
+           th:href="|/admin/bookings.csv${queryString != '' ? '?' + #strings.substring(queryString, 1) : ''}|">
+          <i class="fa-solid fa-file-csv" aria-hidden="true"></i> Export CSV
+        </a>
+        <a th:href="@{/admin/refunds}" class="btn btn-light-custom">
+          <i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Refund queue
+        </a>
+      </div>
+    </div>
+
+    <div th:replace="~{fragments/alerts :: flash}"></div>
+
+    <!-- ================= filters ================= -->
+    <section class="card-custom mb-4">
+      <form method="get" th:action="@{/admin/bookings}" class="card-pad">
+        <div class="row g-3 align-items-end">
+          <div class="col-12 col-md-4 col-xl-3">
+            <label class="form-label" for="f-attendee">Attendee</label>
+            <input class="form-control" id="f-attendee" type="search" name="attendee"
+                   placeholder="Name or e-mail" th:value="${criteria.attendee}">
+          </div>
+          <div class="col-12 col-md-4 col-xl-3">
+            <label class="form-label" for="f-event">Event</label>
+            <input class="form-control" id="f-event" type="search" name="event"
+                   placeholder="Event name" th:value="${criteria.event}">
+          </div>
+          <div class="col-6 col-md-4 col-xl-2">
+            <label class="form-label" for="f-status">Booking status</label>
+            <select class="form-select" id="f-status" name="status">
+              <option value="">Any</option>
+              <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}"
+                      th:selected="${criteria.status != null and criteria.status == s}">S</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-4 col-xl-2">
+            <label class="form-label" for="f-payment">Payment</label>
+            <select class="form-select" id="f-payment" name="paymentStatus">
+              <option value="">Any</option>
+              <option th:each="p : ${paymentStatuses}" th:value="${p}" th:text="${p}"
+                      th:selected="${criteria.paymentStatus != null and criteria.paymentStatus == p}">P</option>
+            </select>
+          </div>
+          <div class="col-12 col-md-4 col-xl-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary w-100">
+              <i class="fa-solid fa-filter" aria-hidden="true"></i> Filter
+            </button>
+            <a th:href="@{/admin/bookings}" class="btn btn-light-custom"
+               th:if="${!criteria.empty}" title="Clear filters">
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+        <div class="mt-3">
+          <label class="check-row" for="f-unpaid">
+            <input type="checkbox" id="f-unpaid" name="unpaidOnly" value="true"
+                   th:checked="${criteria.unpaidOnly}">
+            Only bookings with no payment at all
+          </label>
+        </div>
+      </form>
+    </section>
+
+    <!-- ================= results ================= -->
+    <section class="card-custom">
+      <div class="card-head">
+        <div>
+          <h2>
+            <span th:text="${bookings.totalElements}">0</span>
+            <span th:text="${bookings.totalElements == 1} ? 'booking' : 'bookings'">bookings</span>
+          </h2>
+          <p class="text-micro mb-0" style="color:var(--muted);">
+            Newest first. Cancelling a paid booking here raises a refund automatically.
+          </p>
+        </div>
+      </div>
+
+      <div th:if="${bookings.totalElements == 0}">
+          <div
+               th:replace="~{fragments/components :: emptyState(
+                  'fa-ticket',
+                  'Nothing matches',
+                  'No booking matches these filters. Clear them to see everything.',
+                  '/admin/bookings', 'Clear filters')}"></div>
+      </div>
+
+      <div class="table-responsive" th:if="${bookings.totalElements > 0}">
+        <table class="table-modern">
+          <caption class="visually-hidden-focusable">Platform bookings</caption>
+          <thead>
+            <tr>
+              <th scope="col">Attendee</th>
+              <th scope="col">Event</th>
+              <th scope="col">Booking</th>
+              <th scope="col">Seats</th>
+              <th scope="col">Payment</th>
+              <th scope="col">Refund</th>
+              <th scope="col">Registered</th>
+              <th scope="col" class="col-actions"><span class="visually-hidden-focusable">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="b : ${bookings.content}">
+              <td>
+                <div class="cell-title" th:text="${b.attendeeName}">Attendee</div>
+                <div class="text-micro" style="color:var(--muted);" th:text="${b.attendeeEmail}">mail</div>
+              </td>
+              <td>
+                <a class="cell-title" th:href="@{/events/{id}(id=${b.eventId})}"
+                   th:text="${b.eventName}">Event</a>
+                <div class="text-micro" style="color:var(--muted);" th:text="${b.eventStatus}">STATUS</div>
+              </td>
+              <td>
+                <th:block th:replace="~{fragments/components :: registrationStatus(${b.status})}"></th:block>
+              </td>
+              <td class="tnum">
+                <span th:text="${b.seats}">1</span>
+                <div class="text-micro" style="color:var(--muted);"
+                     th:if="${b.seatsCheckedIn != null}"
+                     th:text="|${b.seatsCheckedIn} arrived|">3 arrived</div>
+              </td>
+              <td>
+                <span th:if="${b.paymentStatus == null}" class="text-micro"
+                      style="color:var(--muted);">Not paid</span>
+                <div th:if="${b.paymentStatus != null}">
+                  <span class="tnum"
+                        th:text="'LKR ' + ${#numbers.formatDecimal(b.paidAmount, 1, 'COMMA', 2, 'POINT')}">LKR 0.00</span>
+                  <th:block th:replace="~{fragments/components :: paymentStatus(${b.paymentStatus})}"></th:block>
+                </div>
+              </td>
+              <td>
+                <span th:if="${b.refundStatus == null and !b.refundOwedOnCancel}"
+                      class="text-micro" style="color:var(--muted);">&mdash;</span>
+                <!-- Said before the operator acts, not after: cancelling
+                     this row will put money into the refund queue. -->
+                <span th:if="${b.refundStatus == null and b.refundOwedOnCancel}"
+                      class="text-micro" style="color:var(--warning-ink);">
+                  Refundable
+                </span>
+                <div th:if="${b.refundStatus != null}">
+                  <span class="tnum"
+                        th:text="'LKR ' + ${#numbers.formatDecimal(b.refundAmount, 1, 'COMMA', 2, 'POINT')}">LKR 0.00</span>
+                  <th:block th:replace="~{fragments/components :: refundStatus(${b.refundStatus})}"></th:block>
+                </div>
+              </td>
+              <td class="text-micro" style="color:var(--muted);"
+                  th:text="${b.registeredAt != null
+                            ? #temporals.format(b.registeredAt, 'd MMM yyyy, HH:mm') : ''}">When</td>
+              <td class="col-actions">
+                <form method="post" data-busy
+                      th:action="@{/admin/bookings/{id}/cancel(id=${b.registrationId})}"
+                      th:if="${b.cancellable}">
+                  <input type="hidden" name="reason" value="Cancelled by administrator">
+                  <button type="submit" class="btn btn-light-custom btn-sm">Cancel booking</button>
+                </form>
+                <span class="text-micro" style="color:var(--muted);"
+                      th:unless="${b.cancellable}"
+                      th:text="${b.cancelledAt != null
+                                ? 'Cancelled ' + #temporals.format(b.cancelledAt, 'd MMM') : 'Cancelled'}">Cancelled</span>
+                <!-- Beside cancelling, not instead of it. Cancelling is
+                     what belongs on almost every booking; this is for the
+                     row that should never have existed. -->
+                <div th:replace="~{fragments/components :: confirmDelete(
+                      @{/admin/bookings/{id}/delete(id=${b.registrationId})},
+                      ${b.attendeeName}, 'booking',
+                      'Its payment and refund go with it, and its seats go back to the event.')}"></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ================= paging ================= -->
+      <div class="card-pad d-flex align-items-center justify-content-between"
+           style="border-top:1px solid var(--border);"
+           th:if="${bookings.totalPages > 1}">
+        <span class="text-micro" style="color:var(--muted);">
+          Page <span th:text="${bookings.number + 1}">1</span>
+          of <span th:text="${bookings.totalPages}">1</span>
+        </span>
+        <div class="d-flex gap-2">
+          <a class="btn btn-light-custom btn-sm"
+             th:if="${bookings.hasPrevious()}"
+             th:href="|/admin/bookings?page=${bookings.number - 1}${queryString}|">Previous</a>
+          <a class="btn btn-light-custom btn-sm"
+             th:if="${bookings.hasNext()}"
+             th:href="|/admin/bookings?page=${bookings.number + 1}${queryString}|">Next</a>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

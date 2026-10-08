@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Contact')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/navbar :: nav('contact', true)}"></div>
+
+<main id="main">
+
+<section class="page-hero">
+    <div class="page-hero__media" aria-hidden="true">
+        <img th:src="@{/img/exp-private.svg}" alt="" loading="lazy">
+    </div>
+    <div class="page-hero__scrim" aria-hidden="true"></div>
+    <div class="container-editorial page-hero__inner">
+        <p class="eyebrow eyebrow--light">Contact</p>
+        <h1 class="display-1x page-hero__title">Tell us about your event.</h1>
+        <p class="page-hero__text">
+            Whether it is a conference for six hundred or a dinner for twelve, start
+            here and we will take it from the top.
+        </p>
+    </div>
+</section>
+
+
+<section class="section section--ivory" data-reveal>
+    <div class="container-editorial">
+        <div class="split">
+
+            <!-- LEFT: the enquiry form -->
+            <div>
+                <p class="eyebrow">Enquiry</p>
+                <h2 class="display-2x mb-4">Start a conversation.</h2>
+
+                <!--
+                  This composes an email rather than posting to a server.
+
+                  There is no enquiry endpoint, no enquiries table and no
+                  outbound mail configured by default in this application.
+                  A form that POSTed somewhere and showed "thank you" would
+                  be a lie told politely - the message would go nowhere. So
+                  it opens the visitor's own mail client with everything
+                  filled in, which actually delivers, and the address is
+                  printed in full on the right for anyone who would rather
+                  write it themselves.
+                -->
+                <form id="enquiry" class="enquiry-form" novalidate>
+                    <div class="form-row-2">
+                        <div>
+                            <label class="form-label" for="name">Your name</label>
+                            <input class="form-control" type="text" id="name" name="name"
+                                   required autocomplete="name" placeholder="Jane Perera">
+                        </div>
+                        <div>
+                            <label class="form-label" for="email">Email</label>
+                            <input class="form-control" type="email" id="email" name="email"
+                                   required autocomplete="email" placeholder="jane@example.com">
+                        </div>
+                    </div>
+
+                    <div class="form-row-2">
+                        <div>
+                            <label class="form-label" for="kind">Type of event</label>
+                            <select class="form-select" id="kind" name="kind">
+                                <option value="">Not sure yet</option>
+                                <!-- Real categories, from the database - so the form
+                                     cannot offer something this platform does not run. -->
+                                <option th:each="c : ${categories}" th:value="${c}" th:text="${c}">Category</option>
+                                <option value="Other">Something else</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label" for="guests">Approximate guests</label>
+                            <input class="form-control" type="number" id="guests" name="guests"
+                                   min="1" max="100000" placeholder="120">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label" for="message">What are you planning?</label>
+                        <textarea class="form-control" id="message" name="message" rows="5" required
+                                  placeholder="A little about the event, the date you have in mind, and anything that matters."></textarea>
+                    </div>
+
+                    <div class="alert-custom alert-error" id="enquiry-error" style="display:none;" role="alert">
+                        <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+                        <span id="enquiry-error-text"></span>
+                    </div>
+
+                    <button class="btn btn-primary btn-lg" type="submit">Send enquiry</button>
+
+                    <p class="text-micro text-muted-custom mt-3 mb-0">
+                        This opens your email application with the message ready to send.
+                        Nothing is submitted to this website.
+                    </p>
+                </form>
+            </div>
+
+            <!-- RIGHT: the real details -->
+            <div>
+                <p class="eyebrow">Details</p>
+                <h2 class="display-2x mb-4">Or reach us<br>directly.</h2>
+
+                <div class="facts">
+                    <div class="facts__row">
+                        <div class="facts__key">Email</div>
+                        <p class="facts__val"><a href="mailto:hello@verdantevents.lk">hello@verdantevents.lk</a></p>
+                    </div>
+                    <div class="facts__row">
+                        <div class="facts__key">Telephone</div>
+                        <p class="facts__val"><a href="tel:+94112345678">+94 11 234 5678</a></p>
+                    </div>
+                    <div class="facts__row">
+                        <div class="facts__key">Studio</div>
+                        <p class="facts__val">123 Event Street<br>Colombo 03<br>Sri Lanka</p>
+                    </div>
+                    <div class="facts__row">
+                        <div class="facts__key">Hours</div>
+                        <p class="facts__val">Monday to Friday, 9.00&ndash;17.30</p>
+                    </div>
+                    <div class="facts__row">
+                        <div class="facts__key">Social</div>
+                        <p class="facts__val text-muted-custom">
+                            No social accounts are published for this platform yet, so none
+                            are linked.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-5">
+                    <p class="text-meta text-muted-custom mb-3">
+                        Already have an account? Everything about your bookings lives in
+                        your dashboard.
+                    </p>
+                    <a class="link-editorial" th:href="@{/login}" sec:authorize="!isAuthenticated()">
+                        Sign in <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+                    <a class="link-editorial" th:href="@{/my-registrations}" sec:authorize="isAuthenticated()">
+                        My bookings <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="section section--dark section--tight" data-reveal>
+    <div class="container-editorial">
+        <div class="section-head section-head--center">
+            <p class="eyebrow eyebrow--center eyebrow--light">Looking for something else?</p>
+            <h2 class="display-2x section-head__title">Browse what is already happening.</h2>
+        </div>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a class="btn btn-primary btn-lg" th:href="@{/events}">Explore Events</a>
+            <a class="btn btn-outline-light btn-lg" th:href="@{/services}">Our Services</a>
+        </div>
+    </div>
+</section>
+
+</main>
+
+<div th:replace="~{fragments/footer :: foot}"></div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+<script>
+/*
+  Turns the enquiry form into a pre-filled email.
+
+  Validated here rather than relying on the browser's default bubbles,
+  so the message matches the rest of the site's error styling. With
+  JavaScript off the form simply does nothing on submit and the address
+  printed beside it is the route - which is why that address is real
+  text on the page rather than hidden behind this handler.
+*/
+(function () {
+  var form = document.getElementById('enquiry');
+  if (!form) { return; }
+  var box = document.getElementById('enquiry-error');
+  var text = document.getElementById('enquiry-error-text');
+
+  function fail(message, field) {
+    text.textContent = message;
+    box.style.display = 'flex';
+    if (field) { field.focus(); }
+  }
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    box.style.display = 'none';
+
+    var name = form.name.value.trim();
+    var email = form.email.value.trim();
+    var message = form.message.value.trim();
+
+    if (!name)    { return fail('Please tell us your name.', form.name); }
+    if (!email || email.indexOf('@') < 1) {
+      return fail('Please enter an email address we can reply to.', form.email);
+    }
+    if (!message) { return fail('Please tell us a little about the event.', form.message); }
+
+    var kind = form.kind.value || 'Not specified';
+    var guests = form.guests.value || 'Not specified';
+
+    var subject = 'Event enquiry — ' + kind + ' — ' + name;
+    var body =
+      'Name: ' + name + '\n' +
+      'Email: ' + email + '\n' +
+      'Type of event: ' + kind + '\n' +
+      'Approximate guests: ' + guests + '\n\n' +
+      message + '\n';
+
+    window.location.href = 'mailto:hello@verdantevents.lk'
+      + '?subject=' + encodeURIComponent(subject)
+      + '&body=' + encodeURIComponent(body);
+  });
+})();
+</script>
+</body>
+</html>

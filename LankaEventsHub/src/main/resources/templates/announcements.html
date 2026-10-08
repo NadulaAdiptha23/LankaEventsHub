@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Announcements')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('myevents')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">Announcements</h1>
+        <p class="page-header__sub" th:text="${event.name}">Event</p>
+      </div>
+      <div class="page-header__actions">
+        <a th:href="@{/events/{id}(id=${eventId})}" class="btn btn-light-custom">
+          <i class="fa-solid fa-eye" aria-hidden="true"></i> View event
+        </a>
+        <a th:href="@{/my-events}" class="btn btn-light-custom">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> My events
+        </a>
+      </div>
+    </div>
+
+    <div th:replace="~{fragments/alerts :: flash}"></div>
+
+    <div class="alert-custom alert-info" th:unless="${isAdmin}">
+      <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+      <span>
+        An announcement reaches everyone holding a place on this event, in your own words -
+        so an Administrator reads it before any attendee does. Save a draft, submit it,
+        and if it is turned down you will be told why and can revise it.
+      </span>
+    </div>
+    <div class="alert-custom alert-info" th:if="${isAdmin}">
+      <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+      <span>
+        You are the approver, so your own announcements go out directly. Anything an
+        organizer submits waits in
+        <a th:href="@{/admin/announcements}">the approval queue</a> until you review it.
+      </span>
+    </div>
+
+    <!-- ============================== compose ============================== -->
+    <section class="card-custom mb-4">
+      <div class="card-head">
+        <h2>Write an announcement</h2>
+      </div>
+      <div class="card-pad">
+        <form th:action="@{/events/{id}/announcements(id=${eventId})}" method="post" class="row g-3">
+          <div class="col-12">
+            <label class="form-label" for="title">Title</label>
+            <input class="form-control" id="title" name="title" maxlength="150" required
+                   placeholder="Venue entrance has moved">
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="message">Message</label>
+            <textarea class="form-control" id="message" name="message" rows="4"
+                      maxlength="1000" required
+                      placeholder="Please use the Galle Road entrance on the day - the main gate is closed for works."></textarea>
+            <div class="form-text">Up to 1000 characters. This is what attendees will read.</div>
+          </div>
+          <div class="col-12 d-flex gap-2 flex-wrap">
+            <button type="submit" class="btn btn-light-custom">
+              <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Save draft
+            </button>
+            <button type="submit" name="submitNow" value="true" class="btn btn-primary">
+              <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
+              <span th:text="${isAdmin} ? 'Save and submit' : 'Save and send for approval'">Save and submit</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ============================== list ============================== -->
+    <section class="card-custom">
+      <div class="card-head" th:unless="${#lists.isEmpty(announcements)}">
+        <h2>This event's announcements</h2>
+        <span class="text-micro" style="color:var(--muted);"
+              th:text="${#lists.size(announcements)} + ' total'">0 total</span>
+      </div>
+
+      <div th:if="${#lists.isEmpty(announcements)}">
+          <div
+               th:replace="~{fragments/components :: emptyState(
+                 'fa-bullhorn',
+                 'No announcements yet',
+                 'Anything written here reaches every attendee holding a place on this event.',
+                 null, null)}"></div>
+      </div>
+
+      <div class="table-responsive" th:unless="${#lists.isEmpty(announcements)}">
+        <table class="table-modern">
+          <caption class="visually-hidden">Announcements written for this event</caption>
+          <thead>
+            <tr>
+              <th scope="col">Announcement</th>
+              <th scope="col">Author</th>
+              <th scope="col">Status</th>
+              <th scope="col" class="col-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="a : ${announcements}">
+              <td>
+                <div class="cell-title" th:text="${a.title}">Title</div>
+                <div class="text-micro" style="color:var(--muted);" th:text="${a.message}">Message</div>
+
+                <div class="alert-custom alert-error mt-2" th:if="${a.rejectReason != null}">
+                  <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
+                  <span>
+                    <strong>Not approved:</strong>
+                    <span th:text="${a.rejectReason}">reason</span>
+                    Edit the wording and submit it again.
+                  </span>
+                </div>
+
+                <div class="text-micro mt-1" style="color:var(--muted);"
+                     th:if="${a.published}"
+                     th:text="|Sent ${#temporals.format(a.publishedAt, 'd MMM yyyy, HH:mm')} to ${a.recipientCount} attendee(s)|">Sent</div>
+
+                <!-- Inline edit, collapsed until asked for. Only rendered
+                     for a draft or a rejected announcement, which is the
+                     same rule the service enforces - the screen never
+                     offers an action that would be refused. -->
+                <div class="collapse" th:id="'edit-' + ${a.id}" th:if="${a.editable}">
+                  <form th:action="@{/announcements/{id}/update(id=${a.id})}" method="post"
+                        class="row g-2 mt-2">
+                    <input type="hidden" name="eventId" th:value="${eventId}">
+                    <div class="col-12">
+                      <label class="form-label" th:for="'t-' + ${a.id}">Title</label>
+                      <input class="form-control" th:id="'t-' + ${a.id}" name="title"
+                             th:value="${a.title}" maxlength="150" required>
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label" th:for="'m-' + ${a.id}">Message</label>
+                      <textarea class="form-control" th:id="'m-' + ${a.id}" name="message"
+                                rows="3" maxlength="1000" required th:text="${a.message}"></textarea>
+                    </div>
+                    <div class="col-12">
+                      <button class="btn btn-primary btn-sm" type="submit">Save changes</button>
+                    </div>
+                  </form>
+                </div>
+              </td>
+
+              <td th:text="${a.authorName}">Author</td>
+
+              <td>
+                <th:block th:replace="~{fragments/components :: announcementStatus(${a.status})}"></th:block>
+              </td>
+
+              <td class="col-actions">
+                <span class="d-inline-flex gap-2 flex-wrap">
+                  <form th:if="${a.editable and !isAdmin}"
+                        th:action="@{/announcements/{id}/submit(id=${a.id})}" method="post">
+                    <input type="hidden" name="eventId" th:value="${eventId}">
+                    <button class="btn btn-success btn-sm" type="submit">Send for approval</button>
+                  </form>
+
+                  <form th:if="${a.editable and isAdmin}"
+                        th:action="@{/announcements/{id}/publish(id=${a.id})}" method="post">
+                    <input type="hidden" name="eventId" th:value="${eventId}">
+                    <button class="btn btn-success btn-sm" type="submit">Publish now</button>
+                  </form>
+
+                  <button th:if="${a.editable}" class="btn btn-light-custom btn-sm" type="button"
+                          data-bs-toggle="collapse" th:attr="data-bs-target='#edit-' + ${a.id}">
+                    Edit
+                  </button>
+
+                  <form th:if="${a.editable}"
+                        th:action="@{/announcements/{id}/delete(id=${a.id})}" method="post">
+                    <input type="hidden" name="eventId" th:value="${eventId}">
+                    <button class="btn btn-outline-danger btn-sm" type="submit">Delete</button>
+                  </form>
+
+                  <span class="text-micro" style="color:var(--muted);"
+                        th:if="${a.awaitingApproval}">With an administrator</span>
+                  <span class="text-micro" style="color:var(--muted);"
+                        th:if="${a.published}">Sent - cannot be changed</span>
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div th:replace="~{fragments/footer :: foot}"></div>
+</body>
+</html>

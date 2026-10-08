@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Create Event')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('create')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">Create an event</h1>
+        <p class="page-header__sub">
+          Save it as a draft and come back to it, or submit it now &mdash; either
+          way an administrator approves it before attendees can see it.
+        </p>
+      </div>
+      <div class="page-header__actions">
+        <a th:href="@{/my-events}" class="btn btn-light-custom">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> My events
+        </a>
+      </div>
+    </div>
+
+    <div th:replace="~{fragments/alerts :: flash}"></div>
+
+    <div class="row">
+      <div class="col-xl-9">
+        <!--
+          Every input below maps to a field the backend actually reads. The
+          earlier version of this form had an "Address" box, a file-upload
+          dropzone and a session builder that were never submitted anywhere -
+          they have been removed rather than left looking functional.
+          Sessions are added from the event's own page after it exists.
+
+          The maxlength values match the limits the service enforces, so a
+          long paste is stopped here rather than rejected after a round trip.
+        -->
+        <form method="post" data-busy th:action="@{/events/new}">
+
+          <section class="card-custom card-pad mb-4">
+            <div class="form-section">
+              <div class="form-section__head">
+                <span class="form-section__num">1</span>
+                <div>
+                  <h2 class="form-section__title">Event details</h2>
+                  <p class="form-section__sub">What attendees see first.</p>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label" for="name">Event name <span class="req">*</span></label>
+                <input type="text" id="name" name="name" class="form-control" required
+                       minlength="3" maxlength="150"
+                       placeholder="e.g. Intro to Cloud Computing Workshop"
+                       th:value="${form != null} ? ${form.name} : ''">
+                <p class="form-text">Between 3 and 150 characters.</p>
+              </div>
+
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <label class="form-label" for="category">Category</label>
+                  <select id="category" name="category" class="form-select">
+                    <option value="">Select a category</option>
+                    <option th:each="c : ${ {'Workshop','Conference','Seminar','Networking','Concert','Sports','Tech','Other'} }"
+                            th:value="${c}" th:text="${c}"
+                            th:selected="${form != null and form.category == c}">Category</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <span class="form-label">Event type</span>
+                  <div class="d-flex gap-4 mt-1">
+                    <label class="check-row" for="type-public">
+                      <input type="radio" id="type-public" name="eventType" value="PUBLIC"
+                             th:checked="${form == null or form.eventType == null
+                                          or form.eventType.name() == 'PUBLIC'}">
+                      Open to everyone
+                    </label>
+                    <label class="check-row" for="type-restricted">
+                      <input type="radio" id="type-restricted" name="eventType" value="RESTRICTED"
+                             th:checked="${form != null and form.eventType != null
+                                          and form.eventType.name() == 'RESTRICTED'}">
+                      Invite only
+                    </label>
+                  </div>
+                  <p class="form-text">
+                    Invite-only events need you to approve each attendee before they can register.
+                  </p>
+                </div>
+              </div>
+
+              <div class="mb-0">
+                <label class="form-label" for="description">Description</label>
+                <textarea id="description" name="description" class="form-control" rows="4"
+                          maxlength="5000"
+                          placeholder="What is this event, who is it for, and what will people get out of it?"
+                          th:text="${form != null} ? ${form.description} : ''"></textarea>
+                <p class="form-text">Up to 5000 characters.</p>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="form-section__head">
+                <span class="form-section__num">2</span>
+                <div>
+                  <h2 class="form-section__title">Date and venue</h2>
+                  <p class="form-section__sub">
+                    The venue is checked against other events for double-booking.
+                  </p>
+                </div>
+              </div>
+
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <label class="form-label" for="venue">Venue</label>
+                  <input type="text" id="venue" name="venue" class="form-control" maxlength="150"
+                         placeholder="SLIIT Auditorium, Malabe"
+                         th:value="${form != null} ? ${form.venue} : ''">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label" for="capacity">Capacity <span class="req">*</span></label>
+                  <input type="number" id="capacity" name="capacity" class="form-control"
+                         min="1" required placeholder="100"
+                         th:value="${form != null} ? ${form.capacity} : ''">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label" for="fee">Fee (LKR)</label>
+                  <input type="number" id="fee" name="fee" class="form-control" min="0" step="0.01"
+                         th:value="${form != null and form.fee != null} ? ${form.fee} : '0'">
+                  <p class="form-text">0 = free</p>
+                </div>
+              </div>
+
+              <div class="row g-3 mb-0">
+                <div class="col-md-6">
+                  <label class="form-label" for="startDatetime">Starts</label>
+                  <input type="datetime-local" id="startDatetime" name="startDatetime" class="form-control"
+                         th:value="${form != null and form.startDatetime != null}
+                                   ? ${#temporals.format(form.startDatetime,'yyyy-MM-dd''T''HH:mm')} : ''">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="endDatetime">Ends</label>
+                  <input type="datetime-local" id="endDatetime" name="endDatetime" class="form-control"
+                         th:value="${form != null and form.endDatetime != null}
+                                   ? ${#temporals.format(form.endDatetime,'yyyy-MM-dd''T''HH:mm')} : ''">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="form-section__head">
+                <span class="form-section__num">3</span>
+                <div>
+                  <h2 class="form-section__title">Registration window</h2>
+                  <p class="form-section__sub">When people can sign up.</p>
+                </div>
+              </div>
+
+              <div class="row g-3 mb-0">
+                <div class="col-md-6">
+                  <label class="form-label" for="registrationOpenDate">Registration opens</label>
+                  <input type="datetime-local" id="registrationOpenDate" name="registrationOpenDate"
+                         class="form-control"
+                         th:value="${form != null and form.registrationOpenDate != null}
+                                   ? ${#temporals.format(form.registrationOpenDate,'yyyy-MM-dd''T''HH:mm')} : ''">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="registrationDeadline">Registration closes</label>
+                  <input type="datetime-local" id="registrationDeadline" name="registrationDeadline"
+                         class="form-control"
+                         th:value="${form != null and form.registrationDeadline != null}
+                                   ? ${#temporals.format(form.registrationDeadline,'yyyy-MM-dd''T''HH:mm')} : ''">
+                  <p class="form-text">Must be on or before the event start.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="form-section__head">
+                <span class="form-section__num">4</span>
+                <div>
+                  <h2 class="form-section__title">Additional information</h2>
+                  <p class="form-section__sub">All optional.</p>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label" for="bannerUrl">Banner image URL</label>
+                <input type="url" id="bannerUrl" name="bannerUrl" class="form-control" maxlength="255"
+                       placeholder="https://example.com/event-image.jpg"
+                       th:value="${form != null} ? ${form.bannerUrl} : ''">
+                <p class="form-text">
+                  Must start with http:// or https://. There is no file upload in this version.
+                </p>
+              </div>
+
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <label class="form-label" for="contactPerson">Contact person</label>
+                  <input type="text" id="contactPerson" name="contactPerson" class="form-control"
+                         maxlength="150" th:value="${form != null} ? ${form.contactPerson} : ''">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="contactDetails">Contact details</label>
+                  <input type="text" id="contactDetails" name="contactDetails" class="form-control"
+                         maxlength="150" placeholder="email or phone number"
+                         th:value="${form != null} ? ${form.contactDetails} : ''">
+                </div>
+              </div>
+
+              <div class="mb-0">
+                <label class="form-label" for="specialInstructions">Special instructions</label>
+                <textarea id="specialInstructions" name="specialInstructions" class="form-control"
+                          rows="3" maxlength="2000"
+                          placeholder="Parking, dress code, what to bring, accessibility notes..."
+                          th:text="${form != null} ? ${form.specialInstructions} : ''"></textarea>
+                <p class="form-text">Up to 2000 characters.</p>
+              </div>
+            </div>
+          </section>
+
+          <!--
+            Two buttons, one form, one endpoint. Saving a draft asks nothing
+            of anyone else, so it is the quieter of the two. Submitting is
+            the one that puts the event in front of an administrator, so it
+            is the primary action - and it still only succeeds if the venue,
+            start time, capacity and deadline are all filled in.
+          -->
+          <div class="d-flex gap-2 justify-content-end flex-wrap mb-5">
+            <a th:href="@{/my-events}" class="btn btn-light-custom">Cancel</a>
+            <button type="submit" name="action" value="draft"
+                    class="btn btn-light-custom">Save as draft</button>
+            <button type="submit" name="action" value="submit"
+                    class="btn btn-primary">Save and submit for approval</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

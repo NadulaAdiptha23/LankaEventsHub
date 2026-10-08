@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Event Approvals')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('approvals')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">Event approvals</h1>
+        <p class="page-header__sub">Review and publish submitted events.</p>
+      </div>
+      <div class="page-header__actions">
+        <a th:href="@{/admin/users}" class="btn btn-light-custom">
+          <i class="fa-solid fa-users" aria-hidden="true"></i> Users
+        </a>
+        <a th:href="@{/admin/reports}" class="btn btn-light-custom">
+          <i class="fa-solid fa-chart-line" aria-hidden="true"></i> Reports
+        </a>
+      </div>
+    </div>
+
+    <div th:replace="~{fragments/alerts :: flash}"></div>
+
+    <div class="row g-4 mb-5">
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-icon"><i class="fa-solid fa-calendar-days" aria-hidden="true"></i></span>
+          <div class="stat-value" th:text="${#lists.size(events)}">0</div>
+          <div class="stat-label">Total events</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-icon is-success"><i class="fa-solid fa-circle-check" aria-hidden="true"></i></span>
+          <div class="stat-value" th:text="${#lists.size(events.?[status.name() == 'PUBLISHED'])}">0</div>
+          <div class="stat-label">Published</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-icon is-warning"><i class="fa-solid fa-clock" aria-hidden="true"></i></span>
+          <div class="stat-value" th:text="${#lists.size(events.?[status.name() == 'PENDING_APPROVAL'])}">0</div>
+          <div class="stat-label">Awaiting approval</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-icon is-danger"><i class="fa-solid fa-circle-xmark" aria-hidden="true"></i></span>
+          <div class="stat-value" th:text="${#lists.size(events.?[status.name() == 'CANCELLED'])}">0</div>
+          <div class="stat-label">Cancelled</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         The queue that actually needs an administrator, first and on
+         its own. Rendered only when there is something in it.
+         ============================================================ -->
+    <section class="card-custom mb-4"
+             th:if="${!#lists.isEmpty(events.?[status.name() == 'PENDING_APPROVAL'])}">
+      <div class="card-head">
+        <div>
+          <h2><i class="fa-solid fa-circle-exclamation me-2" style="color:var(--warning);"
+                 aria-hidden="true"></i>Waiting for you</h2>
+          <p class="text-micro mb-0" style="color:var(--muted);">
+            These events are invisible to attendees until they are approved.
+          </p>
+        </div>
+      </div>
+      <div class="card-pad">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 py-2"
+             th:each="event : ${events.?[status.name() == 'PENDING_APPROVAL']}">
+          <div style="min-width:0;">
+            <div class="fw-semibold text-heading" th:text="${event.name}">Event</div>
+            <div class="text-micro" style="color:var(--muted);"
+                 th:text="${(event.organizerName ?: 'Unknown organizer') + ' · '
+                          + (event.startDatetime != null
+                             ? #temporals.format(event.startDatetime, 'd MMM yyyy')
+                             : 'no date set')}">Meta</div>
+          </div>
+          <div class="d-flex gap-2">
+            <a class="btn btn-light-custom btn-sm" th:href="@{/events/{id}(id=${event.id})}">Review</a>
+            <form method="post" data-busy th:action="@{/admin/events/{id}/approve(id=${event.id})}">
+              <button type="submit" class="btn btn-success btn-sm">
+                <i class="fa-solid fa-check" aria-hidden="true"></i> Approve
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card-custom">
+      <div class="card-head">
+        <h2>All events</h2>
+        <a th:href="@{/my-events}" class="btn btn-light-custom btn-sm">Manage all events</a>
+      </div>
+
+      <div th:if="${#lists.isEmpty(events)}">
+          <div
+               th:replace="~{fragments/components :: emptyState(
+                  'fa-calendar-xmark',
+                  'No events yet',
+                  'Events submitted by organizers will appear here for review.',
+                  null, null)}"></div>
+      </div>
+
+      <div class="table-responsive" th:unless="${#lists.isEmpty(events)}">
+        <table class="table-modern">
+          <caption class="visually-hidden-focusable">Every event on the platform</caption>
+          <thead>
+            <tr>
+              <th scope="col">Event</th>
+              <th scope="col">Organizer</th>
+              <th scope="col">Date</th>
+              <th scope="col">Status</th>
+              <th scope="col" style="min-width:150px;">Capacity</th>
+              <th scope="col" class="col-actions"><span class="visually-hidden-focusable">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="event : ${events}">
+              <td>
+                <div class="cell-title" th:text="${event.name}">Event</div>
+                <div class="cell-sub">
+                  <span th:text="${event.venue ?: 'Venue to be confirmed'}">Venue</span>
+                  <span th:if="${event.category}" th:text="' · ' + ${event.category}"></span>
+                </div>
+              </td>
+              <td th:text="${event.organizerName ?: '—'}">Organizer</td>
+              <td th:text="${event.startDatetime != null
+                            ? #temporals.format(event.startDatetime, 'd MMM yyyy') : 'To be confirmed'}">Date</td>
+              <td>
+                <th:block th:replace="~{fragments/components :: eventStatus(${event.status})}"></th:block>
+              </td>
+              <td>
+                <div th:replace="~{fragments/components :: capacityMeter(${event.seatsTaken}, ${event.capacity})}"></div>
+              </td>
+              <td class="col-actions">
+                <div class="action-menu">
+                  <button type="button" class="action-menu__trigger"
+                          aria-haspopup="true" aria-expanded="false"
+                          th:aria-label="'Actions for ' + ${event.name}">
+                    <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
+                  </button>
+                  <div class="action-menu__list">
+                    <a th:href="@{/events/{id}(id=${event.id})}">
+                      <i class="fa-solid fa-eye" aria-hidden="true"></i> View event
+                    </a>
+                    <a th:href="@{/events/{id}/attendees(id=${event.id})}">
+                      <i class="fa-solid fa-users" aria-hidden="true"></i> Attendees
+                    </a>
+                    <!-- Approve is only offered from PENDING_APPROVAL,
+                         which is the only status the server accepts it in. -->
+                    <div class="action-menu__sep" th:if="${event.status.name() == 'PENDING_APPROVAL'}"></div>
+                    <form method="post" data-busy
+                          th:if="${event.status.name() == 'PENDING_APPROVAL'}"
+                          th:action="@{/admin/events/{id}/approve(id=${event.id})}">
+                      <button type="submit">
+                        <i class="fa-solid fa-check" aria-hidden="true"></i> Approve and publish
+                      </button>
+                    </form>
+                  </div>
+                </div>
+                <!-- In the cell, below the menu rather than inside it:
+                     the confirmation panel needs room to open, and a
+                     dropdown would clip it. It also cannot go in a row of
+                     its own - inside a <tbody>, Thymeleaf's HTML parser
+                     relocates a <th:block> wrapper out of the table, and
+                     the second row then renders outside the loop with no
+                     `event` at all. -->
+                <div th:replace="~{fragments/components :: confirmDelete(
+                      @{/admin/events/{id}/delete(id=${event.id})},
+                      ${event.name}, 'event',
+                      'Its registrations, payments, refunds, announcements, discounts, sessions and invitations go with it.')}"></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

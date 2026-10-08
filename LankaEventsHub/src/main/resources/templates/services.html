@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Services')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/navbar :: nav('services', true)}"></div>
+
+<main id="main">
+
+<section class="page-hero">
+    <div class="page-hero__media" aria-hidden="true">
+        <img th:src="@{/img/exp-corporate.svg}" alt="" loading="lazy">
+    </div>
+    <div class="page-hero__scrim" aria-hidden="true"></div>
+    <div class="container-editorial page-hero__inner">
+        <p class="eyebrow eyebrow--light">Services</p>
+        <h1 class="display-1x page-hero__title">Everything an event needs, in one place.</h1>
+        <p class="page-hero__text">
+            Verdant Events runs the whole lifecycle &mdash; from the first draft of an idea
+            to the last person through the door.
+        </p>
+    </div>
+</section>
+
+
+<!-- The four disciplines, expanded. Same numbering as the homepage, so
+     somebody arriving from there recognises where they have landed. -->
+<section class="section section--ivory" data-reveal>
+    <div class="container-editorial">
+        <div class="section-head">
+            <p class="eyebrow">What we do</p>
+            <h2 class="display-2x section-head__title mb-0">Four disciplines.</h2>
+        </div>
+
+        <div class="numbered">
+            <div class="numbered__row">
+                <div class="numbered__num">01</div>
+                <h3 class="numbered__title">Event Management</h3>
+                <p class="numbered__text">
+                    Events are created as drafts, submitted for approval and published
+                    deliberately &mdash; nothing reaches an audience half-finished. Once
+                    people have registered, the terms they signed up to are locked:
+                    date, venue, price and capacity stop being editable, because
+                    changing them underneath somebody who already booked is not an
+                    edit, it is a different event.
+                </p>
+            </div>
+            <div class="numbered__row">
+                <div class="numbered__num">02</div>
+                <h3 class="numbered__title">Event Discovery</h3>
+                <p class="numbered__text">
+                    Six filters that all reach the database &mdash; keyword, category,
+                    venue, date range, maximum price and event type, plus &ldquo;only
+                    events with seats left&rdquo;. Availability shown on a listing is
+                    availability that exists, because a seat is held the moment
+                    somebody starts booking it.
+                </p>
+            </div>
+            <div class="numbered__row">
+                <div class="numbered__num">03</div>
+                <h3 class="numbered__title">Venue &amp; Logistics</h3>
+                <p class="numbered__text">
+                    A venue cannot be double-booked: the clash is refused on create and
+                    on update, and the check runs against the database rather than
+                    against a form. Sessions, schedules and capacity are coordinated in
+                    the same place, and capacity can never be cut below the seats
+                    already sold.
+                </p>
+            </div>
+            <div class="numbered__row">
+                <div class="numbered__num">04</div>
+                <h3 class="numbered__title">Experience Design</h3>
+                <p class="numbered__text">
+                    Invitations for restricted events, announcements that reach everyone
+                    holding a seat, e-tickets that carry nothing personal, and a door
+                    list that records how many of each party actually arrived.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- The capabilities, as a ruled grid. -->
+<section class="section section--white" data-reveal>
+    <div class="container-editorial">
+        <div class="row g-5">
+            <div class="col-lg-4">
+                <p class="eyebrow">Capabilities</p>
+                <h2 class="display-2x mb-4">The detail<br>underneath.</h2>
+                <p class="text-meta text-muted-custom">
+                    None of this is optional extra. It is what separates an event that
+                    runs from one that is survived.
+                </p>
+            </div>
+            <div class="col-lg-8">
+                <div class="why-grid">
+                    <div class="why">
+                        <h3 class="why__title">Approval workflow</h3>
+                        <p class="why__text">Organizers submit; administrators approve. Nothing is published by accident.</p>
+                    </div>
+                    <div class="why">
+                        <h3 class="why__title">Held seats</h3>
+                        <p class="why__text">A seat on a paid event is reserved while the attendee pays, and released automatically if they walk away.</p>
+                    </div>
+                    <div class="why">
+                        <h3 class="why__title">Waitlists</h3>
+                        <p class="why__text">Full events keep a queue. When seats come back, the queue moves — automatically, in order.</p>
+                    </div>
+                    <div class="why">
+                        <h3 class="why__title">Party bookings</h3>
+                        <p class="why__text">One booking for up to ten people, counted as ten seats everywhere it matters.</p>
+                    </div>
+                    <div class="why">
+                        <h3 class="why__title">Discounts</h3>
+                        <p class="why__text">Early bird, student, promo code and group rates, applied server-side and never to the wrong event.</p>
+                    </div>
+                    <div class="why">
+                        <h3 class="why__title">Payments &amp; refunds</h3>
+                        <p class="why__text">Card at checkout or cash at the door, with refunds raised automatically when an event is cancelled.</p>
+                    </div>
+                    <div class="why">
+                        <h3 class="why__title">Door check-in</h3>
+                        <p class="why__text">Record who arrived — and how many of each party — from a phone at the entrance.</p>
+                    </div>
+                    <div class="why">
+                        <h3 class="why__title">Reporting</h3>
+                        <p class="why__text">Attendance, revenue, refunds and category performance, computed live and exportable as CSV.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="section section--dark section--tight" data-reveal>
+    <div class="container-editorial">
+        <div class="section-head section-head--center">
+            <p class="eyebrow eyebrow--center eyebrow--light">Who it is for</p>
+            <h2 class="display-2x section-head__title">Three roles, one platform.</h2>
+        </div>
+        <ol class="timeline">
+            <li class="timeline__step">
+                <span class="timeline__num">01</span>
+                <h3 class="timeline__title">Attendees</h3>
+                <p class="timeline__text">Browse, book a seat or a table, pay, and carry an e-ticket to the door.</p>
+            </li>
+            <li class="timeline__step">
+                <span class="timeline__num">02</span>
+                <h3 class="timeline__title">Organizers</h3>
+                <p class="timeline__text">Create and run your own events, manage the roster, take payment and check people in.</p>
+            </li>
+            <li class="timeline__step">
+                <span class="timeline__num">03</span>
+                <h3 class="timeline__title">Administrators</h3>
+                <p class="timeline__text">Approve what gets published, work the refund queue, and see the whole platform at once.</p>
+            </li>
+        </ol>
+    </div>
+</section>
+
+
+<section class="section cta-band" data-reveal>
+    <div class="cta-band__media" aria-hidden="true">
+        <img th:src="@{/img/cta.svg}" alt="" loading="lazy">
+    </div>
+    <div class="cta-band__scrim" aria-hidden="true"></div>
+    <div class="container-narrow cta-band__inner">
+        <p class="eyebrow eyebrow--center eyebrow--light">Ready when you are</p>
+        <h2 class="display-1x cta-band__title">Let&rsquo;s plan something.</h2>
+        <p class="cta-band__text">
+            Tell us what you have in mind, or start browsing what is already happening.
+        </p>
+        <div class="cta-band__actions">
+            <a class="btn btn-primary btn-lg" th:href="@{/contact}">Plan Your Event</a>
+            <a class="btn btn-outline-light btn-lg" th:href="@{/events}">Explore Events</a>
+        </div>
+    </div>
+</section>
+
+</main>
+
+<div th:replace="~{fragments/footer :: foot}"></div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

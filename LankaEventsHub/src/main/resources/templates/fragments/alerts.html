@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--
+  ====================================================================
+  Feedback, split by what the reader has to do about it.
+
+  A success is an acknowledgement - it goes to a toast, top-right, and
+  leaves on its own. Turning it into a full-width banner pushes the page
+  down and leaves the reader to dismiss something they have already
+  read.
+
+  A failure is a thing to act on. It stays inline, in the flow, where
+  the reader is already looking, and it does not disappear on a timer.
+
+  The markup for both is rendered server-side, so a reader with
+  JavaScript off still sees every message; app.js only moves the
+  success ones into the toast stack.
+  ====================================================================
+-->
+<div th:fragment="flash">
+    <!-- Promoted to a toast by app.js; visible as-is without JavaScript. -->
+    <div th:if="${flashSuccess}" data-flash="success"
+         class="alert-custom alert-success" role="status">
+        <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+        <span th:text="${flashSuccess}">Done</span>
+    </div>
+
+    <!-- Failures stay put. -->
+    <div th:if="${flashError}" class="alert-custom alert-error" role="alert">
+        <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+        <span th:text="${flashError}">Something went wrong</span>
+    </div>
+    <div th:if="${error}" class="alert-custom alert-error" role="alert">
+        <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+        <span th:text="${error}">Something went wrong</span>
+    </div>
+</div>
+</body>
+</html>

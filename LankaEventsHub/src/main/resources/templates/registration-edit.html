@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Edit Booking')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('dashboard')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">Edit booking</h1>
+        <p class="page-header__sub" th:text="${registration.eventName}">Event</p>
+      </div>
+      <div class="page-header__actions">
+        <a th:href="@{/my-registrations}" class="btn btn-light-custom">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> My registrations
+        </a>
+      </div>
+    </div>
+
+    <div class="alert-custom alert-error" th:if="${error}" role="alert">
+      <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
+      <span th:text="${error}">Error</span>
+    </div>
+
+    <div class="row">
+      <div class="col-xl-7">
+        <div class="card-custom fact-row mb-4">
+          <div class="fact">
+            <span class="fact__icon"><i class="fa-solid fa-location-dot" aria-hidden="true"></i></span>
+            <div>
+              <div class="fact__label">Venue</div>
+              <div class="fact__value" th:text="${registration.eventVenue}">Venue</div>
+            </div>
+          </div>
+          <div class="fact" th:if="${registration.eventStartDatetime}">
+            <span class="fact__icon"><i class="fa-solid fa-calendar-days" aria-hidden="true"></i></span>
+            <div>
+              <div class="fact__label">Starts</div>
+              <div class="fact__value" th:text="${#temporals.format(registration.eventStartDatetime, 'd MMM yyyy, HH:mm')}">Date</div>
+            </div>
+          </div>
+          <div class="fact">
+            <span class="fact__icon"><i class="fa-solid fa-circle-info" aria-hidden="true"></i></span>
+            <div>
+              <div class="fact__label">Status</div>
+              <div class="fact__value" th:text="${registration.status}">Status</div>
+            </div>
+          </div>
+          <div class="fact" th:if="${registration.eventFee != null and registration.eventFee.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+            <span class="fact__icon"><i class="fa-solid fa-credit-card" aria-hidden="true"></i></span>
+            <div>
+              <div class="fact__label">Price per seat</div>
+              <div class="fact__value" th:text="'LKR ' + ${registration.eventFee}">Fee</div>
+            </div>
+          </div>
+        </div>
+
+        <section class="card-custom card-pad mb-4">
+          <form method="post" data-busy th:action="@{/registrations/{id}/edit(id=${registration.id})}">
+            <div class="mb-4">
+              <label class="form-label" for="seats">Number of seats <span class="req">*</span></label>
+              <select id="seats" name="seats" class="form-select" style="max-width:200px;">
+                <option th:each="n : ${#numbers.sequence(1, 10)}" th:value="${n}"
+                        th:text="${n == 1 ? '1 seat' : n + ' seats'}"
+                        th:selected="${n == registration.seats}">1 seat</option>
+              </select>
+              <p class="form-text">
+                Growing the booking needs that many extra seats free on the event;
+                shrinking it gives the difference straight back, which can move
+                someone up from the waitlist.
+              </p>
+            </div>
+            <div class="d-flex gap-3">
+              <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Save changes
+              </button>
+              <a th:href="@{/my-registrations}" class="btn btn-light-custom">Cancel</a>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

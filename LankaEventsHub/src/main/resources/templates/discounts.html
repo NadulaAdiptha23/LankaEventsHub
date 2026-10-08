@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Discounts')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('discounts')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">Discounts</h1>
+        <p class="page-header__sub">
+          What attendees can knock off the ticket price, and when.
+        </p>
+      </div>
+    </div>
+
+    <div th:replace="~{fragments/alerts :: flash}"></div>
+
+    <!-- ================= add ================= -->
+    <section class="card-custom mb-4">
+      <div class="card-head">
+        <div>
+          <h2>Add a discount</h2>
+          <p class="text-micro mb-0" style="color:var(--muted);">
+            One of each kind per event. Discounts never stack &mdash; an attendee gets
+            the single best one they qualify for.
+          </p>
+        </div>
+      </div>
+
+      <div class="card-pad" th:if="${#lists.isEmpty(manageableEvents)}">
+        <p class="text-micro mb-0" style="color:var(--muted);">
+          You have no events yet. Create one first and its discounts can be set up here.
+        </p>
+      </div>
+
+      <form method="post" th:action="@{/discounts}" class="card-pad" data-busy
+            th:unless="${#lists.isEmpty(manageableEvents)}">
+        <div class="row g-3 align-items-end">
+          <div class="col-12 col-lg-4">
+            <label class="form-label" for="d-event">Event</label>
+            <select class="form-select" id="d-event" name="eventId" required>
+              <option th:each="e : ${manageableEvents}" th:value="${e.id}"
+                      th:text="${e.name}">Event</option>
+            </select>
+          </div>
+          <div class="col-6 col-lg-3">
+            <label class="form-label" for="d-type">Type</label>
+            <select class="form-select" id="d-type" name="type" required>
+              <option th:each="t : ${types}" th:value="${t}"
+                      th:text="${#strings.capitalizeWords(#strings.replace(#strings.toLowerCase(t), '_', ' '))}">Type</option>
+            </select>
+          </div>
+          <div class="col-6 col-lg-2">
+            <label class="form-label" for="d-percent">Percent off</label>
+            <input class="form-control" id="d-percent" name="percentOff" type="number"
+                   min="0.01" max="100" step="0.01" required placeholder="10">
+          </div>
+          <div class="col-12 col-lg-3">
+            <label class="form-label" for="d-code">Promo code</label>
+            <input class="form-control" id="d-code" name="code" type="text" maxlength="40"
+                   placeholder="Only for promo-code discounts">
+          </div>
+          <div class="col-12 col-md-6 col-lg-4">
+            <label class="form-label" for="d-from">Valid from</label>
+            <input class="form-control" id="d-from" name="validFrom" type="datetime-local">
+          </div>
+          <div class="col-12 col-md-6 col-lg-4">
+            <label class="form-label" for="d-to">Valid until</label>
+            <input class="form-control" id="d-to" name="validTo" type="datetime-local">
+          </div>
+          <div class="col-12 col-lg-4">
+            <button type="submit" class="btn btn-primary w-100">
+              <i class="fa-solid fa-plus" aria-hidden="true"></i> Add discount
+            </button>
+          </div>
+        </div>
+        <p class="text-micro mt-3 mb-0" style="color:var(--muted);">
+          Leave the dates blank for a discount with no time limit. A promo code is
+          matched without regard to capitalisation.
+        </p>
+      </form>
+    </section>
+
+    <!-- ================= list ================= -->
+    <section class="card-custom">
+      <div class="card-head">
+        <div>
+          <h2>
+            <span th:text="${#lists.size(discounts)}">0</span>
+            <span th:text="${#lists.size(discounts) == 1} ? 'discount' : 'discounts'">discounts</span>
+          </h2>
+          <p class="text-micro mb-0" style="color:var(--muted);">
+            Switching one off stops it being offered immediately, and keeps the
+            history of the payments that used it.
+          </p>
+        </div>
+      </div>
+
+      <div th:if="${#lists.isEmpty(discounts)}">
+          <div
+               th:replace="~{fragments/components :: emptyState(
+                  'fa-tags',
+                  'No discounts yet',
+                  'Add one above and it appears at checkout for that event straight away.',
+                  null, null)}"></div>
+      </div>
+
+      <div class="table-responsive" th:unless="${#lists.isEmpty(discounts)}">
+        <table class="table-modern">
+          <caption class="visually-hidden-focusable">Discounts you manage</caption>
+          <thead>
+            <tr>
+              <th scope="col">Event</th>
+              <th scope="col">Type</th>
+              <th scope="col">Off</th>
+              <th scope="col">Code</th>
+              <th scope="col">Valid</th>
+              <th scope="col">State</th>
+              <th scope="col" class="col-actions"><span class="visually-hidden-focusable">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="d : ${discounts}">
+              <td class="cell-title" th:text="${d.eventName}">Event</td>
+              <td th:text="${#strings.capitalizeWords(#strings.replace(#strings.toLowerCase(d.type), '_', ' '))}">Type</td>
+              <td class="tnum" th:text="${d.percentOff} + '%'">0%</td>
+              <td>
+                <code th:if="${d.code != null}" th:text="${d.code}">CODE</code>
+                <span th:if="${d.code == null}" class="text-micro" style="color:var(--muted);">&mdash;</span>
+              </td>
+              <td class="text-micro" style="color:var(--muted);">
+                <span th:if="${d.validFrom == null and d.validTo == null}">Always</span>
+                <span th:unless="${d.validFrom == null and d.validTo == null}">
+                  <span th:text="${d.validFrom != null
+                        ? #temporals.format(d.validFrom, 'd MMM yyyy') : 'Any time'}">from</span>
+                  &ndash;
+                  <span th:text="${d.validTo != null
+                        ? #temporals.format(d.validTo, 'd MMM yyyy') : 'no end'}">to</span>
+                </span>
+              </td>
+              <td>
+                <!-- Two different things: switched on by its owner, and
+                     usable right now. A discount can be on but out of its
+                     date window, and saying only "Active" would hide that. -->
+                <span th:replace="~{fragments/components :: statusPill(
+                      ${d.currentlyValid ? 'LIVE' : (d.active ? 'SCHEDULED' : 'OFF')},
+                      ${d.currentlyValid ? 'badge-success-soft'
+                        : (d.active ? 'badge-warning-soft' : 'badge-gray-soft')})}"></span>
+              </td>
+              <td class="col-actions">
+                <div class="d-flex gap-2 flex-wrap">
+                  <a th:href="@{/discounts/{id}/edit(id=${d.id})}" class="btn btn-light-custom btn-sm">
+                    <i class="fa-solid fa-pen" aria-hidden="true"></i> Edit
+                  </a>
+                  <form method="post" data-busy
+                        th:action="@{/discounts/{id}/toggle(id=${d.id})}">
+                    <input type="hidden" name="active" th:value="${!d.active}">
+                    <button type="submit" class="btn btn-light-custom btn-sm"
+                            th:text="${d.active} ? 'Switch off' : 'Switch on'">Toggle</button>
+                  </form>
+                  <form method="post" data-busy
+                        th:action="@{/discounts/{id}/delete(id=${d.id})}">
+                    <button type="submit" class="btn btn-light-custom btn-sm">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card-pad text-micro" style="color:var(--muted);border-top:1px solid var(--border);"
+           th:unless="${#lists.isEmpty(discounts)}">
+        A discount that has already been applied to a payment cannot be deleted &mdash;
+        that would erase why the payment was cheaper. Switch it off instead.
+      </div>
+    </section>
+  </main>
+</div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

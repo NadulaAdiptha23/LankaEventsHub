@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<!--
+  ====================================================================
+  Dashboard navigation.
+
+  Grouped into MAIN / MANAGEMENT / ACCOUNT rather than presented as one
+  flat list. With seven or eight destinations a flat list is just a
+  column of equally-weighted words; the groups say which of them are the
+  day-to-day work and which are occasional.
+
+  Each role gets its own set, chosen by sec:authorize - the same
+  expressions as before. This is a convenience, not a control: every
+  destination re-checks authorization on the server.
+
+  Under 992px this becomes an off-canvas drawer (see theme.css §16 and
+  the mobileBar fragment below). It used to reflow into a wrapped strip
+  of pills across the top of the page, which cost a third of the screen
+  on a phone.
+  ====================================================================
+-->
+<aside th:fragment="side(active)" class="sidebar" id="app-sidebar">
+    <!-- A link, not a label: the wordmark goes home from inside the
+         application exactly as it does from the public pages. -->
+    <a class="sidebar__brand" th:href="@{/}" aria-label="Verdant Events — home">
+        <span class="brand-mark" aria-hidden="true">
+            <th:block th:replace="~{fragments/navbar :: mark}"></th:block>
+        </span>
+        <div>
+            <div class="sidebar__brand-name">Verdant Events</div>
+            <div class="sidebar__brand-role" sec:authorize="hasRole('ATTENDEE')">Attendee</div>
+            <div class="sidebar__brand-role" sec:authorize="hasRole('ORGANIZER')">Organizer</div>
+            <div class="sidebar__brand-role" sec:authorize="hasRole('ADMIN')">Administrator</div>
+        </div>
+    </a>
+
+    <nav class="sidebar__nav" aria-label="Dashboard">
+
+        <!-- ---------------- Attendee ---------------- -->
+        <div sec:authorize="hasRole('ATTENDEE')">
+            <div class="sidebar__group">
+                <span class="sidebar__group-label">Main</span>
+                <a th:href="@{/my-registrations}"
+                   th:classappend="${active == 'dashboard' or active == 'registrations'} ? 'active'">
+                    <i class="fa-solid fa-gauge" aria-hidden="true"></i> Dashboard
+                </a>
+                <a th:href="@{/events}" th:classappend="${active == 'events'} ? 'active'">
+                    <i class="fa-solid fa-calendar-days" aria-hidden="true"></i> Browse Events
+                </a>
+            </div>
+            <div class="sidebar__group">
+                <span class="sidebar__group-label">Account</span>
+                <a th:href="@{/notifications}" th:classappend="${active == 'notifications'} ? 'active'">
+                    <i class="fa-solid fa-bell" aria-hidden="true"></i> Notifications
+                    <span class="sidebar__count" th:if="${unreadNotifications != null and unreadNotifications > 0}"
+                          th:text="${unreadNotifications}">0</span>
+                </a>
+                <a th:href="@{/reports}" th:classappend="${active == 'savedreports'} ? 'active'">
+                    <i class="fa-solid fa-chart-simple" aria-hidden="true"></i> My Reports
+                </a>
+                <a th:href="@{/profile}" th:classappend="${active == 'profile'} ? 'active'">
+                    <i class="fa-solid fa-user" aria-hidden="true"></i> Profile
+                </a>
+            </div>
+        </div>
+
+        <!-- ---------------- Organizer ---------------- -->
+        <div sec:authorize="hasRole('ORGANIZER')">
+            <div class="sidebar__group">
+                <span class="sidebar__group-label">Main</span>
+                <a th:href="@{/my-events}"
+                   th:classappend="${active == 'dashboard' or active == 'myevents'} ? 'active'">
+                    <i class="fa-solid fa-gauge" aria-hidden="true"></i> Dashboard
+                </a>
+                <a th:href="@{/events/new}" th:classappend="${active == 'create'} ? 'active'">
+                    <i class="fa-solid fa-circle-plus" aria-hidden="true"></i> Create Event
+                </a>
+                <a th:href="@{/events}" th:classappend="${active == 'events'} ? 'active'">
+                    <i class="fa-solid fa-calendar-days" aria-hidden="true"></i> Browse Events
+                </a>
+            </div>
+            <div class="sidebar__group">
+                <span class="sidebar__group-label">Management</span>
+                <a th:href="@{/my-registrations}" th:classappend="${active == 'registrations'} ? 'active'">
+                    <i class="fa-solid fa-ticket" aria-hidden="true"></i> My Registrations
+                </a>
+                <a th:href="@{/discounts}" th:classappend="${active == 'discounts'} ? 'active'">
+                    <i class="fa-solid fa-tags" aria-hidden="true"></i> Discounts
+                </a>
+            </div>
+            <div class="sidebar__group">
+                <span class="sidebar__group-label">Account</span>
+                <a th:href="@{/notifications}" th:classappend="${active == 'notifications'} ? 'active'">
+                    <i class="fa-solid fa-bell" aria-hidden="true"></i> Notifications
+                    <span class="sidebar__count" th:if="${unreadNotifications != null and unreadNotifications > 0}"
+                          th:text="${unreadNotifications}">0</span>
+                </a>
+                <a th:href="@{/reports}" th:classappend="${active == 'savedreports'} ? 'active'">
+                    <i class="fa-solid fa-chart-simple" aria-hidden="true"></i> My Reports
+                </a>
+                <a th:href="@{/profile}" th:classappend="${active == 'profile'} ? 'active'">
+                    <i class="fa-solid fa-user" aria-hidden="true"></i> Profile
+                </a>
+            </div>
+        </div>
+
+        <!-- ---------------- Administrator ---------------- -->
+        <div sec:authorize="hasRole('ADMIN')">
+            <div class="sidebar__group">
+                <span class="sidebar__group-label">Main</span>
+                <a th:href="@{/admin/reports}"
+                   th:classappend="${active == 'dashboard' or active == 'reports'} ? 'active'">
+                    <i class="fa-solid fa-chart-line" aria-hidden="true"></i> Reports
+                </a>
+                <a th:href="@{/my-events}" th:classappend="${active == 'myevents'} ? 'active'">
+                    <i class="fa-solid fa-calendar-check" aria-hidden="true"></i> All Events
+                </a>
+                <a th:href="@{/events}" th:classappend="${active == 'events'} ? 'active'">
+                    <i class="fa-solid fa-calendar-days" aria-hidden="true"></i> Browse Events
+                </a>
+            </div>
+            <div class="sidebar__group">
+                <span class="sidebar__group-label">Management</span>
+                <a th:href="@{/admin/events}" th:classappend="${active == 'approvals'} ? 'active'">
+                    <i class="fa-solid fa-circle-check" aria-hidden="true"></i> Approvals
+                </a>
+                <a th:href="@{/admin/users}" th:classappend="${active == 'users'} ? 'active'">
+                    <i class="fa-solid fa-users" aria-hidden="true"></i> Users
+                </a>
+                <a th:href="@{/admin/bookings}" th:classappend="${active == 'bookings'} ? 'active'">
+                    <i class="fa-solid fa-ticket" aria-hidden="true"></i> Bookings
+                </a>
+                <a th:href="@{/admin/discounts}" th:classappend="${active == 'discounts'} ? 'active'">
+                    <i class="fa-solid fa-tags" aria-hidden="true"></i> Discounts
+                </a>
+                <a th:href="@{/admin/refunds}" th:classappend="${active == 'refunds'} ? 'active'">
+                    <i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Refunds
+                </a>
+                <a th:href="@{/admin/announcements}" th:classappend="${active == 'announcements'} ? 'active'">
+                    <i class="fa-solid fa-bullhorn" aria-hidden="true"></i> Announcements
+                    <span class="sidebar__count" th:if="${pendingAnnouncements != null and pendingAnnouncements > 0}"
+                          th:text="${pendingAnnouncements}">0</span>
+                </a>
+                <a th:href="@{/admin/audit}" th:classappend="${active == 'audit'} ? 'active'">
+                    <i class="fa-solid fa-clipboard-list" aria-hidden="true"></i> Audit log
+                </a>
+                <a th:href="@{/reports}" th:classappend="${active == 'savedreports'} ? 'active'">
+                    <i class="fa-solid fa-chart-simple" aria-hidden="true"></i> My Reports
+                </a>
+            </div>
+            <div class="sidebar__group">
+                <span class="sidebar__group-label">Account</span>
+                <a th:href="@{/notifications}" th:classappend="${active == 'notifications'} ? 'active'">
+                    <i class="fa-solid fa-bell" aria-hidden="true"></i> Notifications
+                    <span class="sidebar__count" th:if="${unreadNotifications != null and unreadNotifications > 0}"
+                          th:text="${unreadNotifications}">0</span>
+                </a>
+                <a th:href="@{/profile}" th:classappend="${active == 'profile'} ? 'active'">
+                    <i class="fa-solid fa-user" aria-hidden="true"></i> Profile
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="sidebar__foot">
+        <span class="avatar"
+              th:text="${#strings.toUpperCase(#strings.substring(#authentication.name,0,1))}">U</span>
+        <div class="sidebar__user">
+            <div class="sidebar__user-name truncate" sec:authentication="name">user@eventsphere.test</div>
+            <form method="post" th:action="@{/logout}" class="m-0">
+                <button type="submit" class="sidebar__logout">
+                    <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i> Sign out
+                </button>
+            </form>
+        </div>
+    </div>
+</aside>
+
+<!--
+  The bar that replaces the sidebar on a phone. It is a sibling of the
+  drawer rather than part of it, so the drawer can slide over the page
+  while this stays put.
+-->
+<div th:fragment="mobileBar" class="mobile-bar">
+    <a class="mobile-bar__brand" th:href="@{/}">
+        <span class="brand-mark" aria-hidden="true">
+            <th:block th:replace="~{fragments/navbar :: mark}"></th:block>
+        </span>
+        Verdant Events
+    </a>
+    <button type="button" class="mobile-bar__toggle" data-drawer-toggle
+            aria-controls="app-sidebar" aria-expanded="false" aria-label="Open navigation menu">
+        <i class="fa-solid fa-bars" aria-hidden="true"></i>
+    </button>
+</div>
+</body>
+</html>

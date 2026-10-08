@@ -1,0 +1,55 @@
+/*
+  The two brand faces, served by this application.
+
+  Previously these came from Google Fonts, which means every page load
+  depended on a third-party host being reachable - and on a network that
+  blocks it (a corporate proxy, an exam hall, a plane) the entire
+  typographic identity silently falls back to Times and Arial. Vendoring
+  them is two fewer DNS lookups and two fewer TLS handshakes in the
+  critical path, and the brand renders even offline.
+
+  Latin subset only, and only the weights the stylesheet actually asks
+  for: seven files, 380KB in total.
+
+  font-display: swap so text is readable immediately and reflows once,
+  rather than being invisible while a font loads.
+*/
+
+/* --- Playfair Display — headings --------------------------------- */
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal; font-weight: 400; font-display: swap;
+  src: url('fonts/playfair-display-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal; font-weight: 500; font-display: swap;
+  src: url('fonts/playfair-display-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal; font-weight: 600; font-display: swap;
+  src: url('fonts/playfair-display-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: italic; font-weight: 400; font-display: swap;
+  src: url('fonts/playfair-display-latin-400-italic.woff2') format('woff2');
+}
+
+/* --- DM Sans — everything a person operates ---------------------- */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal; font-weight: 400; font-display: swap;
+  src: url('fonts/dm-sans-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal; font-weight: 500; font-display: swap;
+  src: url('fonts/dm-sans-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal; font-weight: 700; font-display: swap;
+  src: url('fonts/dm-sans-latin-700-normal.woff2') format('woff2');
+}

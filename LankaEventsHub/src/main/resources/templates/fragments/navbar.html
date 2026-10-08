@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<!-- ==================================================================
+     THE VERDANT EVENTS MARK
+
+     An inline SVG rather than the PNG lockup: the navbar needs a 34px
+     mark, the supplied logo is a 1200px square that also carries the
+     wordmark and the tagline, and scaling that down produces mush at
+     the size it is actually used. The full lockup is used where it has
+     room to breathe - the auth pages and the footer.
+
+     currentColor on the V means the mark inverts with the navbar
+     automatically when the bar is transparent over the hero.
+     ================================================================== -->
+<th:block th:fragment="mark">
+    <svg viewBox="0 0 40 40" role="img" aria-label="Verdant Events" focusable="false">
+        <path d="M31.5 9A16.5 16.5 0 1 0 34 24" fill="none"
+              stroke="#B08D57" stroke-width="1.3" stroke-linecap="round" opacity="0.9"/>
+        <path d="M8.6 9.4h7.4L19.8 27l3.4-17.6h2.2L20.9 34h-3.4z" fill="currentColor"/>
+        <path d="M21.4 24.6c1.5-7.6 6.3-12.8 13.1-15.6-1.1 8.8-5.1 14.6-11.4 17.9z"
+              fill="#B08D57"/>
+    </svg>
+</th:block>
+
+
+<!-- ==================================================================
+     PUBLIC NAVIGATION
+
+     The links a visitor sees are decided by Spring Security's own
+     sec:authorize, not by anything this markup guesses. Hiding a link
+     was never the access control - every destination re-checks on the
+     server - but showing someone a dashboard they cannot open is still
+     a bad page.
+
+     `solid` is passed true by every page that has no hero behind the
+     bar, so those pages never render the transparent state even for a
+     single frame. `active` names the current section, so the rule under
+     the right link is drawn on the server rather than guessed by a
+     script reading the URL.
+     ================================================================== -->
+<!--
+  expand-XL, not expand-lg. Bootstrap's lg breakpoint (992px) would lay
+  this bar out horizontally from 992px up, and it does not fit there:
+  the lockup, five section links, My Bookings, the notifications
+  button, Dashboard and the account menu measure about 1127px at their
+  designed spacing when somebody is signed in. The result between 992
+  and 1200 was a horizontal scrollbar on every public page - and only
+  for signed-in visitors, which is exactly the kind of bug that
+  survives a demo.
+
+  Below 1200px the bar uses the drawer instead. Squeezing the spacing
+  until it happened to fit was the first attempt and it was the wrong
+  shape of fix: the budget depends on which links the viewer's role
+  puts in the bar, so it would have to be re-tuned every time a link
+  is added.
+-->
+<nav th:fragment="nav(active, solid)"
+     class="navbar navbar-public navbar-expand-xl"
+     th:classappend="${solid} ? 'navbar-public--solid' : ''"
+     aria-label="Main">
+    <div class="container">
+
+        <!--
+          The wordmark is an anchor to "/" on EVERY page, which is what
+          makes it work from Events, Services, About, Contact and the
+          auth pages with no script at all. On the homepage itself
+          app.js additionally turns the click into a smooth scroll back
+          to the top rather than a reload.
+        -->
+        <a class="navbar-brand" th:href="@{/}" aria-label="Verdant Events — home">
+            <span class="brand-mark" aria-hidden="true">
+                <th:block th:replace="~{fragments/navbar :: mark}"></th:block>
+            </span>
+            <span class="brand-word">
+                <span class="brand-word__name">Verdant Events</span>
+                <span class="brand-word__sub">Event Management</span>
+            </span>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navMain" aria-controls="navMain"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navMain">
+            <ul class="navbar-nav mx-auto mb-3 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/}"
+                       th:classappend="${active == 'home'} ? 'active' : ''">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/events}"
+                       th:classappend="${active == 'events'} ? 'active' : ''">Events</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/services}"
+                       th:classappend="${active == 'services'} ? 'active' : ''">Services</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/about}"
+                       th:classappend="${active == 'about'} ? 'active' : ''">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/contact}"
+                       th:classappend="${active == 'contact'} ? 'active' : ''">Contact</a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" th:href="@{/my-registrations}"
+                       th:classappend="${active == 'bookings'} ? 'active' : ''">My Bookings</a>
+                </li>
+            </ul>
+
+            <!-- Signed out -->
+            <div class="d-flex align-items-center gap-2" sec:authorize="!isAuthenticated()">
+                <a class="btn btn-ghost" th:href="@{/login}">Sign In</a>
+                <a class="btn btn-primary" th:href="@{/register}">Get Started</a>
+            </div>
+
+            <!-- Signed in -->
+            <div class="d-flex align-items-center gap-2" sec:authorize="isAuthenticated()">
+                <a class="btn btn-icon btn-ghost" th:href="@{/notifications}"
+                   aria-label="Notifications" title="Notifications">
+                    <i class="fa-solid fa-bell" aria-hidden="true"></i>
+                </a>
+
+                <a class="btn btn-light-custom btn-sm" sec:authorize="hasRole('ATTENDEE')"
+                   th:href="@{/my-registrations}">Dashboard</a>
+                <a class="btn btn-light-custom btn-sm" sec:authorize="hasRole('ORGANIZER')"
+                   th:href="@{/my-events}">Dashboard</a>
+                <a class="btn btn-light-custom btn-sm" sec:authorize="hasRole('ADMIN')"
+                   th:href="@{/admin/reports}">Dashboard</a>
+
+                <div class="action-menu">
+                    <button type="button" class="action-menu__trigger" style="width:2.25rem;height:2.25rem;"
+                            aria-haspopup="true" aria-expanded="false" aria-label="Account menu">
+                        <span class="avatar avatar-sm"
+                              th:text="${#strings.toUpperCase(#strings.substring(#authentication.name,0,1))}">U</span>
+                    </button>
+                    <div class="action-menu__list">
+                        <div class="px-2 py-1">
+                            <div class="text-micro text-muted-custom">Signed in as</div>
+                            <div class="text-meta fw-semibold truncate text-heading"
+                                 sec:authentication="name">you@example.com</div>
+                        </div>
+                        <div class="action-menu__sep"></div>
+                        <a th:href="@{/profile}"><i class="fa-solid fa-user" aria-hidden="true"></i> Profile</a>
+                        <a th:href="@{/notifications}"><i class="fa-solid fa-bell" aria-hidden="true"></i> Notifications</a>
+                        <div class="action-menu__sep"></div>
+                        <form method="post" th:action="@{/logout}">
+                            <button type="submit" class="is-danger">
+                                <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i> Sign out
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+</body>
+</html>

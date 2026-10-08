@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Add User')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('users')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">Add a user</h1>
+        <p class="page-header__sub">
+          Creates an active account directly - no sign-up email is sent. The
+          person can sign in with the password you set below, or you can
+          hand it to them another way.
+        </p>
+      </div>
+      <div class="page-header__actions">
+        <a th:href="@{/admin/users}" class="btn btn-light-custom">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Users
+        </a>
+      </div>
+    </div>
+
+    <div class="alert-custom alert-error" th:if="${error}" role="alert">
+      <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
+      <span th:text="${error}">Error</span>
+    </div>
+
+    <div class="row">
+      <div class="col-xl-8">
+        <form method="post" data-busy th:action="@{/admin/users}">
+
+          <section class="card-custom card-pad mb-4">
+            <div class="form-section">
+              <div class="form-section__head">
+                <span class="form-section__num">1</span>
+                <div>
+                  <h2 class="form-section__title">Account details</h2>
+                  <p class="form-section__sub">Who they are and how they sign in.</p>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label" for="fullName">Full name <span class="req">*</span></label>
+                <input type="text" id="fullName" name="fullName" class="form-control" required
+                       maxlength="150" th:value="${fullName}">
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label" for="email">Email <span class="req">*</span></label>
+                <input type="email" id="email" name="email" class="form-control" required
+                       maxlength="150" th:value="${email}">
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-4">
+                  <label class="form-label" for="password">Password <span class="req">*</span></label>
+                  <input type="password" id="password" name="password" class="form-control"
+                         required minlength="8">
+                  <p class="form-text">At least 8 characters.</p>
+                </div>
+                <div class="col-md-6 mb-4">
+                  <label class="form-label" for="confirmPassword">Confirm password <span class="req">*</span></label>
+                  <input type="password" id="confirmPassword" name="confirmPassword" class="form-control"
+                         required minlength="8">
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="card-custom card-pad mb-4">
+            <div class="form-section">
+              <div class="form-section__head">
+                <span class="form-section__num">2</span>
+                <div>
+                  <h2 class="form-section__title">Access</h2>
+                  <p class="form-section__sub">
+                    An account created here can be any role, including
+                    Administrator - unlike the public sign-up form, which
+                    never allows that.
+                  </p>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label" for="role">Role <span class="req">*</span></label>
+                <select id="role" name="role" class="form-select" required>
+                  <option th:each="r : ${roles}" th:value="${r}" th:text="${r}"
+                          th:selected="${r == selectedRole}">Role</option>
+                </select>
+              </div>
+
+              <div class="form-check mb-3">
+                <input type="checkbox" class="form-check-input" id="active" name="active"
+                       value="true" th:checked="${active == null ? true : active}">
+                <label class="form-check-label" for="active">Active</label>
+                <p class="form-text">Leave checked unless you want the account created suspended.</p>
+              </div>
+
+              <div class="form-check mb-3">
+                <input type="checkbox" class="form-check-input" id="verifiedStudent" name="verifiedStudent"
+                       value="true" th:checked="${verifiedStudent}">
+                <label class="form-check-label" for="verifiedStudent">Verified student</label>
+                <p class="form-text">Unlocks the STUDENT discount on paid events. Verify the student ID off-system before checking this.</p>
+              </div>
+            </div>
+          </section>
+
+          <div class="d-flex gap-3">
+            <button type="submit" class="btn btn-primary">
+              <i class="fa-solid fa-user-plus" aria-hidden="true"></i> Create account
+            </button>
+            <a th:href="@{/admin/users}" class="btn btn-light-custom">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

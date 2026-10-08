@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Review Registration')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('dashboard')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">Review your registration</h1>
+        <p class="page-header__sub" th:text="${event.name}">Event</p>
+      </div>
+      <div class="page-header__actions">
+        <a th:href="@{/events/{id}(id=${event.id})}" class="btn btn-light-custom">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back to event
+        </a>
+      </div>
+    </div>
+
+    <div class="alert-custom alert-info mb-4" th:if="${wouldWaitlist}">
+      <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+      <span>This event is full - confirming below joins the waitlist instead of a seat. You'll be
+            notified automatically if a place opens up.</span>
+    </div>
+
+    <div class="row">
+      <div class="col-xl-7">
+
+        <!-- Event information -->
+        <section class="card-custom card-pad mb-4">
+          <h2 class="form-section__title mb-3">Event</h2>
+          <div class="fact-row">
+            <div class="fact">
+              <span class="fact__icon"><i class="fa-solid fa-calendar-days" aria-hidden="true"></i></span>
+              <div>
+                <div class="fact__label">Date</div>
+                <div class="fact__value" th:text="${event.startDatetime != null
+                        ? #temporals.format(event.startDatetime, 'EEEE, d MMMM yyyy, HH:mm')
+                        : 'To be confirmed'}">Date</div>
+              </div>
+            </div>
+            <div class="fact">
+              <span class="fact__icon"><i class="fa-solid fa-location-dot" aria-hidden="true"></i></span>
+              <div>
+                <div class="fact__label">Venue</div>
+                <div class="fact__value" th:text="${event.venue ?: 'To be confirmed'}">Venue</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Personal details: shown for confirmation, not editable here.
+             Name and email belong to the account, not the booking, so
+             this page displays them rather than collecting a second,
+             possibly-drifting copy - see the profile page to change them. -->
+        <section class="card-custom card-pad mb-4">
+          <h2 class="form-section__title mb-3">Registering as</h2>
+          <div class="fact-row">
+            <div class="fact">
+              <span class="fact__icon"><i class="fa-solid fa-user" aria-hidden="true"></i></span>
+              <div>
+                <div class="fact__label">Name</div>
+                <div class="fact__value" th:text="${attendeeName}">Name</div>
+              </div>
+            </div>
+            <div class="fact">
+              <span class="fact__icon"><i class="fa-solid fa-envelope" aria-hidden="true"></i></span>
+              <div>
+                <div class="fact__label">Email</div>
+                <div class="fact__value" th:text="${attendeeEmail}">Email</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Price summary: subtotal shown here is a PREVIEW only. The
+             actual charge is computed again, from scratch, on the server
+             when the booking is created - this number is for the
+             attendee's benefit, not a value anything downstream trusts. -->
+        <section class="card-custom card-pad mb-4" th:if="${feePerSeat.signum() > 0}">
+          <h2 class="form-section__title mb-3">Price summary</h2>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Price per seat</span>
+            <span th:text="'LKR ' + ${#numbers.formatDecimal(feePerSeat, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span th:text="'Seats (' + ${seats} + ')'">Seats</span>
+            <span></span>
+          </div>
+          <hr>
+          <div class="d-flex justify-content-between mb-2">
+            <strong>Subtotal</strong>
+            <strong th:text="'LKR ' + ${#numbers.formatDecimal(subtotal, 1, 'COMMA', 2, 'POINT')}">0.00</strong>
+          </div>
+          <p class="form-text mb-0">
+            Any discount you're eligible for (early bird, student, promo code
+            or group) is applied at checkout, after this booking is created -
+            it needs the discount rules re-checked against the real booking,
+            not a guess made before it exists.
+          </p>
+        </section>
+
+        <form method="post" data-busy th:action="@{/events/{id}/register(id=${event.id})}">
+          <input type="hidden" name="seats" th:value="${seats}">
+          <button type="submit" class="btn btn-primary btn-lg btn-block">
+            <i class="fa-solid fa-ticket" aria-hidden="true"></i>
+            <span th:if="${wouldWaitlist}">Join the waitlist</span>
+            <span th:if="${!wouldWaitlist and feePerSeat.signum() > 0}">Confirm Registration &amp; Continue to Payment</span>
+            <span th:if="${!wouldWaitlist and feePerSeat.signum() == 0}">Confirm Registration</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

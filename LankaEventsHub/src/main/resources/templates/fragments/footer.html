@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--
+  The footer.
+
+  Four columns on an obsidian ground, opened by the full lockup so the
+  brand closes the page the way it opened it. The contact block carries
+  the project's own details; the note about social accounts stays,
+  because inventing an Instagram URL that goes nowhere is worse than
+  saying plainly that there isn't one.
+-->
+<footer th:fragment="foot" class="footer-dark">
+    <div class="container-editorial">
+
+        <div class="footer-dark__top">
+            <div class="footer-brand">
+                <span class="footer-brand__mark" aria-hidden="true">
+                    <th:block th:replace="~{fragments/navbar :: mark}"></th:block>
+                </span>
+                <span>
+                    <span class="footer-brand__name">Verdant Events</span>
+                    <span class="footer-brand__tag">Events that create lasting moments</span>
+                </span>
+            </div>
+            <p class="footer-dark__lede">
+                Event management and event discovery in one platform &mdash; conferences,
+                workshops, celebrations and everything in between.
+            </p>
+        </div>
+
+        <hr class="rule rule--dark">
+
+        <div class="row g-5 footer-dark__cols">
+            <div class="col-lg-3 col-6">
+                <h6>Navigation</h6>
+                <ul class="list-unstyled mb-0">
+                    <li><a th:href="@{/}">Home</a></li>
+                    <li><a th:href="@{/events}">Events</a></li>
+                    <li><a th:href="@{/services}">Services</a></li>
+                    <li><a th:href="@{/about}">About</a></li>
+                    <li><a th:href="@{/contact}">Contact</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-3 col-6">
+                <h6>Account</h6>
+                <ul class="list-unstyled mb-0">
+                    <li><a th:href="@{/login}">Sign In</a></li>
+                    <li><a th:href="@{/register}">Get Started</a></li>
+                    <li><a th:href="@{/my-registrations}">My bookings</a></li>
+                    <li><a th:href="@{/forgot-password}">Forgot password</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-3 col-6">
+                <h6>Contact</h6>
+                <ul class="list-unstyled mb-0">
+                    <li>123 Event Street, Colombo 03</li>
+                    <li><a href="mailto:hello@verdantevents.lk">hello@verdantevents.lk</a></li>
+                    <li><a href="tel:+94112345678">+94 11 234 5678</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-3 col-6">
+                <h6>Social</h6>
+                <!--
+                  Deliberately not a row of icons linking to "#".
+
+                  There are no Verdant Events social accounts, and a
+                  footer full of dead links to invented profiles is a
+                  claim, not decoration.
+                -->
+                <p class="footer-dark__note mb-0">
+                    No social accounts are published for this platform yet, so none are
+                    linked here. Enquiries go to the address above.
+                </p>
+            </div>
+        </div>
+
+        <div class="footer-dark__bottom">
+            <span>&copy; 2026 Verdant Events. All rights reserved.</span>
+            <span>Built for SE2030 &mdash; Group 2026-Y2-S1-MLB-B1G1-05.</span>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

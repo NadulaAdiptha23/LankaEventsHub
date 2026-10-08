@@ -1,0 +1,888 @@
+{
+ "admin-refunds.html": {
+  "authorize": [],
+  "fields": [],
+  "forms": [
+   {
+    "action": "@{/admin/refunds/{id}/advance(id=${r.id})}",
+    "fields": [],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/head :: head('Refunds')}",
+   "~{fragments/sidebar :: side('refunds')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "lists",
+   "numbers",
+   "r",
+   "refunds"
+  ],
+  "urls": [
+   "@{/admin/refunds/{id}/advance(id=${r.id})}"
+  ]
+ },
+ "admin-reports.html": {
+  "authorize": [],
+  "fields": [],
+  "forms": [],
+  "fragments": [
+   "~{fragments/head :: head('Reports and Analytics')}",
+   "~{fragments/sidebar :: side('reports')}"
+  ],
+  "js_ids": [
+   "categoryChart",
+   "regChart"
+  ],
+  "model": [
+   "e",
+   "lists",
+   "maps",
+   "numbers",
+   "summary"
+  ],
+  "urls": [
+   "@{/admin/events}",
+   "@{/admin/users}"
+  ]
+ },
+ "admin-users.html": {
+  "authorize": [],
+  "fields": [
+   "role",
+   "verified"
+  ],
+  "forms": [
+   {
+    "action": "@{/admin/users/{id}/role(id=${user.id})}",
+    "fields": [
+     "role"
+    ],
+    "method": "post"
+   },
+   {
+    "action": "@{/admin/users/{id}/toggle-active(id=${user.id})}",
+    "fields": [],
+    "method": "post"
+   },
+   {
+    "action": "@{/admin/users/{id}/verify-student(id=${user.id})}",
+    "fields": [
+     "verified"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/head :: head('Manage Users')}",
+   "~{fragments/sidebar :: side('users')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "lists",
+   "r",
+   "roles",
+   "strings",
+   "user",
+   "users"
+  ],
+  "urls": [
+   "@{/admin/events}",
+   "@{/admin/reports}",
+   "@{/admin/users/{id}/role(id=${user.id})}",
+   "@{/admin/users/{id}/toggle-active(id=${user.id})}",
+   "@{/admin/users/{id}/verify-student(id=${user.id})}"
+  ]
+ },
+ "error.html": {
+  "authorize": [],
+  "fields": [],
+  "forms": [],
+  "fragments": [
+   "~{fragments/footer :: foot}",
+   "~{fragments/head :: head('Something went wrong')}",
+   "~{fragments/navbar :: nav}"
+  ],
+  "js_ids": [],
+  "model": [
+   "error",
+   "message",
+   "status"
+  ],
+  "urls": [
+   "@{/events}",
+   "@{/}"
+  ]
+ },
+ "event-attendees.html": {
+  "authorize": [],
+  "fields": [],
+  "forms": [],
+  "fragments": [
+   "~{fragments/head :: head('Attendees')}",
+   "~{fragments/sidebar :: side('myevents')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "event",
+   "lists",
+   "r",
+   "registrations"
+  ],
+  "urls": [
+   "@{/my-events}"
+  ]
+ },
+ "event-detail.html": {
+  "authorize": [
+   "!isAuthenticated()",
+   "isAuthenticated()"
+  ],
+  "fields": [],
+  "forms": [
+   {
+    "action": "@{/events/{id}/cancel(id=${event.id})}",
+    "fields": [],
+    "method": "post"
+   },
+   {
+    "action": "@{/events/{id}/register(id=${event.id})}",
+    "fields": [],
+    "method": "post"
+   },
+   {
+    "action": "@{/events/{id}/request-invitation(id=${event.id})}",
+    "fields": [],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/footer :: foot}",
+   "~{fragments/head :: head('Event Details')}",
+   "~{fragments/navbar :: nav}"
+  ],
+  "js_ids": [],
+  "model": [
+   "availability",
+   "canManage",
+   "event",
+   "iter",
+   "session"
+  ],
+  "urls": [
+   "@{/events/{id}/attendees(id=${event.id})}",
+   "@{/events/{id}/cancel(id=${event.id})}",
+   "@{/events/{id}/edit(id=${event.id})}",
+   "@{/events/{id}/invitations(id=${event.id})}",
+   "@{/events/{id}/register(id=${event.id})}",
+   "@{/events/{id}/request-invitation(id=${event.id})}",
+   "@{/events}",
+   "@{/login}",
+   "@{/register}"
+  ]
+ },
+ "event-edit.html": {
+  "authorize": [],
+  "fields": [
+   "bannerUrl",
+   "capacity",
+   "category",
+   "contactDetails",
+   "contactPerson",
+   "description",
+   "endDatetime",
+   "eventType",
+   "fee",
+   "name",
+   "registrationDeadline",
+   "registrationOpenDate",
+   "specialInstructions",
+   "startDatetime",
+   "venue"
+  ],
+  "forms": [
+   {
+    "action": "@{/events/{id}/edit(id=${event.id})}",
+    "fields": [
+     "bannerUrl",
+     "capacity",
+     "category",
+     "contactDetails",
+     "contactPerson",
+     "description",
+     "endDatetime",
+     "eventType",
+     "fee",
+     "name",
+     "registrationDeadline",
+     "registrationOpenDate",
+     "specialInstructions",
+     "startDatetime",
+     "venue"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/head :: head('Edit Event')}",
+   "~{fragments/sidebar :: side('myevents')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "event",
+   "temporals"
+  ],
+  "urls": [
+   "@{/events/{id}(id=${event.id})}",
+   "@{/events/{id}/edit(id=${event.id})}",
+   "@{/my-events}"
+  ]
+ },
+ "event-form.html": {
+  "authorize": [],
+  "fields": [
+   "bannerUrl",
+   "capacity",
+   "category",
+   "contactDetails",
+   "contactPerson",
+   "description",
+   "endDatetime",
+   "eventType",
+   "fee",
+   "name",
+   "registrationDeadline",
+   "registrationOpenDate",
+   "specialInstructions",
+   "startDatetime",
+   "venue"
+  ],
+  "forms": [
+   {
+    "action": "@{/events/new}",
+    "fields": [
+     "bannerUrl",
+     "capacity",
+     "category",
+     "contactDetails",
+     "contactPerson",
+     "description",
+     "endDatetime",
+     "eventType",
+     "fee",
+     "name",
+     "registrationDeadline",
+     "registrationOpenDate",
+     "specialInstructions",
+     "startDatetime",
+     "venue"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/head :: head('Create Event')}",
+   "~{fragments/sidebar :: side('create')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "c",
+   "form",
+   "temporals"
+  ],
+  "urls": [
+   "@{/events/new}",
+   "@{/my-events}"
+  ]
+ },
+ "event-list.html": {
+  "authorize": [],
+  "fields": [
+   "category",
+   "keyword",
+   "venue"
+  ],
+  "forms": [
+   {
+    "action": "@{/events}",
+    "fields": [
+     "category",
+     "keyword",
+     "venue"
+    ],
+    "method": "get"
+   }
+  ],
+  "fragments": [
+   "~{fragments/footer :: foot}",
+   "~{fragments/head :: head('Events')}",
+   "~{fragments/navbar :: nav}"
+  ],
+  "js_ids": [],
+  "model": [
+   "cat",
+   "event",
+   "events",
+   "keyword",
+   "lists",
+   "venue"
+  ],
+  "urls": [
+   "@{/events/{id}(id=${event.id})}",
+   "@{/events}"
+  ]
+ },
+ "events-admin.html": {
+  "authorize": [],
+  "fields": [],
+  "forms": [
+   {
+    "action": "@{/admin/events/{id}/approve(id=${event.id})}",
+    "fields": [],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/head :: head('Event Approvals')}",
+   "~{fragments/sidebar :: side('approvals')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "event",
+   "events",
+   "lists"
+  ],
+  "urls": [
+   "@{/admin/events/{id}/approve(id=${event.id})}",
+   "@{/admin/reports}",
+   "@{/admin/users}",
+   "@{/events/{id}(id=${event.id})}",
+   "@{/events/{id}/attendees(id=${event.id})}",
+   "@{/my-events}"
+  ]
+ },
+ "forgot-password.html": {
+  "authorize": [],
+  "fields": [
+   "email"
+  ],
+  "forms": [
+   {
+    "action": "@{/forgot-password}",
+    "fields": [
+     "email"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/head :: head('Forgot Password')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "devMode",
+   "devResetLink",
+   "submitted"
+  ],
+  "urls": [
+   "@{${devResetLink}}",
+   "@{/forgot-password}",
+   "@{/login}"
+  ]
+ },
+ "fragments/alerts.html": {
+  "authorize": [],
+  "fields": [],
+  "forms": [],
+  "fragments": [],
+  "js_ids": [],
+  "model": [
+   "error",
+   "flashError",
+   "flashSuccess"
+  ],
+  "urls": []
+ },
+ "fragments/footer.html": {
+  "authorize": [],
+  "fields": [],
+  "forms": [],
+  "fragments": [],
+  "js_ids": [],
+  "model": [],
+  "urls": [
+   "@{/events}",
+   "@{/forgot-password}",
+   "@{/login}",
+   "@{/my-registrations}",
+   "@{/register}",
+   "@{/}"
+  ]
+ },
+ "fragments/head.html": {
+  "authorize": [],
+  "fields": [
+   "_csrf",
+   "_csrf_header",
+   "viewport"
+  ],
+  "forms": [],
+  "fragments": [],
+  "js_ids": [],
+  "model": [
+   "title"
+  ],
+  "urls": [
+   "@{/css/theme.css}"
+  ]
+ },
+ "fragments/navbar.html": {
+  "authorize": [
+   "!isAuthenticated()",
+   "hasRole('ADMIN')",
+   "hasRole('ATTENDEE')",
+   "hasRole('ORGANIZER')",
+   "isAuthenticated()"
+  ],
+  "fields": [],
+  "forms": [
+   {
+    "action": "@{/logout}",
+    "fields": [],
+    "method": "post"
+   }
+  ],
+  "fragments": [],
+  "js_ids": [],
+  "model": [],
+  "urls": [
+   "@{/admin/reports}",
+   "@{/events}",
+   "@{/login}",
+   "@{/logout}",
+   "@{/my-events}",
+   "@{/my-registrations}",
+   "@{/register}",
+   "@{/}"
+  ]
+ },
+ "fragments/sidebar.html": {
+  "authorize": [
+   "hasRole('ADMIN')",
+   "hasRole('ATTENDEE')",
+   "hasRole('ORGANIZER')"
+  ],
+  "fields": [],
+  "forms": [
+   {
+    "action": "@{/logout}",
+    "fields": [],
+    "method": "post"
+   }
+  ],
+  "fragments": [],
+  "js_ids": [],
+  "model": [
+   "active",
+   "strings"
+  ],
+  "urls": [
+   "@{/admin/events}",
+   "@{/admin/refunds}",
+   "@{/admin/reports}",
+   "@{/admin/users}",
+   "@{/events/new}",
+   "@{/events}",
+   "@{/logout}",
+   "@{/my-events}",
+   "@{/my-registrations}",
+   "@{/notifications}",
+   "@{/profile}"
+  ]
+ },
+ "home.html": {
+  "authorize": [],
+  "fields": [
+   "category",
+   "date",
+   "keyword",
+   "venue"
+  ],
+  "forms": [
+   {
+    "action": "@{/events}",
+    "fields": [
+     "category",
+     "date",
+     "keyword",
+     "venue"
+    ],
+    "method": "get"
+   }
+  ],
+  "fragments": [
+   "~{fragments/footer :: foot}",
+   "~{fragments/head :: head('Home')}",
+   "~{fragments/navbar :: nav}"
+  ],
+  "js_ids": [],
+  "model": [
+   "cat",
+   "event",
+   "events",
+   "iter"
+  ],
+  "urls": [
+   "@{/events(category=${cat})}",
+   "@{/events/{id}(id=${event.id})}",
+   "@{/events}",
+   "@{/register}"
+  ]
+ },
+ "invitations.html": {
+  "authorize": [],
+  "fields": [
+   "decision",
+   "invitationIds"
+  ],
+  "forms": [
+   {
+    "action": "@{/events/{id}/invitations/bulk(id=${eventId})}",
+    "fields": [
+     "decision",
+     "invitationIds"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/head :: head('Invitation Requests')}",
+   "~{fragments/sidebar :: side('myevents')}"
+  ],
+  "js_ids": [
+   "select-all"
+  ],
+  "model": [
+   "event",
+   "eventId",
+   "inv",
+   "invitations",
+   "lists",
+   "strings"
+  ],
+  "urls": [
+   "@{/events/{id}/invitations/bulk(id=${eventId})}",
+   "@{/my-events}"
+  ]
+ },
+ "login.html": {
+  "authorize": [],
+  "fields": [
+   "password",
+   "username"
+  ],
+  "forms": [
+   {
+    "action": "@{/login}",
+    "fields": [
+     "password",
+     "username"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/head :: head('Login')}"
+  ],
+  "js_ids": [
+   "eyeIcon",
+   "password"
+  ],
+  "model": [
+   "param"
+  ],
+  "urls": [
+   "@{/forgot-password}",
+   "@{/login}",
+   "@{/register}"
+  ]
+ },
+ "my-events.html": {
+  "authorize": [
+   "!hasRole('ADMIN')",
+   "hasRole('ADMIN')"
+  ],
+  "fields": [],
+  "forms": [
+   {
+    "action": "@{/events/{id}/cancel-event(id=${event.id})}",
+    "fields": [],
+    "method": "post"
+   },
+   {
+    "action": "@{/events/{id}/complete(id=${event.id})}",
+    "fields": [],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/head :: head('My Events')}",
+   "~{fragments/sidebar :: side('myevents')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "event",
+   "events",
+   "lists",
+   "param"
+  ],
+  "urls": [
+   "@{/events/new}",
+   "@{/events/{id}(id=${event.id})}",
+   "@{/events/{id}/attendees(id=${event.id})}",
+   "@{/events/{id}/cancel-event(id=${event.id})}",
+   "@{/events/{id}/complete(id=${event.id})}",
+   "@{/events/{id}/edit(id=${event.id})}",
+   "@{/events/{id}/invitations(id=${event.id})}"
+  ]
+ },
+ "my-registrations.html": {
+  "authorize": [],
+  "fields": [],
+  "forms": [],
+  "fragments": [
+   "~{fragments/head :: head('My Registrations')}",
+   "~{fragments/sidebar :: side('registrations')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "lists",
+   "row",
+   "rows",
+   "unreadNotifications"
+  ],
+  "urls": [
+   "@{/events/{id}(id=${row.registration.eventId})}",
+   "@{/events}",
+   "@{/notifications}",
+   "@{/registrations/{id}/pay(id=${row.registration.id})}",
+   "@{/registrations/{id}/ticket(id=${row.registration.id})}"
+  ]
+ },
+ "notifications.html": {
+  "authorize": [],
+  "fields": [],
+  "forms": [
+   {
+    "action": "@{/notifications/read-all}",
+    "fields": [],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/head :: head('Notifications')}",
+   "~{fragments/sidebar :: side('notifications')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "lists",
+   "n",
+   "notifications",
+   "strings",
+   "unreadNotifications"
+  ],
+  "urls": [
+   "@{/notifications/read-all}"
+  ]
+ },
+ "payment-form.html": {
+  "authorize": [],
+  "fields": [
+   "discountId",
+   "enteredCode",
+   "groupSize"
+  ],
+  "forms": [
+   {
+    "action": "@{/registrations/{id}/pay(id=${registration.id})}",
+    "fields": [
+     "discountId",
+     "enteredCode",
+     "groupSize"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/head :: head('Complete Payment')}",
+   "~{fragments/sidebar :: side('registrations')}"
+  ],
+  "js_ids": [
+   "discountId",
+   "enteredCode",
+   "group-field",
+   "groupSize",
+   "pay-button",
+   "payTotal",
+   "promo-field",
+   "q-discount",
+   "q-final",
+   "q-original",
+   "quote-error"
+  ],
+  "model": [
+   "d",
+   "discounts",
+   "enteredCode",
+   "groupSize",
+   "lists",
+   "numbers",
+   "registration",
+   "registrationId",
+   "selectedDiscountId"
+  ],
+  "urls": [
+   "@{/my-registrations}",
+   "@{/registrations/{id}/pay(id=${registration.id})}"
+  ]
+ },
+ "profile.html": {
+  "authorize": [],
+  "fields": [
+   "confirmPassword",
+   "contactNumber",
+   "currentPassword",
+   "fullName",
+   "newPassword"
+  ],
+  "forms": [
+   {
+    "action": "@{/profile/password}",
+    "fields": [
+     "confirmPassword",
+     "currentPassword",
+     "newPassword"
+    ],
+    "method": "post"
+   },
+   {
+    "action": "@{/profile}",
+    "fields": [
+     "contactNumber",
+     "fullName"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/alerts :: flash}",
+   "~{fragments/head :: head('My Profile')}",
+   "~{fragments/sidebar :: side('profile')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "profile"
+  ],
+  "urls": [
+   "@{/profile/password}",
+   "@{/profile}"
+  ]
+ },
+ "register.html": {
+  "authorize": [],
+  "fields": [
+   "confirmPassword",
+   "email",
+   "fullName",
+   "password"
+  ],
+  "forms": [
+   {
+    "action": "@{/register}",
+    "fields": [
+     "confirmPassword",
+     "email",
+     "fullName",
+     "password"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/head :: head('Register')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "email",
+   "error",
+   "fullName",
+   "t"
+  ],
+  "urls": [
+   "@{/login}",
+   "@{/register}"
+  ]
+ },
+ "reset-password.html": {
+  "authorize": [],
+  "fields": [
+   "confirmPassword",
+   "newPassword",
+   "token"
+  ],
+  "forms": [
+   {
+    "action": "@{/reset-password}",
+    "fields": [
+     "confirmPassword",
+     "newPassword",
+     "token"
+    ],
+    "method": "post"
+   }
+  ],
+  "fragments": [
+   "~{fragments/head :: head('Reset Password')}"
+  ],
+  "js_ids": [],
+  "model": [
+   "error",
+   "token"
+  ],
+  "urls": [
+   "@{/reset-password}"
+  ]
+ },
+ "ticket.html": {
+  "authorize": [],
+  "fields": [],
+  "forms": [],
+  "fragments": [
+   "~{fragments/head :: head('My Digital Ticket')}",
+   "~{fragments/sidebar :: side('registrations')}"
+  ],
+  "js_ids": [
+   "qr-fallback",
+   "qrcode"
+  ],
+  "model": [
+   "numbers",
+   "payment",
+   "registration"
+  ],
+  "urls": [
+   "@{/my-registrations}"
+  ]
+ }
+}

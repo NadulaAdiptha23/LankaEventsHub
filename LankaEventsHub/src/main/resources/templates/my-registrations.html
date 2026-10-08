@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('My Registrations')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('dashboard')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">Your events</h1>
+        <p class="page-header__sub">
+          Signed in as <span sec:authentication="name">user@eventsphere.test</span>
+        </p>
+      </div>
+      <div class="page-header__actions">
+        <a th:href="@{/notifications}" class="btn btn-light-custom">
+          <i class="fa-solid fa-bell" aria-hidden="true"></i>
+          Notifications
+          <span class="badge-custom badge-danger-soft badge-plain ms-1"
+                th:if="${unreadNotifications > 0}" th:text="${unreadNotifications}">0</span>
+        </a>
+        <a th:href="@{/events}" class="btn btn-primary">
+          <i class="fa-solid fa-plus" aria-hidden="true"></i> Browse events
+        </a>
+      </div>
+    </div>
+
+    <div th:replace="~{fragments/alerts :: flash}"></div>
+
+    <!-- ============================================================
+         Every figure below is counted from the rows already on this
+         page. Nothing here is a metric the backend does not have.
+         ============================================================ -->
+    <div class="row g-4 mb-5">
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-icon"><i class="fa-solid fa-calendar-days" aria-hidden="true"></i></span>
+          <div class="stat-value" th:text="${rows != null ? rows.size() : 0}">0</div>
+          <div class="stat-label">Total registrations</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-icon is-success"><i class="fa-solid fa-circle-check" aria-hidden="true"></i></span>
+          <div class="stat-value"
+               th:text="${rows == null ? 0 : #lists.size(rows.?[registration.status.name() == 'CONFIRMED'])}">0</div>
+          <div class="stat-label">Confirmed places</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-icon is-warning"><i class="fa-solid fa-clock" aria-hidden="true"></i></span>
+          <div class="stat-value"
+               th:text="${rows == null ? 0 : #lists.size(rows.?[requiresPayment and !paid])}">0</div>
+          <div class="stat-label">Awaiting payment</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-icon is-neutral"><i class="fa-solid fa-ticket" aria-hidden="true"></i></span>
+          <div class="stat-value" th:text="${rows == null ? 0 : #lists.size(rows.?[paid])}">0</div>
+          <div class="stat-label">Tickets issued</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+
+      <!-- ==========================================================
+           Anything that still needs the attendee to do something.
+           Rendered first, and only when there is actually something.
+           ========================================================== -->
+      <div class="col-12"
+           th:if="${rows != null and !#lists.isEmpty(rows.?[registration.status.name() == 'PENDING_PAYMENT'])}">
+        <section class="card-custom">
+          <div class="card-head">
+            <h2><i class="fa-solid fa-circle-exclamation me-2" style="color:var(--warning);"
+                   aria-hidden="true"></i>Needs your attention</h2>
+          </div>
+          <div class="card-pad">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 py-2"
+                 th:each="row : ${rows.?[registration.status.name() == 'PENDING_PAYMENT']}">
+              <div>
+                <div class="fw-semibold text-heading" th:text="${row.registration.eventName}">Event</div>
+                <!-- Not "confirmed". The seat is held, and saying
+                     otherwise is how somebody ends up at a door with no
+                     booking. The deadline is shown because it is the
+                     whole point of a hold. -->
+                <div class="text-micro" style="color:var(--muted);">
+                  <span th:if="${!row.registration.party}">A seat is held for you</span>
+                  <span th:if="${row.registration.party}"
+                        th:text="|${row.registration.seats} seats are held for you|">Seats are held</span>
+                  &mdash; confirmed once you pay.
+                  <span th:if="${row.registration.paymentDueAt != null}">
+                    The hold is released at
+                    <strong th:text="${#temporals.format(row.registration.paymentDueAt, 'd MMM, HH:mm')}">time</strong>
+                    if it is still unpaid.
+                  </span>
+                </div>
+              </div>
+              <a class="btn btn-primary btn-sm"
+                 th:href="@{/registrations/{id}/pay(id=${row.registration.id})}">
+                <!-- The party total, not the per-seat fee: this button
+                     must show the amount the checkout will actually
+                     take. -->
+                Pay LKR <span th:text="${#numbers.formatDecimal(row.registration.totalFee, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+              </a>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ==========================================================
+           All registrations
+           ========================================================== -->
+      <div class="col-12">
+        <section class="card-custom">
+          <div class="card-head">
+            <div>
+              <h2>All registrations</h2>
+              <p class="text-micro mb-0" style="color:var(--muted);">
+                Confirmed, waitlisted and cancelled places
+              </p>
+            </div>
+          </div>
+
+          <div th:if="${#lists.isEmpty(rows)}">
+              <div
+                   th:replace="~{fragments/components :: emptyState(
+                      'fa-ticket',
+                      'No registrations yet',
+                      'When you register for an event it will appear here, along with its ticket.',
+                      @{/events}, 'Browse events')}"></div>
+          </div>
+
+          <div class="table-responsive" th:unless="${#lists.isEmpty(rows)}">
+            <table class="table-modern">
+              <caption class="visually-hidden-focusable">Your event registrations</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Event</th>
+                  <th scope="col">When</th>
+                  <th scope="col">Payment</th>
+                  <th scope="col">Status</th>
+                  <th scope="col" class="col-actions"><span class="visually-hidden-focusable">Actions</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="row : ${rows}">
+                  <td>
+                    <div class="cell-title" th:text="${row.registration.eventName}">Event</div>
+                    <div class="cell-sub" th:text="${row.registration.eventVenue ?: 'Venue to be confirmed'}">Venue</div>
+                    <div class="text-micro" style="color:var(--muted);"
+                         th:if="${row.registration.party}"
+                         th:text="|Booking for ${row.registration.seats} people|">Booking for 4 people</div>
+                  </td>
+                  <td th:text="${row.registration.eventStartDatetime != null
+                                ? #temporals.format(row.registration.eventStartDatetime, 'd MMM yyyy, HH:mm')
+                                : 'To be confirmed'}">Date</td>
+                  <td>
+                    <span class="badge-custom badge-success-soft" th:if="${row.paid}">Paid</span>
+                    <!-- A declined card is its own state. Showing it as
+                         "Payment due" would be true but unhelpful: the
+                         attendee already tried, and needs to know the
+                         attempt failed rather than that they forgot. -->
+                    <span class="badge-custom badge-danger-soft"
+                          th:if="${row.paymentFailed}">Payment failed</span>
+                    <span class="badge-custom badge-warning-soft"
+                          th:if="${row.requiresPayment and !row.paid and !row.paymentFailed}">Payment due</span>
+                    <span class="badge-custom badge-gray-soft badge-plain"
+                          th:if="${!row.requiresPayment}">Free</span>
+                  </td>
+                  <td>
+                    <!-- "Event cancelled" and "you cancelled" are different
+                         things and must not share a label. -->
+                    <span class="badge-custom badge-danger-soft"
+                          th:if="${row.registration.eventCancelled}">Event cancelled</span>
+                    <div th:unless="${row.registration.eventCancelled}">
+                        <th:block
+                                  th:replace="~{fragments/components :: registrationStatus(${row.registration.status})}"></th:block>
+                    </div>
+                  </td>
+                  <td class="col-actions">
+                    <div class="action-menu">
+                      <button type="button" class="action-menu__trigger"
+                              aria-haspopup="true" aria-expanded="false"
+                              th:aria-label="'Actions for ' + ${row.registration.eventName}">
+                        <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
+                      </button>
+                      <div class="action-menu__list">
+                        <a th:href="@{/events/{id}(id=${row.registration.eventId})}">
+                          <i class="fa-solid fa-eye" aria-hidden="true"></i> View event
+                        </a>
+                        <a th:if="${row.registration.status.name() == 'PENDING_PAYMENT'}"
+                           th:href="@{/registrations/{id}/pay(id=${row.registration.id})}">
+                          <i class="fa-solid fa-credit-card" aria-hidden="true"></i> Pay now
+                        </a>
+                        <a th:if="${row.registration.status.name() == 'PENDING_PAYMENT'
+                                    or (row.registration.status.name() == 'CONFIRMED' and !row.requiresPayment)}"
+                           th:href="@{/registrations/{id}/edit(id=${row.registration.id})}">
+                          <i class="fa-solid fa-pen" aria-hidden="true"></i> Edit booking
+                        </a>
+                        <a th:if="${row.paid and !row.registration.eventCancelled}"
+                           th:href="@{/registrations/{id}/ticket(id=${row.registration.id})}">
+                          <i class="fa-solid fa-ticket" aria-hidden="true"></i> View ticket
+                        </a>
+                        <a th:if="${row.paid and row.registration.eventCancelled}"
+                           th:href="@{/registrations/{id}/ticket(id=${row.registration.id})}">
+                          <i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Refund status
+                        </a>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

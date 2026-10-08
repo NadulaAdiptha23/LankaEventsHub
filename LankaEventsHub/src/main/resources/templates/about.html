@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('About')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/navbar :: nav('about', true)}"></div>
+
+<main id="main">
+
+<section class="page-hero">
+    <div class="page-hero__media" aria-hidden="true">
+        <img th:src="@{/img/exp-wedding.svg}" alt="" loading="lazy">
+    </div>
+    <div class="page-hero__scrim" aria-hidden="true"></div>
+    <div class="container-editorial page-hero__inner">
+        <p class="eyebrow eyebrow--light">About</p>
+        <h1 class="display-1x page-hero__title">Events that create lasting moments.</h1>
+        <p class="page-hero__text">
+            Verdant Events connects organizers, attendees, events and experiences in a
+            single platform &mdash; so both sides of the room are working from the same
+            truth.
+        </p>
+    </div>
+</section>
+
+
+<section class="section section--ivory" data-reveal>
+    <div class="container-editorial">
+        <div class="split">
+            <div class="frame frame--tall">
+                <img th:src="@{/img/about.svg}"
+                     alt="An audience seated before a lit presentation screen" loading="lazy">
+            </div>
+            <div>
+                <p class="eyebrow">Our story</p>
+                <h2 class="display-2x mb-4">One system, instead<br>of two that disagree.</h2>
+                <p class="lede mb-4">
+                    Most event tools serve either the organizer or the guest. Running the
+                    event in one system and selling seats in another is how a venue ends
+                    up double-booked, how a seat gets sold twice, and how somebody arrives
+                    holding a ticket for an evening that moved last week.
+                </p>
+                <p class="text-meta text-muted-custom mb-4">
+                    Verdant Events keeps both sides in one place. The capacity an organizer
+                    sets is the capacity a guest sees. The seat a guest books is the seat
+                    the door expects. Payment is what confirms a booking, so a confirmed
+                    booking always means somebody paid. There is no second copy of the
+                    truth to drift out of step with the first.
+                </p>
+                <p class="text-meta text-muted-custom mb-4">
+                    Every rule in the platform earns its place by preventing something
+                    that actually goes wrong on the night &mdash; not by being a feature
+                    worth listing.
+                </p>
+                <a class="link-editorial" th:href="@{/services}">
+                    What we do <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Real figures only. Omitted entirely on a platform with no history. -->
+<section class="section section--tight section--white" th:if="${stats != null and stats.meaningful}" data-reveal>
+    <div class="container-editorial">
+        <p class="eyebrow">By the numbers</p>
+        <div class="stat-row">
+            <div class="stat-row__item">
+                <div class="stat-row__value" th:text="${stats.eventsDelivered}">0</div>
+                <div class="stat-row__label">Events delivered</div>
+            </div>
+            <div class="stat-row__item">
+                <div class="stat-row__value" th:text="${stats.eventsLive}">0</div>
+                <div class="stat-row__label">Open for booking</div>
+            </div>
+            <div class="stat-row__item">
+                <div class="stat-row__value" th:text="${stats.attendees}">0</div>
+                <div class="stat-row__label">Confirmed bookings</div>
+            </div>
+            <div class="stat-row__item">
+                <div class="stat-row__value" th:text="${stats.organizers}">0</div>
+                <div class="stat-row__label">Professional organizers</div>
+            </div>
+        </div>
+        <p class="text-micro text-muted-custom mt-4 mb-0">
+            Counted from this platform&rsquo;s own records when you opened this page.
+        </p>
+    </div>
+</section>
+
+
+<section class="section section--white" data-reveal>
+    <div class="container-editorial">
+        <div class="row g-5">
+            <div class="col-lg-4">
+                <p class="eyebrow">What we hold to</p>
+                <h2 class="display-2x mb-0">Four principles.</h2>
+            </div>
+            <div class="col-lg-8">
+                <div class="numbered">
+                    <div class="numbered__row">
+                        <div class="numbered__num">01</div>
+                        <h3 class="numbered__title">Say the true number</h3>
+                        <p class="numbered__text">
+                            Seats, prices and availability are read from the database when
+                            the page loads. If an event has four seats left, it says four.
+                        </p>
+                    </div>
+                    <div class="numbered__row">
+                        <div class="numbered__num">02</div>
+                        <h3 class="numbered__title">Nothing sold twice</h3>
+                        <p class="numbered__text">
+                            Two people clicking for the last seat at the same moment cannot
+                            both succeed. The database enforces it, not the form.
+                        </p>
+                    </div>
+                    <div class="numbered__row">
+                        <div class="numbered__num">03</div>
+                        <h3 class="numbered__title">Confirmed means paid</h3>
+                        <p class="numbered__text">
+                            A booking is confirmed by money arriving &mdash; at checkout or
+                            at the door. Nothing else promotes it.
+                        </p>
+                    </div>
+                    <div class="numbered__row">
+                        <div class="numbered__num">04</div>
+                        <h3 class="numbered__title">Everything traceable</h3>
+                        <p class="numbered__text">
+                            Approvals, cancellations, refunds and deletions are recorded
+                            with who did them and what went &mdash; before it goes.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="section section--ivory section--tight" data-reveal>
+    <div class="container-editorial">
+        <div class="row g-5">
+            <div class="col-lg-4">
+                <p class="eyebrow">The project</p>
+                <h2 class="display-2x mb-0">Who built this.</h2>
+            </div>
+            <div class="col-lg-8">
+                <div class="facts">
+                    <div class="facts__row">
+                        <div class="facts__key">Built by</div>
+                        <p class="facts__val">Group 2026-Y2-S1-MLB-B1G1-05, SLIIT</p>
+                    </div>
+                    <div class="facts__row">
+                        <div class="facts__key">Module</div>
+                        <p class="facts__val">SE2030 &mdash; Software Engineering</p>
+                    </div>
+                    <div class="facts__row">
+                        <div class="facts__key">Platform</div>
+                        <p class="facts__val">Java 17 &middot; Spring Boot &middot; MySQL &middot; Thymeleaf</p>
+                    </div>
+                    <div class="facts__row">
+                        <div class="facts__key">Status</div>
+                        <p class="facts__val">
+                            An academic project. It is a working application rather than a
+                            commercial service, and this page says so instead of implying
+                            otherwise.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="section cta-band" data-reveal>
+    <div class="cta-band__media" aria-hidden="true">
+        <img th:src="@{/img/cta.svg}" alt="" loading="lazy">
+    </div>
+    <div class="cta-band__scrim" aria-hidden="true"></div>
+    <div class="container-narrow cta-band__inner">
+        <p class="eyebrow eyebrow--center eyebrow--light">Get started</p>
+        <h2 class="display-1x cta-band__title">Your next great event<br>starts here.</h2>
+        <p class="cta-band__text">
+            From intimate gatherings to large-scale experiences, Verdant Events helps
+            bring every detail together.
+        </p>
+        <div class="cta-band__actions">
+            <a class="btn btn-primary btn-lg" th:href="@{/register}" sec:authorize="!isAuthenticated()">Get Started</a>
+            <a class="btn btn-primary btn-lg" th:href="@{/my-registrations}" sec:authorize="isAuthenticated()">Go to dashboard</a>
+            <a class="btn btn-outline-light btn-lg" th:href="@{/events}">Explore Events</a>
+        </div>
+    </div>
+</section>
+
+</main>
+
+<div th:replace="~{fragments/footer :: foot}"></div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

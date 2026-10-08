@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Manage Users')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('users')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">Users</h1>
+        <p class="page-header__sub">Roles, account status and student verification.</p>
+      </div>
+      <div class="page-header__actions">
+        <a th:href="@{/admin/users/new}" class="btn btn-primary">
+          <i class="fa-solid fa-user-plus" aria-hidden="true"></i> Add user
+        </a>
+        <a th:href="@{/admin/events}" class="btn btn-light-custom">
+          <i class="fa-solid fa-circle-check" aria-hidden="true"></i> Approvals
+        </a>
+        <a th:href="@{/admin/reports}" class="btn btn-light-custom">
+          <i class="fa-solid fa-chart-line" aria-hidden="true"></i> Reports
+        </a>
+      </div>
+    </div>
+
+    <div th:replace="~{fragments/alerts :: flash}"></div>
+
+    <div class="row g-4 mb-5">
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-icon"><i class="fa-solid fa-users" aria-hidden="true"></i></span>
+          <div class="stat-value" th:text="${#lists.size(users)}">0</div>
+          <div class="stat-label">Total accounts</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-icon is-success"><i class="fa-solid fa-user-check" aria-hidden="true"></i></span>
+          <div class="stat-value" th:text="${#lists.size(users.?[active])}">0</div>
+          <div class="stat-label">Active</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-icon is-neutral"><i class="fa-solid fa-user-tie" aria-hidden="true"></i></span>
+          <div class="stat-value" th:text="${#lists.size(users.?[role.name() == 'ORGANIZER'])}">0</div>
+          <div class="stat-label">Organizers</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-icon is-danger"><i class="fa-solid fa-user-slash" aria-hidden="true"></i></span>
+          <div class="stat-value" th:text="${#lists.size(users.?[!active])}">0</div>
+          <div class="stat-label">Suspended</div>
+        </div>
+      </div>
+    </div>
+
+    <section class="card-custom">
+      <div class="card-head">
+        <div>
+          <h2>All users</h2>
+          <p class="text-micro mb-0" style="color:var(--muted);">
+            Changing a role or suspending an account ends that user's live sessions immediately.
+          </p>
+        </div>
+        <span class="text-micro" style="color:var(--muted);"
+              th:text="${#lists.size(users)} + ' accounts'">0 accounts</span>
+      </div>
+
+      <div th:if="${#lists.isEmpty(users)}">
+          <div
+               th:replace="~{fragments/components :: emptyState(
+                  'fa-users',
+                  'No accounts yet',
+                  'Accounts appear here as soon as people register.',
+                  null, null)}"></div>
+      </div>
+
+      <div class="table-responsive" th:unless="${#lists.isEmpty(users)}">
+        <table class="table-modern">
+          <caption class="visually-hidden-focusable">All platform user accounts</caption>
+          <thead>
+            <tr>
+              <th scope="col">User</th>
+              <th scope="col">Role</th>
+              <th scope="col">Status</th>
+              <th scope="col">Student</th>
+              <th scope="col" class="col-actions"><span class="visually-hidden-focusable">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="user : ${users}">
+              <td>
+                <div class="d-flex align-items-center gap-3">
+                  <span class="avatar avatar-sm"
+                        th:text="${#strings.toUpperCase(#strings.substring(user.fullName,0,1))}">U</span>
+                  <div style="min-width:0;">
+                    <div class="cell-title truncate" th:text="${user.fullName}">Name</div>
+                    <div class="cell-sub truncate" th:text="${user.email}">email</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <!-- Submits on change: a role select with a separate Save
+                     button beside it is a change people forget to apply.
+                     The server re-checks every rule regardless. -->
+                <form method="post" th:action="@{/admin/users/{id}/role(id=${user.id})}">
+                  <label class="visually-hidden-focusable" th:for="'role-' + ${user.id}">Role</label>
+                  <select name="role" class="form-select form-select-sm w-auto"
+                          th:id="'role-' + ${user.id}" onchange="this.form.submit()">
+                    <option th:each="r : ${roles}" th:value="${r}" th:text="${r}"
+                            th:selected="${r == user.role}">Role</option>
+                  </select>
+                </form>
+              </td>
+              <td>
+                <span class="badge-custom badge-success-soft" th:if="${user.active}">Active</span>
+                <span class="badge-custom badge-danger-soft" th:unless="${user.active}">Suspended</span>
+              </td>
+              <td>
+                <span class="badge-custom badge-primary-soft"
+                      th:if="${user.verifiedStudent}">Verified</span>
+                <span class="badge-custom badge-gray-soft badge-plain"
+                      th:unless="${user.verifiedStudent}">—</span>
+              </td>
+              <td class="col-actions">
+                <div class="action-menu">
+                  <button type="button" class="action-menu__trigger"
+                          aria-haspopup="true" aria-expanded="false"
+                          th:aria-label="'Actions for ' + ${user.fullName}">
+                    <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
+                  </button>
+                  <div class="action-menu__list">
+                    <a th:href="@{/admin/users/{id}/edit(id=${user.id})}">
+                      <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                      <span>Edit name/email</span>
+                    </a>
+                    <div class="action-menu__sep"></div>
+                    <!-- The only thing that unlocks the STUDENT discount.
+                         Verifying the actual student ID is a manual step
+                         off-system. -->
+                    <form method="post" data-busy
+                          th:action="@{/admin/users/{id}/verify-student(id=${user.id})}">
+                      <input type="hidden" name="verified" th:value="${!user.verifiedStudent}">
+                      <button type="submit">
+                        <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
+                        <span th:text="${user.verifiedStudent}
+                              ? 'Remove student verification' : 'Mark as verified student'">Verify</span>
+                      </button>
+                    </form>
+                    <div class="action-menu__sep"></div>
+                    <form method="post" data-busy
+                          th:action="@{/admin/users/{id}/toggle-active(id=${user.id})}">
+                      <button type="submit" th:classappend="${user.active} ? 'is-danger' : ''">
+                        <i class="fa-solid" aria-hidden="true"
+                           th:classappend="${user.active} ? 'fa-user-slash' : 'fa-user-check'"></i>
+                        <span th:text="${user.active} ? 'Suspend account' : 'Reactivate account'">Toggle</span>
+                      </button>
+                    </form>
+                  </div>
+                </div>
+                <div th:replace="~{fragments/components :: confirmDelete(
+                      @{/admin/users/{id}/delete(id=${user.id})},
+                      ${user.fullName}, 'account',
+                      'Their bookings, payments, refunds, notifications and saved reports go with it. The audit trail is kept.')}"></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>

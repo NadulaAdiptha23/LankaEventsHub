@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('At the door')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div th:replace="~{fragments/sidebar :: mobileBar}"></div>
+
+<div class="app-shell">
+  <div th:replace="~{fragments/sidebar :: side('myevents')}"></div>
+
+  <main id="main" class="main-content fade-in">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">At the door</h1>
+        <p class="page-header__sub" th:text="${event.name}">Event</p>
+      </div>
+      <div class="page-header__actions">
+        <a th:href="@{/events/{id}/attendees(id=${event.id})}" class="btn btn-light-custom">
+          <i class="fa-solid fa-users" aria-hidden="true"></i> Attendees
+        </a>
+        <a th:href="@{/my-events}" class="btn btn-light-custom">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> My events
+        </a>
+      </div>
+    </div>
+
+    <div th:replace="~{fragments/alerts :: flash}"></div>
+
+    <!-- What this page is for, in one sentence, because somebody opening
+         it on a phone at a door has no time to work it out. -->
+    <div class="alert-custom alert-info mb-4">
+      <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+      <span>
+        Everyone here chose to pay on arrival. Their seats are held but their
+        bookings are not confirmed — recording the payment is what confirms them.
+      </span>
+    </div>
+
+    <div th:if="${#lists.isEmpty(owed)}">
+        <div th:replace="~{fragments/components :: emptyState(
+              'fa-solid fa-circle-check',
+              'Nobody owes anything',
+              'Every booking on this event has been paid for. Anyone paying on arrival will appear here as soon as they reserve.',
+              null, null)}"
+            ></div>
+    </div>
+
+    <section class="card-custom" th:unless="${#lists.isEmpty(owed)}">
+      <div class="card-head">
+        <h2>Still to collect</h2>
+        <!-- The total is what an organizer actually wants to know before
+             they start, so it is on the header rather than buried at the
+             bottom of the table. -->
+        <span class="badge-custom badge-warning-soft tnum"
+              th:text="|${#lists.size(owed)} booking(s)|">0 bookings</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table-modern">
+          <caption class="visually-hidden-focusable">Bookings to be paid for at the door</caption>
+          <thead>
+            <tr>
+              <th scope="col">Attendee</th>
+              <th scope="col">Seats</th>
+              <th scope="col">Code</th>
+              <th scope="col">Amount</th>
+              <th scope="col" class="col-actions">
+                <span class="visually-hidden-focusable">Actions</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="p : ${owed}">
+              <td>
+                <div class="d-flex align-items-center gap-3">
+                  <span class="avatar avatar-sm"
+                        th:text="${p.attendeeName != null
+                                  ? #strings.toUpperCase(#strings.substring(p.attendeeName,0,1)) : '?'}">U</span>
+                  <span class="cell-title" th:text="${p.attendeeName}">Name</span>
+                </div>
+              </td>
+              <td class="tnum" th:text="${p.seats}">1</td>
+              <td>
+                <code class="tnum" th:text="${p.ticketCode}">TICKET-CODE</code>
+              </td>
+              <td class="tnum fw-semibold text-heading"
+                  th:text="'LKR ' + ${#numbers.formatDecimal(p.finalAmount, 1, 'COMMA', 2, 'POINT')}">LKR 0.00</td>
+              <td class="col-actions">
+                <!-- The note is free text on purpose: "cash", "card
+                     machine", a receipt number. It goes into the audit
+                     row and nowhere else, because how the money arrived
+                     is a fact somebody may have to reconstruct later. -->
+                <form method="post" data-busy class="d-flex align-items-center gap-2"
+                      th:action="@{/events/{eventId}/door/{registrationId}/settle(
+                                   eventId=${event.id}, registrationId=${p.registrationId})}">
+                  <label class="visually-hidden-focusable"
+                         th:for="|note-${p.registrationId}|">How it was paid</label>
+                  <input type="text" class="form-control form-control-sm" name="note"
+                         style="width:11rem;" maxlength="120" placeholder="Cash, card machine…"
+                         th:id="|note-${p.registrationId}|">
+                  <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fa-solid fa-hand-holding-dollar" aria-hidden="true"></i>
+                    Mark paid
+                  </button>
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card-pad text-micro" style="color:var(--muted);border-top:1px solid var(--border);">
+        Marking a booking paid confirms it and issues nothing new — the code above is
+        already the attendee's, and it is the same one they were shown when they
+        reserved.
+      </div>
+    </section>
+  </main>
+</div>
+<script th:src="@{/vendor/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>
